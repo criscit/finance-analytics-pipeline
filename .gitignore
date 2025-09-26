@@ -50,8 +50,12 @@ Thumbs.db
 
 # Data and credentials
 data/warehouse/
-data/exports/csv/*
-data/exports/metadata/*
+data/exports/
+data/dagster_home/history/
+data/dagster_home/logs/
+data/dagster_home/schedules/
+data/dagster_home/storage/
+data/dagster_home_daemon/logs/
 credentials/*.json
 *.duckdb
 *.db

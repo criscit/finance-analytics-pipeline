@@ -38,6 +38,3 @@ def ingest_csv_to_duckdb():
         con.execute(f"insert into stg_{table} select * from read_csv_auto('{f}', header=true)")
         con.execute("insert into meta_ingest_ledger(filename,size,md5) values (?,?,?)", [f.name, size, md5])
     con.close()
-
-
-

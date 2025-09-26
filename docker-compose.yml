@@ -1,20 +1,20 @@
 # file: docker-compose.yml
 services:
-  pipeline-worker:
+  worker:
     build:
       context: .
       dockerfile: infra/Dockerfile
     environment:
-      - DAGSTER_HOME=/app/dagster_home
-      - RAW_PATH=/app/data/raw
-      - DUCKDB_PATH=/app/data/warehouse/analytics.duckdb
-      - EXPORT_CSV_PATH=/app/data/exports/csv
-      - EXPORT_META_PATH=/app/data/exports/metadata
-      - RAW_STABILITY_SECONDS=5
-      - GOOGLE_SA_JSON=/app/credentials/finance-sheets-writer-prod-sa.json
-      - GOOGLE_SHEET_ID=
-      - GOOGLE_SHEET_RANGE=
-      - EXPORT_TABLE=main_marts.daily_snapshot
+      - DAGSTER_HOME=${DAGSTER_HOME}
+      - RAW_PATH=${RAW_PATH}
+      - DUCKDB_PATH=${DUCKDB_PATH}
+      - EXPORT_CSV_PATH=${EXPORT_CSV_PATH}
+      - EXPORT_META_PATH=${EXPORT_META_PATH}
+      - RAW_STABILITY_SECONDS=${RAW_STABILITY_SECONDS}
+      - GOOGLE_SA_JSON=${GOOGLE_SA_JSON}
+      - GOOGLE_SHEET_ID=${GOOGLE_SHEET_ID}
+      - GOOGLE_SHEET_RANGE=${GOOGLE_SHEET_RANGE}
+      - EXPORT_TABLE=${EXPORT_TABLE}
     volumes:
       - ./orchestration:/app/orchestration
       - ./transform:/app/transform

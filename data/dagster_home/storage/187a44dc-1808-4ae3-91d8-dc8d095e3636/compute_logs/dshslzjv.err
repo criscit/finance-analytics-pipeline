@@ -1,7 +1,0 @@
-2025-09-25 08:41:04 +0000 - dagster - DEBUG - daily_pipeline - 187a44dc-1808-4ae3-91d8-dc8d095e3636 - 11030 - LOGS_CAPTURED - Started capturing logs in process (pid: 11030).
-2025-09-25 08:41:04 +0000 - dagster - DEBUG - daily_pipeline - 187a44dc-1808-4ae3-91d8-dc8d095e3636 - 11030 - run_ge_checkpoints - STEP_START - Started execution of step "run_ge_checkpoints".
-2025-09-25 08:41:04 +0000 - dagster - DEBUG - daily_pipeline - 187a44dc-1808-4ae3-91d8-dc8d095e3636 - 11030 - run_ge_checkpoints - STEP_OUTPUT - Yielded output "result" of type "Any". (Type check passed).
-2025-09-25 08:41:04 +0000 - dagster - DEBUG - daily_pipeline - 187a44dc-1808-4ae3-91d8-dc8d095e3636 - run_ge_checkpoints - Writing file at: /app/dagster_home/storage/run_ge_checkpoints using PickledObjectFilesystemIOManager...
-2025-09-25 08:41:04 +0000 - dagster - DEBUG - daily_pipeline - 187a44dc-1808-4ae3-91d8-dc8d095e3636 - 11030 - run_ge_checkpoints - ASSET_MATERIALIZATION - Materialized value run_ge_checkpoints.
-2025-09-25 08:41:04 +0000 - dagster - DEBUG - daily_pipeline - 187a44dc-1808-4ae3-91d8-dc8d095e3636 - 11030 - run_ge_checkpoints - HANDLED_OUTPUT - Handled output "result" using IO manager "io_manager"
-2025-09-25 08:41:05 +0000 - dagster - DEBUG - daily_pipeline - 187a44dc-1808-4ae3-91d8-dc8d095e3636 - 11030 - run_ge_checkpoints - STEP_SUCCESS - Finished execution of step "run_ge_checkpoints" in 571ms.
