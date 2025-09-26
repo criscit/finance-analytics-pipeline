@@ -1,0 +1,89 @@
+2025-09-25 07:46:43 +0000 - dagster - DEBUG - daily_pipeline - 251d76ef-944f-4a67-af5a-66b4a9beaf8e - 21937 - LOGS_CAPTURED - Started capturing logs in process (pid: 21937).
+2025-09-25 07:46:43 +0000 - dagster - DEBUG - daily_pipeline - 251d76ef-944f-4a67-af5a-66b4a9beaf8e - 21937 - run_ge_checkpoints - STEP_START - Started execution of step "run_ge_checkpoints".
+2025-09-25 07:46:49 +0000 - dagster - ERROR - daily_pipeline - 251d76ef-944f-4a67-af5a-66b4a9beaf8e - 21937 - run_ge_checkpoints - STEP_FAILURE - Execution of step "run_ge_checkpoints" failed.
+
+dagster._core.errors.DagsterExecutionStepExecutionError: Error occurred while executing op "run_ge_checkpoints"::
+
+RuntimeError: Error while processing DataContextConfig: data_docs
+Encountered errors during loading config.  See ValidationError for more details.
+Traceback (most recent call last):
+  File "/usr/local/bin/great_expectations", line 8, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/great_expectations/cli/cli.py", line 146, in main
+    cli()
+  File "/usr/local/lib/python3.11/site-packages/click/core.py", line 1462, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/click/core.py", line 1383, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/click/core.py", line 1850, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/click/core.py", line 1847, in invoke
+    super().invoke(ctx)
+  File "/usr/local/lib/python3.11/site-packages/click/core.py", line 1246, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/click/core.py", line 814, in invoke
+    return callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/click/decorators.py", line 34, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/great_expectations/cli/checkpoint.py", line 65, in checkpoint
+    ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/great_expectations/cli/cli.py", line 43, in get_data_context_from_config_file
+    context: FileDataContext = toolkit.load_data_context_with_error_handling(  # type: ignore[assignment] # will exit if error
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/great_expectations/cli/toolkit.py", line 420, in load_data_context_with_error_handling
+    context = get_context(context_root_dir=directory)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/great_expectations/data_context/data_context/context_factory.py", line 263, in get_context
+    context = _get_context(**kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/great_expectations/data_context/data_context/context_factory.py", line 302, in _get_context
+    file_context = _get_file_context(
+                   ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/great_expectations/data_context/data_context/context_factory.py", line 383, in _get_file_context
+    return FileDataContext(
+           ^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/great_expectations/data_context/data_context/file_data_context.py", line 66, in __init__
+    self._project_config = self._init_project_config(project_config)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/great_expectations/data_context/data_context/file_data_context.py", line 111, in _init_project_config
+    project_config = FileDataContext._load_file_backed_project_config(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/great_expectations/data_context/data_context/file_data_context.py", line 213, in _load_file_backed_project_config
+    return DataContextConfig.from_commented_map(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/great_expectations/data_context/types/base.py", line 139, in from_commented_map
+    config: Union[dict, BYC] = schema_instance.load(commented_map)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/marshmallow/schema.py", line 792, in load
+    return self._do_load(
+           ^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/marshmallow/schema.py", line 998, in _do_load
+    self.handle_error(exc, data, many=many, partial=partial)
+  File "/usr/local/lib/python3.11/site-packages/great_expectations/data_context/types/base.py", line 1717, in handle_error
+    raise gx_exceptions.InvalidDataContextConfigError(
+great_expectations.exceptions.exceptions.InvalidDataContextConfigError: Error while processing DataContextConfig: data_docs
+
+
+Stack Trace:
+  File "/usr/local/lib/python3.11/site-packages/dagster/_core/execution/plan/utils.py", line 54, in op_execution_error_boundary
+    yield
+  File "/usr/local/lib/python3.11/site-packages/dagster/_utils/__init__.py", line 474, in iterate_with_context
+    next_output = next(iterator)
+                  ^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/dagster/_core/execution/plan/compute_generator.py", line 141, in _coerce_op_compute_fn_to_iterator
+    result = invoke_compute_fn(
+             ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/dagster/_core/execution/plan/compute_generator.py", line 129, in invoke_compute_fn
+    return fn(context, **args_to_pass) if context_arg_provided else fn(**args_to_pass)
+                                                                    ^^^^^^^^^^^^^^^^^^
+  File "/app/orchestration/dagster_project/src/assets_quality_ge.py", line 12, in run_ge_checkpoints
+    raise RuntimeError(out.stderr)
+

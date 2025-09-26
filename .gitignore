@@ -1,0 +1,78 @@
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Data and credentials
+data/warehouse/
+data/exports/csv/*
+data/exports/metadata/*
+credentials/*.json
+*.duckdb
+*.db
+
+# dbt
+transform/target/
+transform/dbt_packages/
+
+# Great Expectations
+quality/great_expectations/uncommitted/
+quality/great_expectations/expectations/
+quality/great_expectations/checkpoints/
+quality/great_expectations/validations/
+
+# Docker
+.dockerignore
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp

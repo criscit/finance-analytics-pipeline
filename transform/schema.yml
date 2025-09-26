@@ -1,0 +1,100 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: main
+    tables:
+      - name: stg_events
+
+models:
+  - name: stg_events
+    description: "Staged events data with type normalization"
+    columns:
+      - name: id
+        description: "Unique event identifier"
+        tests:
+          - not_null
+          - unique
+      - name: user_id
+        description: "User identifier"
+        tests:
+          - not_null
+      - name: event_type
+        description: "Type of event"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['page_view', 'click', 'purchase', 'signup']
+      - name: event_ts
+        description: "Event timestamp"
+        tests:
+          - not_null
+      - name: metric_1
+        description: "First metric value"
+        tests:
+          - not_null
+      - name: metric_2
+        description: "Second metric value"
+        tests:
+          - not_null
+
+  - name: core_events
+    description: "Core events data with deduplication and cleaning"
+    columns:
+      - name: id
+        description: "Unique event identifier"
+        tests:
+          - not_null
+          - unique
+      - name: user_id
+        description: "User identifier"
+        tests:
+          - not_null
+      - name: event_type
+        description: "Type of event"
+        tests:
+          - not_null
+      - name: event_ts
+        description: "Event timestamp"
+        tests:
+          - not_null
+      - name: metric_1
+        description: "First metric value"
+        tests:
+          - not_null
+      - name: metric_2
+        description: "Second metric value"
+        tests:
+          - not_null
+
+  - name: daily_snapshot
+    description: "Daily snapshot for export"
+    columns:
+      - name: id
+        description: "Unique event identifier"
+        tests:
+          - not_null
+          - unique
+      - name: user_id
+        description: "User identifier"
+        tests:
+          - not_null
+      - name: event_type
+        description: "Type of event"
+        tests:
+          - not_null
+      - name: updated_at
+        description: "Event timestamp (renamed for export)"
+        tests:
+          - not_null
+      - name: metric_1
+        description: "First metric value"
+        tests:
+          - not_null
+      - name: metric_2
+        description: "Second metric value"
+        tests:
+          - not_null
+
+
+

@@ -1,0 +1,11 @@
+# file: transform/profiles.yml
+local_duckdb:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('DUCKDB_PATH') }}"
+      threads: 4
+
+
+

@@ -1,0 +1,61 @@
+# Feed configuration for CSV ingestion
+# Defines patterns, options, primary keys, and watermark columns
+
+sources:
+  events:
+    pattern: "events_*.csv"
+    table_prefix: "stg_events"
+    primary_key: "id"
+    watermark_column: "event_ts"
+    options:
+      header: true
+      delimiter: ","
+      quote: '"'
+      escape: '"'
+      nullstr: ""
+    
+  sales:
+    pattern: "sales_*.csv"
+    table_prefix: "stg_sales"
+    primary_key: "sale_id"
+    watermark_column: "sale_date"
+    options:
+      header: true
+      delimiter: ","
+      quote: '"'
+      escape: '"'
+      nullstr: ""
+
+  inventory:
+    pattern: "inventory_*.csv"
+    table_prefix: "stg_inventory"
+    primary_key: "item_id"
+    watermark_column: "updated_at"
+    options:
+      header: true
+      delimiter: ","
+      quote: '"'
+      escape: '"'
+      nullstr: ""
+
+# Global ingestion settings
+ingestion:
+  stability_check_seconds: 8
+  max_file_size_mb: 1000
+  supported_formats: ["csv"]
+  
+# Export settings
+exports:
+  csv:
+    include_header: true
+    delimiter: ","
+    quote: '"'
+    escape: '"'
+  
+  sheets:
+    batch_size: 1000
+    max_retries: 3
+    retry_delay_seconds: 5
+
+
+

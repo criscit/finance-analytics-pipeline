@@ -1,0 +1,39 @@
+# file: docker-compose.yml
+services:
+  pipeline-worker:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile
+    environment:
+      - DAGSTER_HOME=/app/dagster_home
+      - RAW_PATH=/app/data/raw
+      - DUCKDB_PATH=/app/data/warehouse/analytics.duckdb
+      - EXPORT_CSV_PATH=/app/data/exports/csv
+      - EXPORT_META_PATH=/app/data/exports/metadata
+      - RAW_STABILITY_SECONDS=5
+      - GOOGLE_SA_JSON=/app/credentials/finance-sheets-writer-prod-sa.json
+      - GOOGLE_SHEET_ID=
+      - GOOGLE_SHEET_RANGE=
+      - EXPORT_TABLE=main_marts.daily_snapshot
+    volumes:
+      - ./orchestration:/app/orchestration
+      - ./transform:/app/transform
+      - ./quality:/app/quality
+      - ./export:/app/export
+      - ./docs:/app/docs
+      - ./data/warehouse:/app/data/warehouse
+      - ./data/dagster_home:/app/dagster_home
+      - ./sample_data:/app/data/raw:rw
+      - ./data/exports/csv:/app/data/exports/csv:rw
+      - ./data/exports/metadata:/app/data/exports/metadata:rw
+      - ./credentials:/app/credentials:ro
+    command: bash -lc "dagster dev -h 0.0.0.0 -p 3000 --workspace /app/orchestration/dagster_project/workspace.yaml"
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "bash", "-lc", "python -c 'import duckdb;print(1)'"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+# dagster-daemon removed - dagster dev already includes daemon functionality

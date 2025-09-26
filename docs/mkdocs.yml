@@ -1,0 +1,44 @@
+site_name: Finance Analytics Pipeline
+site_description: Local, lake-less data pipeline with Dagster + DuckDB + dbt + Great Expectations
+site_url: https://your-org.github.io/finance-analytics-pipeline
+repo_url: https://github.com/your-org/finance-analytics-pipeline
+repo_name: your-org/finance-analytics-pipeline
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+nav:
+  - Home: index.md
+  - Architecture: architecture.md
+  - Data Model: data-model.md
+  - Runbook: runbook.md
+  - Diagrams: diagrams.md
+
+plugins:
+  - search
+  - mkdocs-material
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - tables
+  - toc:
+      permalink: true
+
+
+

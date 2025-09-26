@@ -1,0 +1,66 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: 1.8.3
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+    
+    - name: Load cached venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v3
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+    
+    - name: Install dependencies
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      run: poetry install --no-interaction --no-ansi
+    
+    - name: Install dependencies
+      if: steps.cached-poetry-dependencies.outputs.cache-hit == 'true'
+      run: poetry install --no-interaction --no-ansi --no-dev
+    
+    - name: Run linting
+      run: |
+        poetry run ruff check .
+        poetry run black --check .
+    
+    - name: Run tests
+      run: poetry run pytest export/tests/ -v
+    
+    - name: Run dbt build (dry run)
+      run: |
+        cd transform
+        poetry run dbt deps
+        poetry run dbt build --dry-run
+      env:
+        DUCKDB_PATH: /tmp/test.duckdb
+    
+    - name: Check dbt project structure
+      run: |
+        poetry run dbt debug --project-dir transform
+      env:
+        DUCKDB_PATH: /tmp/test.duckdb
+
+
+

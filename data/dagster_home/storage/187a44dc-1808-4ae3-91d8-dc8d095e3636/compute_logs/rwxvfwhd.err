@@ -1,0 +1,7 @@
+2025-09-25 08:40:39 +0000 - dagster - DEBUG - daily_pipeline - 187a44dc-1808-4ae3-91d8-dc8d095e3636 - 10305 - LOGS_CAPTURED - Started capturing logs in process (pid: 10305).
+2025-09-25 08:40:39 +0000 - dagster - DEBUG - daily_pipeline - 187a44dc-1808-4ae3-91d8-dc8d095e3636 - 10305 - dbt_build_models - STEP_START - Started execution of step "dbt_build_models".
+2025-09-25 08:41:01 +0000 - dagster - DEBUG - daily_pipeline - 187a44dc-1808-4ae3-91d8-dc8d095e3636 - 10305 - dbt_build_models - STEP_OUTPUT - Yielded output "result" of type "Any". (Type check passed).
+2025-09-25 08:41:01 +0000 - dagster - DEBUG - daily_pipeline - 187a44dc-1808-4ae3-91d8-dc8d095e3636 - dbt_build_models - Writing file at: /app/dagster_home/storage/dbt_build_models using PickledObjectFilesystemIOManager...
+2025-09-25 08:41:01 +0000 - dagster - DEBUG - daily_pipeline - 187a44dc-1808-4ae3-91d8-dc8d095e3636 - 10305 - dbt_build_models - ASSET_MATERIALIZATION - Materialized value dbt_build_models.
+2025-09-25 08:41:02 +0000 - dagster - DEBUG - daily_pipeline - 187a44dc-1808-4ae3-91d8-dc8d095e3636 - 10305 - dbt_build_models - HANDLED_OUTPUT - Handled output "result" using IO manager "io_manager"
+2025-09-25 08:41:02 +0000 - dagster - DEBUG - daily_pipeline - 187a44dc-1808-4ae3-91d8-dc8d095e3636 - 10305 - dbt_build_models - STEP_SUCCESS - Finished execution of step "dbt_build_models" in 22.38s.

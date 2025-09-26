@@ -1,0 +1,7 @@
+2025-09-25 07:46:00 +0000 - dagster - DEBUG - daily_pipeline - 251d76ef-944f-4a67-af5a-66b4a9beaf8e - 20728 - LOGS_CAPTURED - Started capturing logs in process (pid: 20728).
+2025-09-25 07:46:00 +0000 - dagster - DEBUG - daily_pipeline - 251d76ef-944f-4a67-af5a-66b4a9beaf8e - 20728 - ingest_csv_to_duckdb - STEP_START - Started execution of step "ingest_csv_to_duckdb".
+2025-09-25 07:46:16 +0000 - dagster - DEBUG - daily_pipeline - 251d76ef-944f-4a67-af5a-66b4a9beaf8e - 20728 - ingest_csv_to_duckdb - STEP_OUTPUT - Yielded output "result" of type "Any". (Type check passed).
+2025-09-25 07:46:16 +0000 - dagster - DEBUG - daily_pipeline - 251d76ef-944f-4a67-af5a-66b4a9beaf8e - ingest_csv_to_duckdb - Writing file at: /app/dagster_home/storage/ingest_csv_to_duckdb using PickledObjectFilesystemIOManager...
+2025-09-25 07:46:16 +0000 - dagster - DEBUG - daily_pipeline - 251d76ef-944f-4a67-af5a-66b4a9beaf8e - 20728 - ingest_csv_to_duckdb - ASSET_MATERIALIZATION - Materialized value ingest_csv_to_duckdb.
+2025-09-25 07:46:16 +0000 - dagster - DEBUG - daily_pipeline - 251d76ef-944f-4a67-af5a-66b4a9beaf8e - 20728 - ingest_csv_to_duckdb - HANDLED_OUTPUT - Handled output "result" using IO manager "io_manager"
+2025-09-25 07:46:16 +0000 - dagster - DEBUG - daily_pipeline - 251d76ef-944f-4a67-af5a-66b4a9beaf8e - 20728 - ingest_csv_to_duckdb - STEP_SUCCESS - Finished execution of step "ingest_csv_to_duckdb" in 15.88s.

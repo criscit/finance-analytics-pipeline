@@ -1,0 +1,59 @@
+# file: quality/great_expectations/great_expectations.yml
+config_version: 3.0
+
+datasources:
+  local_duckdb:
+    module_name: great_expectations.datasource
+    class_name: Datasource
+    execution_engine:
+      module_name: great_expectations.execution_engine
+      class_name: SqlAlchemyExecutionEngine
+      connection_string: duckdb:///app/data/warehouse/warehouse.duckdb
+    data_connectors:
+      default_runtime_data_connector:
+        class_name: RuntimeDataConnector
+        batch_identifiers:
+          - default_identifier_name
+
+stores:
+  expectations_store:
+    class_name: ExpectationsStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: expectations/
+
+  validations_store:
+    class_name: ValidationsStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: uncommitted/validations/
+
+  evaluation_parameter_store:
+    class_name: EvaluationParameterStore
+    store_backend:
+      class_name: InMemoryStoreBackend
+
+  checkpoint_store:
+    class_name: CheckpointStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: checkpoints/
+
+data_docs:
+  sites:
+    local_site:
+      class_name: SiteBuilder
+      show_how_to_buttons: true
+      store_backend:
+        class_name: TupleFilesystemStoreBackend
+        base_directory: uncommitted/data_docs/local_site/
+      site_index_builder:
+        class_name: DefaultSiteIndexBuilder
+
+expectations_store_name: expectations_store
+validations_store_name: validations_store
+evaluation_parameter_store_name: evaluation_parameter_store
+checkpoint_store_name: checkpoint_store
+
+
+

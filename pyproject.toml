@@ -1,0 +1,48 @@
+[project]
+name = "finance-analytics-pipeline"
+version = "0.1.0"
+description = "Local, lake-less data pipeline with Dagster + DuckDB + dbt-duckdb + Great Expectations"
+authors = [
+    {name = "Aleksei Pavlov", email = "insocriscit15@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "dagster==1.9.0",
+    "dagster-webserver==1.9.0",
+    "duckdb==1.1.0",
+    "dbt-core==1.8.6",
+    "dbt-duckdb==1.8.4",
+    "great-expectations==0.18.12",
+    "google-api-python-client==2.142.0",
+    "gspread==6.1.2",
+    "oauth2client==4.1.3",
+    "python-dotenv==1.0.1",
+    "rx==1.6.1",
+    "graphql-core<3.3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff==0.6.4",
+    "black==24.8.0",
+    "pytest==8.3.2",
+]
+
+[tool.poetry]
+packages = [{include = "orchestration", from = "."}]
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+select = ["E", "F", "W", "C90", "I", "N", "UP", "YTT", "S", "BLE", "FBT", "B", "A", "COM", "C4", "DTZ", "T10", "DJ", "EM", "EXE", "FA", "ISC", "ICN", "G", "INP", "PIE", "T20", "PYI", "PT", "Q", "RSE", "RET", "SLF", "SIM", "TID", "TCH", "INT", "ARG", "PTH", "ERA", "PD", "PGH", "PL", "TRY", "FLY", "NPY", "AIR", "PERF", "FURB", "LOG", "RUF"]
+ignore = ["S101", "T201", "PLR0913", "PLR0912", "PLR0915"]
+
+[tool.black]
+target-version = ['py311']
+line-length = 88
