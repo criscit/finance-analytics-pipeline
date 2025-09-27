@@ -6,7 +6,7 @@ from dagster import asset, Output, MetadataValue
 DB = os.getenv("DUCKDB_PATH", "/app/data/warehouse/warehouse.duckdb")
 OUT = Path(os.getenv("EXPORT_CSV_IN_CONTAINER", "/app/data/exports/csv"))
 META = Path(os.getenv("EXPORT_META_PATH", "/app/data/exports/metadata"))
-TABLE = os.getenv("EXPORT_TABLE", "marts.daily_snapshot")
+TABLE = os.getenv("EXPORT_TABLE", "marts.bank_finance_analytics")
 
 def _md5(path: Path) -> str:
     h = hashlib.md5()

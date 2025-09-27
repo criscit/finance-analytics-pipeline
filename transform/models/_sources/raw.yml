@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: t_bank
+    schema: prod_raw
+    # freshness:
+    #   warn_after: {count: 1, period: day}
+    tables:
+      - name: transactions              # logical, vendor-agnostic
+        identifier: t_bank_transactions # physical table name
+        description: Raw all T-Bank transactions export.

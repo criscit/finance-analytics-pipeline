@@ -49,6 +49,3 @@ clean: ## Clean up generated files
 	rm -rf quality/great_expectations/validations/
 	rm -rf transform/target/
 	rm -rf transform/dbt_packages/
-
-
-

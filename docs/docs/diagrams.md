@@ -91,8 +91,8 @@ graph TD
     C --> D[export_csv_snapshot]
     C --> E[export_to_google_sheets]
     
-    A --> F[meta_ingest_ledger]
-    E --> G[meta_export_bookmark]
+    A --> F[meta.ingest_ledger]
+    E --> G[meta.export_bookmark]
     
     style A fill:#e1f5fe
     style B fill:#f3e5f5
@@ -172,7 +172,7 @@ erDiagram
         timestamp created_at
     }
     
-    daily_snapshot {
+    bank_finance_analytics {
         integer id
         integer user_id
         varchar event_type
@@ -181,28 +181,28 @@ erDiagram
         integer metric_2
     }
     
-    meta_ingest_ledger {
+    meta.ingest_ledger {
         text filename PK
         bigint size
         text md5
         timestamp ingested_at
     }
     
-    meta_export_bookmark {
+    meta.export_bookmark {
         text dataset PK
         timestamp last_ts
         bigint last_id
     }
     
     stg_events ||--|| core_events : transforms
-    core_events ||--|| daily_snapshot : exports
+    core_events ||--|| bank_finance_analytics : exports
 ```
 
 ## Export Process
 
 ```mermaid
 graph TD
-    A[Read marts.daily_snapshot] --> B[Generate CSV]
+    A[Read marts.bank_finance_analytics] --> B[Generate CSV]
     B --> C[Calculate MD5]
     C --> D[Write to dated folder]
     D --> E[Copy to latest.csv]

@@ -3,18 +3,25 @@ name: local_duckdb_pipeline
 version: 1.0.0
 profile: local_duckdb
 model-paths: ["models"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
 target-path: "target"
 clean-targets: ["target"]
 
 models:
   local_duckdb_pipeline:
     +materialized: table
-    marts:
-      +schema: marts
+    staging:
+      +schema: stg
     core:
       +schema: core
-    staging:
-      +schema: staging
+    marts:
+      +schema: mart
 
+seeds:
+  +schema: seed
+  +delimiter: "\t"
 
-
+on-run-start:
+  - "{{ assert_env() }}"
+  - "{{ assert_source('prod_raw','t_bank_transactions') }}"

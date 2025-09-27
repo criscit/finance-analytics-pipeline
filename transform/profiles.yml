@@ -1,11 +1,9 @@
 # file: transform/profiles.yml
 local_duckdb:
-  target: dev
+  target: prod
   outputs:
-    dev:
+    prod:
       type: duckdb
-      path: "{{ env_var('DUCKDB_PATH') }}"
+      schema: prod
+      path: "{{ env_var('DUCKDB_PATH', '/app/data/warehouse/analytics.duckdb') }}"
       threads: 4
-
-
-

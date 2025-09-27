@@ -14,23 +14,23 @@ def sheets_client():
     return build("sheets", "v4", credentials=creds).spreadsheets().values()
 
 def get_bookmark(con):
-    table = os.getenv("EXPORT_TABLE", "marts.daily_snapshot")
+    table = os.getenv("EXPORT_TABLE", "marts.bank_finance_analytics")
     con.execute("""
-      create table if not exists meta_export_bookmark(
+      create table if not exists prod_meta.export_bookmark(
         dataset text primary key,
         last_ts timestamp,
         last_id bigint
       )
     """)
-    row = con.execute("select last_ts, last_id from meta_export_bookmark where dataset=?", [table]).fetchone()
+    row = con.execute("select last_ts, last_id from prod_meta.export_bookmark where dataset=?", [table]).fetchone()
     if row:
         return row[0], row[1]
     return "1970-01-01 00:00:00", -1
 
 def set_bookmark(con, last_ts, last_id):
-    table = os.getenv("EXPORT_TABLE", "marts.daily_snapshot")
+    table = os.getenv("EXPORT_TABLE", "marts.bank_finance_analytics")
     con.execute("""
-      insert into meta_export_bookmark(dataset, last_ts, last_id)
+      insert into prod_meta.export_bookmark(dataset, last_ts, last_id)
       values (?,?,?)
       on conflict(dataset) do update set last_ts=excluded.last_ts, last_id=excluded.last_id
     """, [table, last_ts, last_id])
@@ -43,7 +43,7 @@ def export_to_google_sheets():
     sheet_id = os.getenv("GOOGLE_SHEET_ID")
     range_name = os.getenv("GOOGLE_SHEET_RANGE", "Exports!A1")
     sa_path = os.getenv("GOOGLE_SA_JSON", "/app/credentials/finance-sheets-writer-prod-sa.json")
-    table = os.getenv("EXPORT_TABLE", "marts.daily_snapshot")
+    table = os.getenv("EXPORT_TABLE", "marts.bank_finance_analytics")
     db_path = os.getenv("DUCKDB_PATH", "/app/data/warehouse/warehouse.duckdb")
     
     # Validate required environment variables
@@ -63,8 +63,8 @@ def export_to_google_sheets():
     query = f"""
       with src as (select * from {table})
       select * from src
-      where updated_at > TIMESTAMP '{last_ts}'
-         or (updated_at = TIMESTAMP '{last_ts}' and id > {last_id})
+      where updated_at > timestamp '{last_ts}'
+         or (updated_at = timestamp '{last_ts}' and id > {last_id})
       order by updated_at, id
     """
     rows = con.execute(query).fetchall()

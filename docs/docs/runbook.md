@@ -47,7 +47,7 @@
    - Check sheet permissions (service account email must have edit access)
    - Review export bookmark in DuckDB:
      ```sql
-     SELECT * FROM meta_export_bookmark;
+     SELECT * FROM meta.export_bookmark;
      ```
 
 2. **CSV export issues:**
@@ -61,12 +61,12 @@
 
 1. **Reset Google Sheets bookmark:**
    ```sql
-   DELETE FROM meta_export_bookmark WHERE dataset = 'marts.daily_snapshot';
+   DELETE FROM meta.export_bookmark WHERE dataset = 'marts.bank_finance_analytics';
    ```
 
 2. **Reset ingestion ledger (if needed):**
    ```sql
-   DELETE FROM meta_ingest_ledger WHERE filename = 'your_file.csv';
+   DELETE FROM meta.ingest_ledger WHERE filename = 'your_file.csv';
    ```
 
 ### Manual Data Processing
@@ -137,10 +137,10 @@
 3. **Export verification:**
    ```bash
    # Check latest CSV
-   ls -la data/exports/csv/marts_daily_snapshot/latest.csv
+   ls -la data/exports/csv/marts_bank_finance_analytics/latest.csv
    
    # Check manifest
-   cat data/exports/metadata/marts_daily_snapshot/dt=*/manifest.json
+   cat data/exports/metadata/marts_bank_finance_analytics/dt=*/manifest.json
    ```
 
 ### Log Analysis

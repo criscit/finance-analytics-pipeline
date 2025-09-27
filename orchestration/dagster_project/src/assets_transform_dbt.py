@@ -12,8 +12,5 @@ def dbt_build_models():
         raise RuntimeError(out.stderr)
     out = subprocess.run(["dbt", "build", "--profiles-dir", DBT_DIR], cwd=DBT_DIR, capture_output=True, text=True)
     if out.returncode != 0:
-        raise RuntimeError(out.stderr)
+        raise RuntimeError(f"dbt build failed. stdout: {out.stdout}, stderr: {out.stderr}")
     return Output(None, metadata={"dbt_build_log": MetadataValue.text(out.stdout[-2000:])})
-
-
-

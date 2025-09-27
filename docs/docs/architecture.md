@@ -2,19 +2,18 @@
 
 ## System Overview
 
-The Finance Analytics Pipeline is a local, lake-less data pipeline designed to process CSV files and export results to both CSV files and Google Sheets.
+The Finance Analytics Pipeline is a local data pipeline designed to process CSV files and export results to both CSV files and Google Sheets.
 
 ## Core Components
 
 ### 1. Orchestration (Dagster)
 - **Assets**: Modular data processing units
-- **Schedules**: Automated daily runs at 06:00
+- **Schedules**: Automated monthly runs at 1st day of the month at 06:00
 - **Dependencies**: Clear asset lineage and execution order
 - **UI**: Web interface for monitoring and manual runs
 
 ### 2. Data Warehouse (DuckDB)
 - **Single file**: `warehouse.duckdb` contains all data
-- **No data lake**: Direct CSV ingestion to tables
 - **ACID compliance**: Reliable data integrity
 - **SQL interface**: Standard SQL queries and analytics
 
@@ -97,19 +96,19 @@ volumes:
 
 ### 1. Ingestion Ledger
 ```sql
-CREATE TABLE meta_ingest_ledger(
+CREATE TABLE meta.ingest_ledger(
   filename TEXT PRIMARY KEY,
   size BIGINT,
   md5 TEXT,
-  ingested_at TIMESTAMP DEFAULT now()
+  ingested_at timestamp
 );
 ```
 
 ### 2. Export Bookmarks
 ```sql
-CREATE TABLE meta_export_bookmark(
+CREATE TABLE meta.export_bookmark(
   dataset TEXT PRIMARY KEY,
-  last_ts TIMESTAMP,
+  last_ts timestamp,
   last_id BIGINT
 );
 ```

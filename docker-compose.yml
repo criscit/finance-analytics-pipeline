@@ -16,17 +16,42 @@ services:
       - GOOGLE_SHEET_RANGE=${GOOGLE_SHEET_RANGE}
       - EXPORT_TABLE=${EXPORT_TABLE}
     volumes:
-      - ./orchestration:/app/orchestration
-      - ./transform:/app/transform
-      - ./quality:/app/quality
-      - ./export:/app/export
-      - ./docs:/app/docs
-      - ./data/warehouse:/app/data/warehouse
-      - ./data/dagster_home:/app/dagster_home
-      - ./sample_data:/app/data/raw:rw
-      - ./data/exports/csv:/app/data/exports/csv:rw
-      - ./data/exports/metadata:/app/data/exports/metadata:rw
-      - ./credentials:/app/credentials:ro
+      # Inputs: default to ./sample_data if INPUT_FINANCE_PATH is not set
+      - type: bind
+        source: ${INPUT_FINANCE_PATH:-./sample_data}
+        target: /app/data/raw
+
+      # Exports: keep parent-less, explicit targets to avoid overlap
+      - type: bind
+        source: ${EXPORT_CSV_PATH:-./data/exports/csv}
+        target: /app/data/exports/csv
+      - type: bind
+        source: ${EXPORT_META_PATH:-./data/exports/metadata}
+        target: /app/data/exports/metadata
+
+      # Project code & state
+      - type: bind
+        source: ./orchestration
+        target: /app/orchestration
+      - type: bind
+        source: ./transform
+        target: /app/transform
+      - type: bind
+        source: ./quality
+        target: /app/quality
+      - type: bind
+        source: ./docs
+        target: /app/docs
+      - type: bind
+        source: ./data/warehouse
+        target: /app/data/warehouse
+      - type: bind
+        source: ./data/dagster_home
+        target: /app/dagster_home
+      - type: bind
+        source: ./credentials
+        target: /app/credentials
+        read_only: true
     command: bash -lc "dagster dev -h 0.0.0.0 -p 3000 --workspace /app/orchestration/dagster_project/workspace.yaml"
     ports:
       - "3000:3000"
@@ -35,5 +60,3 @@ services:
       interval: 15s
       timeout: 5s
       retries: 10
-
-# dagster-daemon removed - dagster dev already includes daemon functionality

@@ -13,10 +13,10 @@ CREATE TABLE stg_events (
     id INTEGER,
     user_id INTEGER,
     event_type VARCHAR,
-    event_ts TIMESTAMP,
+    event_ts timestamp,
     metric_1 INTEGER,
     metric_2 INTEGER,
-    created_at TIMESTAMP
+    created_at timestamp
 );
 ```
 
@@ -26,10 +26,10 @@ CREATE TABLE stg_sales (
     sale_id INTEGER,
     product_id INTEGER,
     user_id INTEGER,
-    sale_date TIMESTAMP,
+    sale_date timestamp,
     amount DECIMAL,
     quantity INTEGER,
-    created_at TIMESTAMP
+    created_at timestamp
 );
 ```
 
@@ -41,8 +41,8 @@ CREATE TABLE stg_inventory (
     category VARCHAR,
     stock_quantity INTEGER,
     unit_price DECIMAL,
-    updated_at TIMESTAMP,
-    created_at TIMESTAMP
+    updated_at timestamp,
+    created_at timestamp
 );
 ```
 
@@ -55,23 +55,23 @@ CREATE TABLE core_events (
     id INTEGER PRIMARY KEY,
     user_id INTEGER NOT NULL,
     event_type VARCHAR NOT NULL,
-    event_ts TIMESTAMP NOT NULL,
+    event_ts timestamp NOT NULL,
     metric_1 INTEGER NOT NULL,
     metric_2 INTEGER NOT NULL,
-    created_at TIMESTAMP NOT NULL
+    created_at timestamp NOT NULL
 );
 ```
 
 ### Mart Tables (marts.*)
 Final export-ready tables for downstream consumption.
 
-#### marts.daily_snapshot
+#### marts.bank_finance_analytics
 ```sql
-CREATE TABLE marts.daily_snapshot (
+CREATE TABLE marts.bank_finance_analytics (
     id INTEGER,
     user_id INTEGER,
     event_type VARCHAR,
-    updated_at TIMESTAMP,
+    updated_at timestamp,
     metric_1 INTEGER,
     metric_2 INTEGER
 );
@@ -80,21 +80,21 @@ CREATE TABLE marts.daily_snapshot (
 ### Metadata Tables
 System tables for pipeline management.
 
-#### meta_ingest_ledger
+#### meta.ingest_ledger
 ```sql
-CREATE TABLE meta_ingest_ledger (
+CREATE TABLE meta.ingest_ledger (
     filename TEXT PRIMARY KEY,
     size BIGINT,
     md5 TEXT,
-    ingested_at TIMESTAMP DEFAULT now()
+    ingested_at timestamp
 );
 ```
 
-#### meta_export_bookmark
+#### meta.export_bookmark
 ```sql
-CREATE TABLE meta_export_bookmark (
+CREATE TABLE meta.export_bookmark (
     dataset TEXT PRIMARY KEY,
-    last_ts TIMESTAMP,
+    last_ts timestamp,
     last_id BIGINT
 );
 ```
@@ -104,7 +104,7 @@ CREATE TABLE meta_export_bookmark (
 ### Standard Types
 - **INTEGER**: Numeric identifiers and counts
 - **VARCHAR**: Text fields with variable length
-- **TIMESTAMP**: Date and time values
+- **timestamp**: Date and time values
 - **DECIMAL**: Monetary amounts and precise numbers
 - **TEXT**: Long text fields and metadata
 
@@ -138,7 +138,7 @@ expectations:
       max_value: 1000
 ```
 
-#### marts.daily_snapshot
+#### marts.bank_finance_analytics
 ```yaml
 expectations:
   - expect_column_values_to_not_be_null:
@@ -181,7 +181,7 @@ sources:
 ### Model Tests
 ```yaml
 models:
-  - name: daily_snapshot
+  - name: bank_finance_analytics
     columns:
       - name: id
         tests:
@@ -199,7 +199,7 @@ models:
 
 ### Staging → Core → Marts
 ```
-CSV Files → stg_events → core_events → marts.daily_snapshot
+CSV Files → stg_events → core_events → marts.bank_finance_analytics
 ```
 
 ### Transformation Logic
@@ -247,7 +247,7 @@ id,user_id,event_type,updated_at,metric_1,metric_2
 
 ### Indexing
 - Primary keys on all tables
-- Timestamp columns for time-based queries
+- timestamp columns for time-based queries
 - User ID columns for user-based analytics
 
 ### Partitioning

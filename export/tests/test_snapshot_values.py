@@ -5,7 +5,7 @@ import json
 
 def test_latest_csv_exists():
     """Test that latest.csv exists and is readable"""
-    latest = Path("data/exports/csv/marts_daily_snapshot/latest.csv")
+    latest = Path("data/exports/csv/marts_bank_finance_analytics/latest.csv")
     assert latest.exists(), "latest.csv not found"
     
     # Test that file is readable
@@ -16,7 +16,7 @@ def test_latest_csv_exists():
 
 def test_manifest_exists():
     """Test that manifest.json exists and has required fields"""
-    manifest_pattern = Path("data/exports/metadata/marts_daily_snapshot")
+    manifest_pattern = Path("data/exports/metadata/marts_bank_finance_analytics")
     manifests = list(manifest_pattern.glob("*/manifest.json"))
     assert len(manifests) > 0, "No manifest.json files found"
     
@@ -33,8 +33,8 @@ def test_manifest_exists():
 
 def test_csv_row_count_matches_manifest():
     """Test that CSV row count matches manifest"""
-    latest = Path("data/exports/csv/marts_daily_snapshot/latest.csv")
-    manifest_pattern = Path("data/exports/metadata/marts_daily_snapshot")
+    latest = Path("data/exports/csv/marts_bank_finance_analytics/latest.csv")
+    manifest_pattern = Path("data/exports/metadata/marts_bank_finance_analytics")
     manifests = list(manifest_pattern.glob("*/manifest.json"))
     
     if not manifests:
@@ -55,7 +55,7 @@ def test_csv_row_count_matches_manifest():
 
 def test_metric_values_sanity():
     """Test basic sanity checks on metric values"""
-    latest = Path("data/exports/csv/marts_daily_snapshot/latest.csv")
+    latest = Path("data/exports/csv/marts_bank_finance_analytics/latest.csv")
     if not latest.exists():
         return  # Skip if no data
     
