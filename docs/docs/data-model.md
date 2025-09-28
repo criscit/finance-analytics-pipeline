@@ -67,7 +67,7 @@ Final export-ready tables for downstream consumption.
 
 #### marts.bank_finance_analytics
 ```sql
-CREATE TABLE marts.bank_finance_analytics (
+CREATE TABLE marts.bank_transactions(
     id INTEGER,
     user_id INTEGER,
     event_type VARCHAR,

@@ -22,3 +22,12 @@ repos:
         language: system
         types: [python]
         stages: [pre-push]
+
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest (poetry)
+        entry: poetry run pytest -v export/tests/
+        language: system
+        types: [python]
+        stages: [pre-push]

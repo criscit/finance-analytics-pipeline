@@ -1,9 +1,9 @@
 bank	target_col	expr
 t_bank	card_last4	cast("Номер карты" as varchar(5))
 t_bank	status_nm	cast("Статус" as varchar(10))
-t_bank	category_nm	cast("Категория" as varchar(127))
+t_bank	category_nm	cast("Категория" as varchar(128))
 t_bank	mcc_cd	cast("MCC" as varchar(10))
-t_bank	description	cast("Описание" as varchar(255))
+t_bank	description	cast("Описание" as varchar(256))
 t_bank	transaction_amt	cast(replace("Сумма операции", ',', '.') as double)
 t_bank	transaction_currency_cd	cast("Валюта операции" as varchar(3))
 t_bank	transacted_at_utc	((strptime("Дата операции", '%d.%m.%Y %H:%M:%S') at time zone 'Europe/Moscow') at time zone 'UTC')

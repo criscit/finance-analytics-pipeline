@@ -172,7 +172,7 @@ erDiagram
         timestamp created_at
     }
     
-    bank_finance_analytics {
+    bank_transactions{
         integer id
         integer user_id
         varchar event_type
@@ -195,7 +195,7 @@ erDiagram
     }
     
     stg_events ||--|| core_events : transforms
-    core_events ||--|| bank_finance_analytics : exports
+    core_events ||--|| bank_transactions: exports
 ```
 
 ## Export Process

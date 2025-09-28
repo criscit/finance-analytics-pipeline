@@ -43,7 +43,10 @@ line-length = 100
 [tool.ruff.lint]
 # Core errors + imports + modernizations + bugbear + simplicities + ruff extras
 select = ["E","F","I","UP","B","SIM","C4","RET","PL","RUF"]
-ignore = ["E501"]  # Let Black handle line length
+ignore = [
+  "E501", # Let Black handle line length
+  "RUF001" # ignore ambiguous character warnings
+]
 
 [tool.mypy]
 python_version = "3.11"

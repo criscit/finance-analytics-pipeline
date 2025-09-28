@@ -54,7 +54,7 @@ def archive_processed_files() -> Output[list[dict[str, str]]]:
             con.execute(
                 """
                 update prod_meta.ingest_ledger
-                set archived_at = current_timestamp, archived_path = ?
+                set archived_at = current_timestamp at time zone 'UTC', archived_path = ?
                 where filename = ?
                 """,
                 [target.relative_to(RAW_ROOT).as_posix(), stored_path],

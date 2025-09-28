@@ -203,13 +203,14 @@ def ingest_csv_to_duckdb() -> Output[dict[str, int]]:
     con.execute(
         """
         create table if not exists prod_meta.ingest_ledger (
-            bank varchar(31),
-            table_name varchar(127),
-            file_name varchar(255),
-            src_path varchar(511),
+            bank varchar(32),
+            table_name varchar(128),
+            file_name varchar(256),
+            src_path varchar(512),
             size bigint,
             md5 varchar(32),
-            ingested_at timestamp
+            ingested_at timestamp,
+            archived_at timestamp
         )
         """,
     )
