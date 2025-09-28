@@ -4,7 +4,14 @@
 
 from __future__ import annotations
 
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any
+
+# Constants
+MIN_COMPATIBLE_ARGCOUNT = 4
+EXPECTED_ARGS_COUNT = 3
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 def _apply_rx_schedule_patch() -> None:
@@ -34,7 +41,7 @@ def _apply_rx_schedule_patch() -> None:
     except AttributeError:  # pragma: no cover - built-in/extension functions.
         argcount = None
 
-    if argcount is not None and argcount >= 4:
+    if argcount is not None and argcount >= MIN_COMPATIBLE_ARGCOUNT:
         # Already compatible with the expected call signature.
         return
 
@@ -43,21 +50,22 @@ def _apply_rx_schedule_patch() -> None:
 
         try:
             return original_schedule(self, *args, **kwargs)
-        except TypeError as error:
-            if len(args) == 3 and not kwargs:
+        except TypeError:
+            if len(args) == EXPECTED_ARGS_COUNT and not kwargs:
                 scheduler, state, action = args
                 schedule_fn: Callable[..., Any] | None = getattr(
-                    scheduler, "schedule", None
+                    scheduler,
+                    "schedule",
+                    None,
                 )
                 if callable(schedule_fn) and callable(action):
                     try:
                         return schedule_fn(action, state)
                     except TypeError:
                         return schedule_fn(action)
-            raise error
+            raise
 
     observer_module.ObserverBase.schedule = _patched_schedule
 
 
 _apply_rx_schedule_patch()
-

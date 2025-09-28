@@ -1,11 +1,12 @@
 # file: orchestration/dagster_project/src/assets_ingest.py
+import hashlib
 import os
 import re
 import time
-import hashlib
 from pathlib import Path
+
 import duckdb
-from dagster import asset, get_dagster_logger
+from dagster import Output, asset, get_dagster_logger
 
 RAW_PATH = Path(os.getenv("RAW_PATH", "/app/data/prod_raw"))
 DUCKDB_PATH = os.getenv("DUCKDB_PATH", "/app/data/warehouse/analytics.duckdb")
@@ -17,6 +18,7 @@ INPUT_PATH = RAW_PATH / "To Parse" / "Bank"
 # Helpers
 # -------------------------
 
+
 def _stable(path: Path) -> bool:
     try:
         s1 = path.stat().st_size
@@ -25,6 +27,7 @@ def _stable(path: Path) -> bool:
     except FileNotFoundError:
         return False
 
+
 def _md5(path: Path) -> str:
     hash = hashlib.md5()
     with path.open("rb") as file:
@@ -32,23 +35,27 @@ def _md5(path: Path) -> str:
             hash.update(chunk)
     return hash.hexdigest()
 
+
 def qident(name: str) -> str:
     """Quote an identifier for DuckDB (schema/table/column)."""
     return '"' + name.replace('"', '""') + '"'
 
+
 def qtable(schema: str, table: str) -> str:
     return f"{qident(schema)}.{qident(table)}"
+
 
 def _extract_table_name_from_dir(dir_path: Path) -> str:
     """
     INPUT_PATH/T-Bank/transactions  -> t_bank_transactions
     """
     rel = dir_path.relative_to(INPUT_PATH)  # e.g. Path('T-Bank/transactions')
-    parts = rel.parts                       # ('T-Bank','transactions')
+    parts = rel.parts  # ('T-Bank','transactions')
     raw_name = "_".join(parts).lower()
     table_name = re.sub(r"[^a-z0-9_]", "_", raw_name)
     table_name = re.sub(r"_+", "_", table_name).strip("_")
     return table_name or "unknown"
+
 
 def _file_columns(con: duckdb.DuckDBPyConnection, path: Path) -> list[str]:
     """
@@ -61,10 +68,16 @@ def _file_columns(con: duckdb.DuckDBPyConnection, path: Path) -> list[str]:
     ).fetchall()
     return [r[0] for r in rows]  # column_name
 
-def _table_columns(con: duckdb.DuckDBPyConnection, schema: str, table: str) -> list[str]:
+
+def _table_columns(
+    con: duckdb.DuckDBPyConnection,
+    schema: str,
+    table: str,
+) -> list[str]:
     rows = con.execute(f"pragma table_info({qtable(schema, table)})").fetchall()
     # rows: (cid, name, type, notnull, dflt, pk)
     return [r[1] for r in rows]
+
 
 def build_load_key_expr(file_cols: list[str]) -> str:
     """
@@ -85,45 +98,55 @@ def build_load_key_expr(file_cols: list[str]) -> str:
 
 
 def _ensure_raw_table(
-    con: duckdb.DuckDBPyConnection, schema: str, table: str, path: Path
+    con: duckdb.DuckDBPyConnection,
+    schema: str,
+    table: str,
+    path: Path,
 ) -> None:
     """
     Create prod_raw.<table> with explicit TEXT columns = file headers,
     plus BK + metadata. No CTAS typing here.
     """
     file_cols = _file_columns(con, path)
-    cols_ddl = ",\n  ".join(f'{qident(c)} text' for c in file_cols)
+    cols_ddl = ",\n  ".join(f"{qident(c)} text" for c in file_cols)
 
     con.execute(f"create schema if not exists {qident(schema)};")
-    con.execute(f"""
+    con.execute(
+        f"""
       create table if not exists {qtable(schema, table)} (
         __load_key varchar(32),
         {cols_ddl},
         __ingested_at timestamp
       );
-    """)
+    """,
+    )
     # handy lookup
-    con.execute(f"""
+    con.execute(
+        f"""
       create index if not exists ix_{table}_bk
       on {qtable(schema, table)}(__load_key);
-    """)
+    """,
+    )
 
 
 def _append_file(
-    con: duckdb.DuckDBPyConnection, schema: str, table: str, path: Path,
+    con: duckdb.DuckDBPyConnection,
+    schema: str,
+    table: str,
+    path: Path,
 ) -> int:
     """
     Append rows with a staging read of the CSV.
     RAW stays TEXT-only; BK built from raw strings; metadata added.
     Only inserts rows with transaction_bks that don't already exist in the target table.
-    
+
     Returns:
         int: Number of rows actually inserted (excluding duplicates)
     """
     _ensure_raw_table(con, schema, table, path)
 
-    tgt_cols = _table_columns(con, schema, table)     # RAW table cols (include BK+meta)
-    file_cols = _file_columns(con, path)              # CSV headers
+    tgt_cols = _table_columns(con, schema, table)  # RAW table cols (include BK+meta)
+    file_cols = _file_columns(con, path)  # CSV headers
 
     load_key_expr = build_load_key_expr(file_cols)
 
@@ -134,19 +157,19 @@ def _append_file(
             aligned.append(f"{load_key_expr} as {qident(c)}")
         elif c == "__ingested_at":
             aligned.append(
-                f"(current_timestamp at time zone 'UTC') AS {qident(c)}"
+                f"(current_timestamp at time zone 'UTC') AS {qident(c)}",
             )
         else:
             # data columns: pass through if exists, else NULL
             aligned.append(
-                f"{qident(c)} as {qident(c)}" if c in file_cols else f"NULL AS {qident(c)}"
+                (f"{qident(c)} as {qident(c)}" if c in file_cols else f"NULL AS {qident(c)}"),
             )
 
     try:
         result = con.execute(
             f"""
             insert into {qtable(schema, table)}
-            select
+            select distinct
                 {", ".join(aligned)}
             from
                 read_csv_auto(?, header=true, all_varchar=true)
@@ -154,16 +177,18 @@ def _append_file(
             """,
             [str(path)],
         )
-        return result.rowcount
+        return int(result.rowcount)
     except Exception:
         raise
+
 
 # -------------------------
 # Asset
 # -------------------------
 
+
 @asset
-def ingest_csv_to_duckdb():
+def ingest_csv_to_duckdb() -> Output[dict[str, int]]:
     """
     Ingest CSVs:
       - RAW_PATH/To Parse/Bank/<bank>/**/*.csv  → prod_raw.<derived_table_name>
@@ -186,18 +211,18 @@ def ingest_csv_to_duckdb():
             md5 varchar(32),
             ingested_at timestamp
         )
-        """
+        """,
     )
 
     ingested_count = 0
     skipped = 0
 
-    def process_file(bank: str, table_name: str, path: Path):
+    def process_file(bank: str, table_name: str, path: Path) -> None:
         nonlocal ingested_count, skipped
         if not path.is_file() or path.suffix.lower() != ".csv":
             return
         if not _stable(path):
-            log.info(f"Skipping unstable file: {path}")
+            log.info("Skipping unstable file: %s", path)
             return
 
         rel = path.relative_to(RAW_PATH)
@@ -214,7 +239,7 @@ def ingest_csv_to_duckdb():
             return
 
         ingested_at = time.strftime("%Y-%m-%d %H:%M:%S")
-        
+
         # Atomic per-file ingestion
         con.execute("begin;")
 
@@ -230,16 +255,17 @@ def ingest_csv_to_duckdb():
             con.execute("commit;")
         except Exception as e:
             con.execute("rollback;")
-            log.error(f"Failed to ingest {path}: {e}")
+            log.exception("Failed to ingest %s: %s", path, e)
             raise
-        
+
         ingested_count += 1
-        log.info(f"Ingested {path} -> {qtable('prod_raw', table_name)}")
+        log.info("Ingested %s -> %s", path, qtable("prod_raw", table_name))
 
     if not INPUT_PATH.exists():
-        log.error(f"No To Parse folder found at {INPUT_PATH}")
-        raise ValueError(f"No To Parse folder found at {INPUT_PATH}")
-    
+        log.error("No To Parse folder found at %s", INPUT_PATH)
+        msg = f"No To Parse folder found at {INPUT_PATH}"
+        raise ValueError(msg)
+
     for bank_dir in sorted([p for p in INPUT_PATH.iterdir() if p.is_dir()]):
         bank = bank_dir.name
         for bank_data_type_dir in sorted([p for p in bank_dir.iterdir() if p.is_dir()]):
@@ -248,4 +274,8 @@ def ingest_csv_to_duckdb():
             for file_path in bank_data_type_dir.rglob("*.csv"):
                 process_file(bank, table_name, file_path)
     con.close()
-    log.info(f"Ingestion complete. New files: { ingested_count }, skipped: { skipped }")
+    log.info("Ingestion complete. New files: %s, skipped: %s", ingested_count, skipped)
+    return Output(
+        {"ingested": ingested_count, "skipped": skipped},
+        metadata={"ingested": ingested_count, "skipped": skipped},
+    )

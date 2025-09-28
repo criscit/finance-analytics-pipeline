@@ -1,5 +1,5 @@
 # file: transform/dbt_project.yml
-name: local_duckdb_pipeline
+name: finance_analytics_pipeline
 version: 1.0.0
 profile: local_duckdb
 model-paths: ["models"]
@@ -9,7 +9,7 @@ target-path: "target"
 clean-targets: ["target"]
 
 models:
-  local_duckdb_pipeline:
+  finance_analytics_pipeline:
     +materialized: table
     staging:
       +schema: stg
@@ -17,6 +17,10 @@ models:
       +schema: core
     marts:
       +schema: mart
+
+    integration_marts:
+      +schema: imart
+      +materialized: view
 
 seeds:
   +schema: seed

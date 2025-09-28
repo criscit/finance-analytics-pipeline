@@ -1,43 +1,54 @@
 [project]
 name = "finance-analytics-pipeline"
 version = "0.1.0"
-description = "Local, lake-less data pipeline with Dagster + DuckDB + dbt-duckdb + Great Expectations"
-authors = [
-    {name = "Aleksei Pavlov", email = "insocriscit15@gmail.com"}
-]
+description = "Data pipeline with Dagster + DuckDB + dbt-duckdb + Great Expectations"
+authors = [{ name = "Aleksei Pavlov", email = "insocriscit15@gmail.com" }]
 readme = "README.md"
 requires-python = ">=3.11,<3.13"
 dependencies = [
-    "dagster==1.9.0",
-    "dagster-webserver==1.9.0",
-    "great-expectations==0.18.12",
-    "google-api-python-client==2.142.0",
-    "gspread==6.1.2",
-    "python-dotenv==1.0.1",
-    "dbt-duckdb (>=1.9.6,<2.0.0)",
-]
-
-[project.optional-dependencies]
-dev = [
-    "ruff==0.6.4",
-    "black==24.8.0",
-    "pytest==8.3.2",
+  "dagster==1.9.0",
+  "dagster-webserver==1.9.0",
+  "great-expectations==0.18.12",
+  "google-api-python-client==2.142.0",
+  "gspread==6.1.2",
+  "python-dotenv==1.0.1",
+  "dbt-duckdb>=1.9.6,<2.0.0",
 ]
 
 [tool.poetry]
-packages = [{include = "orchestration", from = "."}]
+packages = [{ include = "orchestration", from = "." }]
 
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+ruff = "0.6.4"
+black = "24.8.0"
+pytest = "8.3.2"
+mypy = "^1.18.2"
+pre-commit = "^4.3.0"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
 [tool.ruff]
 target-version = "py311"
-line-length = 88
-select = ["E", "F", "W", "C90", "I", "N", "UP", "YTT", "S", "BLE", "FBT", "B", "A", "COM", "C4", "DTZ", "T10", "DJ", "EM", "EXE", "FA", "ISC", "ICN", "G", "INP", "PIE", "T20", "PYI", "PT", "Q", "RSE", "RET", "SLF", "SIM", "TID", "TCH", "INT", "ARG", "PTH", "ERA", "PD", "PGH", "PL", "TRY", "FLY", "NPY", "AIR", "PERF", "FURB", "LOG", "RUF"]
-ignore = ["S101", "T201", "PLR0913", "PLR0912", "PLR0915"]
+line-length = 100
 
-[tool.black]
-target-version = ['py311']
-line-length = 88
+[tool.ruff.lint]
+# Core errors + imports + modernizations + bugbear + simplicities + ruff extras
+select = ["E","F","I","UP","B","SIM","C4","RET","PL","RUF"]
+ignore = ["E501"]  # Let Black handle line length
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+ignore_missing_imports = true
+warn_unused_ignores = true
+disallow_untyped_defs = true
+show_error_codes = true

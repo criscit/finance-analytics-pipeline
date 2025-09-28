@@ -19,7 +19,7 @@ def _ensure_parent(path: Path) -> None:
 
 
 @asset(deps=["export_csv_snapshot", "export_to_google_sheets"])
-def archive_processed_files():
+def archive_processed_files() -> Output[list[dict[str, str]]]:
     """Move successfully exported files into the Archive folder tree."""
 
     logger = get_dagster_logger()

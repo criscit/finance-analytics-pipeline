@@ -1,0 +1,24 @@
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.4
+    hooks:
+      - id: ruff
+        args: ["--fix"]
+        stages: [pre-commit]
+      - id: ruff-format
+        stages: [pre-commit]
+
+  - repo: https://github.com/psf/black
+    rev: 24.8.0
+    hooks:
+      - id: black
+        stages: [pre-commit]
+
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy (poetry)
+        entry: poetry run mypy
+        language: system
+        types: [python]
+        stages: [pre-push]

@@ -1,12 +1,13 @@
 select
-  card_last4,
-  status_nm,
+  transaction_bk,
+  't_bank' as bank_nm,
   category_nm,
   description,
   transaction_amt,
   transaction_currency_cd,
   transacted_at_utc,
+  transaction_dt,
   total_rewards_amt,
-  current_timestamp at time zone 'UTC' AS __ingested_at
+  __ingested_at
 from
-  {{ ref('stg_t_bank_transactions') }}
+  {{ ref('mart_load_t_bank_transactions') }}

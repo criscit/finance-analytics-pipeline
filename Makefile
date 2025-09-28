@@ -16,17 +16,6 @@ down: ## Stop the pipeline services
 logs: ## Show logs from pipeline services
 	docker compose logs -f pipeline-worker
 
-lint: ## Run linting checks
-	poetry run ruff check .
-	poetry run black --check .
-
-fmt: ## Format code
-	poetry run black .
-	poetry run ruff check --fix .
-
-test: ## Run tests
-	poetry run pytest export/tests/ -v
-
 dbt-build: ## Run dbt build locally (requires DUCKDB_PATH env var)
 	cd transform && dbt deps
 	cd transform && dbt build
@@ -49,3 +38,16 @@ clean: ## Clean up generated files
 	rm -rf quality/great_expectations/validations/
 	rm -rf transform/target/
 	rm -rf transform/dbt_packages/
+
+setup:        ## install main + dev
+	poetry install --with dev
+lint:
+	poetry run ruff check .
+	poetry run black --check .
+	poetry run mypy .
+test:
+	poetry run pytest export/tests/ -v
+
+fmt:
+	poetry run black .
+	poetry run ruff check --fix .
