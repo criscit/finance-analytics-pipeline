@@ -1,0 +1,12 @@
+# CI-specific profiles.yml - uses environment variables only
+local_duckdb:
+  target: ci
+  outputs:
+    ci:
+      type: duckdb
+      schema: ci
+      path: "{{ env_var('DUCKDB_PATH', '/tmp/test.duckdb') }}"
+      threads: 2
+
+
+

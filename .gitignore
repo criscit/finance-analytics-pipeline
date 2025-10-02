@@ -61,8 +61,17 @@ credentials/*.json
 *.db
 
 # dbt
-transform/target/
-transform/dbt_packages/
+transform/dbt/target/
+transform/dbt/dbt_packages/
+transform/dbt/logs/
+transform/dbt/manifest.json
+transform/dbt/run_results.json
+transform/dbt/semantic_manifest.json
+transform/dbt/perf_info.json
+transform/dbt/partial_parse.msgpack
+transform/dbt/dbt.log
+transform/dbt/graph.gpickle
+transform/dbt/graph_summary.json
 
 # Great Expectations
 quality/great_expectations/uncommitted/

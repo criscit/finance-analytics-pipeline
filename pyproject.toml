@@ -55,3 +55,12 @@ ignore_missing_imports = true
 warn_unused_ignores = true
 disallow_untyped_defs = true
 show_error_codes = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+  "unit: fast, no external I/O",
+  "dagster: dagster-focused tests",
+  "integration: uses db/files/external processes",
+  "e2e: runs full pipeline",
+]

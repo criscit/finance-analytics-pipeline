@@ -1,0 +1,9 @@
+version: 2
+
+sources:
+  - name: t_bank
+    schema: prod_raw
+    tables:
+      - name: transactions
+        identifier: t_bank_transactions
+        description: Raw all T-Bank transactions export.

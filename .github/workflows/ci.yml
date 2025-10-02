@@ -48,13 +48,16 @@ jobs:
         working-directory: transform
         run: poetry run dbt deps
 
-      - name: dbt build (dry run)
+      - name: dbt build          DBT_SKIP_ASSERT_SOURCE: "true"
+        run: poetry run dbt build
         working-directory: transform
         env:
           DUCKDB_PATH: /tmp/test.duckdb
-        run: poetry run dbt build --dry-run
+          DBT_SKIP_ASSERT_SOURCE: "true"
+        run: poetry run dbt build
 
       - name: dbt debug
         env:
           DUCKDB_PATH: /tmp/test.duckdb
+          DBT_SKIP_ASSERT_SOURCE: "true"
         run: poetry run dbt debug --project-dir transform

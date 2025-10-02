@@ -16,6 +16,26 @@ repos:
 
   - repo: local
     hooks:
+      - id: dbt-deps
+        name: dbt deps
+        entry: bash -c 'cd transform/dbt && poetry run dbt deps --profiles-dir profiles'
+        language: system
+        files: ^transform/dbt/packages\.yml$
+        stages: [pre-commit]
+        pass_filenames: false
+
+  - repo: local
+    hooks:
+      - id: dbt-lint
+        name: dbt lint
+        entry: poetry run dbt parse --profiles-dir profiles
+        language: system
+        files: ^transform/dbt/.*\.sql$
+        stages: [pre-commit]
+        pass_filenames: false
+
+  - repo: local
+    hooks:
       - id: mypy
         name: mypy (poetry)
         entry: poetry run mypy
@@ -25,9 +45,10 @@ repos:
 
   - repo: local
     hooks:
-      - id: pytest
-        name: pytest (poetry)
-        entry: poetry run pytest -v export/tests/
+      - id: pytest-unit
+        name: pytest unit tests (poetry)
+        entry: poetry run pytest -m unit --tb=short
         language: system
         types: [python]
         stages: [pre-push]
+        pass_filenames: false

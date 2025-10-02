@@ -1,0 +1,48 @@
+version: 2
+
+models:
+  - name: imart_bind_bank_transactions
+    description: >
+      Integration mart for bank transactions data binding. 
+      This view provides a clean interface to the mart layer for downstream analytics and reporting.
+    tags: [integration_marts, t_bank, bind, analytics]
+    config:
+      materialized: view
+      contract:
+        enforced: true
+
+    columns:
+      - name: bank_nm
+        description: Name of the bank.
+        data_type: varchar(16)
+        data_tests:
+          - not_null
+
+      - name: category_nm
+        description: Bank-assigned spending category label.
+        data_type: varchar(128)
+
+      - name: description
+        description: Free-text operation description from the bank export.
+        data_type: varchar(256)
+
+      - name: transaction_amt
+        description: Amount actually charged/posted, in transaction currency, including cashback ant other rewards.
+        data_type: double
+        data_tests:
+          - not_null
+
+      - name: transaction_currency_cd
+        description: ISO-like currency code of the posted transaction.
+        data_type: varchar(3)
+        data_tests:
+          - accepted_values:
+              values: ['RUB']
+              severity: warn
+          - not_null
+
+      - name: transaction_dt
+        description: Date of the transaction in Europe/Moscow timezone.
+        data_type: date
+        data_tests:
+          - not_null
