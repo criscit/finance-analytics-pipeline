@@ -42,22 +42,22 @@ jobs:
         uses: pre-commit/action@v3.0.1
 
       - name: Run tests
-        run: poetry run pytest -v export/tests/
+        run: poetry run pytest -v tests/
 
       - name: dbt deps
         working-directory: transform
         run: poetry run dbt deps
 
-      - name: dbt build          DBT_SKIP_ASSERT_SOURCE: "true"
-        run: poetry run dbt build
+      - name: dbt build
         working-directory: transform
+        run: poetry run dbt build
         env:
           DUCKDB_PATH: /tmp/test.duckdb
           DBT_SKIP_ASSERT_SOURCE: "true"
-        run: poetry run dbt build
 
       - name: dbt debug
+        working-directory: transform
+        run: poetry run dbt debug
         env:
           DUCKDB_PATH: /tmp/test.duckdb
           DBT_SKIP_ASSERT_SOURCE: "true"
-        run: poetry run dbt debug --project-dir transform

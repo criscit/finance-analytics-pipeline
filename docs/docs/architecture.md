@@ -85,9 +85,7 @@ G:/USER/DATA/FINDNA/RESULT/    # Export CSV files
 
 ```yaml
 volumes:
-  - "${IMPORT_CSV_PATH}:${RAW_PATH}:rw"           # CSV imports
-  - "${EXPORT_CSV_PATH}:${EXPORT_CSV_IN_CONTAINER}:rw"  # CSV exports
-  - "${EXPORT_CSV_PATH}:${EXPORT_META_PATH}:rw"   # Export metadata
+  - "${FINANCE_DIR_HOST}:${FINANCE_DATA_DIR_CONTAINER}:rw"           # Finance data imports and exports
   - ./data/warehouse:/app/data/warehouse           # DuckDB persistence
   - ./credentials:/app/credentials:ro              # Google credentials
 ```

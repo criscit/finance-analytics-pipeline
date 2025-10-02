@@ -4,15 +4,16 @@ import os
 import re
 import time
 from pathlib import Path
+from typing import Any
 
 import duckdb
 from dagster import Output, asset, get_dagster_logger
 
-RAW_PATH = Path(os.getenv("RAW_PATH", "/app/data/prod_raw"))
+FINANCE_DATA_DIR_CONTAINER = Path(os.getenv("FINANCE_DATA_DIR_CONTAINER", "/app/data/finance"))
 DUCKDB_PATH = os.getenv("DUCKDB_PATH", "/app/data/warehouse/analytics.duckdb")
-STABILITY_S = int(os.getenv("RAW_STABILITY_SECONDS", "8"))
+STABILITY_S = 8
 
-INPUT_PATH = RAW_PATH / "To Parse" / "Bank"
+INPUT_PATH = FINANCE_DATA_DIR_CONTAINER / "To Parse" / "Bank"
 
 # -------------------------
 # Helpers
@@ -182,6 +183,52 @@ def _append_file(
         raise
 
 
+def process_file(
+    con: duckdb.DuckDBPyConnection,
+    bank: str,
+    table_name: str,
+    path: Path,
+    log: Any,
+) -> bool:
+    """
+    Process a single CSV file.
+
+    Returns:
+        bool: True if file was processed, False if skipped
+    """
+    if not path.is_file() or path.suffix.lower() != ".csv":
+        return False
+    if not _stable(path):
+        log.info("Skipping unstable file: %s", path)
+        return False
+
+    rel = path.relative_to(FINANCE_DATA_DIR_CONTAINER)
+    src_path = rel.as_posix()
+    md5 = _md5(path)
+    size = path.stat().st_size
+    ingested_at = time.strftime("%Y-%m-%d %H:%M:%S")
+
+    # Atomic per-file ingestion
+    con.execute("begin;")
+
+    try:
+        _append_file(con, "prod_raw", table_name, path)
+        con.execute(
+            """
+            insert into prod_meta.ingest_ledger(src_path, bank, table_name,file_name, size, md5, ingested_at)
+            values (?,?,?,?,?,?,cast(? as timestamp))
+            """,
+            [src_path, bank, table_name, path.name, size, md5, ingested_at],
+        )
+        con.execute("commit;")
+        log.info("Ingested %s -> %s", path, qtable("prod_raw", table_name))
+        return True
+    except Exception as e:
+        con.execute("rollback;")
+        log.exception("Failed to ingest %s: %s", path, e)
+        raise
+
+
 # -------------------------
 # Asset
 # -------------------------
@@ -191,7 +238,7 @@ def _append_file(
 def ingest_csv_to_duckdb() -> Output[dict[str, int]]:
     """
     Ingest CSVs:
-      - RAW_PATH/To Parse/Bank/<bank>/**/*.csv  → prod_raw.<derived_table_name>
+      - FINANCE_DATA_DIR_CONTAINER/To Parse/Bank/<bank>/**/*.csv  → prod_raw.<derived_table_name>
     Ledger: prod_meta.ingest_ledger(src_path, md5)
     """
     log = get_dagster_logger()
@@ -218,50 +265,6 @@ def ingest_csv_to_duckdb() -> Output[dict[str, int]]:
     ingested_count = 0
     skipped = 0
 
-    def process_file(bank: str, table_name: str, path: Path) -> None:
-        nonlocal ingested_count, skipped
-        if not path.is_file() or path.suffix.lower() != ".csv":
-            return
-        if not _stable(path):
-            log.info("Skipping unstable file: %s", path)
-            return
-
-        rel = path.relative_to(RAW_PATH)
-        src_path = rel.as_posix()  # normalize slashes
-        md5 = _md5(path)
-        size = path.stat().st_size
-
-        # Dedup by (src_path, md5)
-        if con.execute(
-            "select 1 from prod_meta.ingest_ledger where src_path = ? and md5 = ?",
-            [src_path, md5],
-        ).fetchone():
-            skipped += 1
-            return
-
-        ingested_at = time.strftime("%Y-%m-%d %H:%M:%S")
-
-        # Atomic per-file ingestion
-        con.execute("begin;")
-
-        try:
-            _append_file(con, "prod_raw", table_name, path)
-            con.execute(
-                """
-                insert into prod_meta.ingest_ledger(src_path, bank, table_name,file_name, size, md5, ingested_at)
-                values (?,?,?,?,?,?,cast(? as timestamp))
-                """,
-                [src_path, bank, table_name, path.name, size, md5, ingested_at],
-            )
-            con.execute("commit;")
-        except Exception as e:
-            con.execute("rollback;")
-            log.exception("Failed to ingest %s: %s", path, e)
-            raise
-
-        ingested_count += 1
-        log.info("Ingested %s -> %s", path, qtable("prod_raw", table_name))
-
     if not INPUT_PATH.exists():
         log.error("No To Parse folder found at %s", INPUT_PATH)
         msg = f"No To Parse folder found at {INPUT_PATH}"
@@ -271,9 +274,31 @@ def ingest_csv_to_duckdb() -> Output[dict[str, int]]:
         bank = bank_dir.name
         for bank_data_type_dir in sorted([p for p in bank_dir.iterdir() if p.is_dir()]):
             table_name = _extract_table_name_from_dir(bank_data_type_dir)
-            con.execute(f"drop table if exists prod_raw.{qident(table_name)}")
+            table_dropped = False
+
             for file_path in bank_data_type_dir.rglob("*.csv"):
-                process_file(bank, table_name, file_path)
+                # Проверяем, загружали ли уже этот файл
+                rel = file_path.relative_to(FINANCE_DATA_DIR_CONTAINER)
+                src_path = rel.as_posix()
+                md5 = _md5(file_path)
+
+                if con.execute(
+                    "select 1 from prod_meta.ingest_ledger where src_path = ? and md5 = ?",
+                    [src_path, md5],
+                ).fetchone():
+                    skipped += 1
+                    log.info("Skipping already processed file: %s", file_path)
+                    continue
+
+                # Если файл не загружали, то нужно удалить таблицу
+                if not table_dropped:
+                    con.execute(f"drop table if exists prod_raw.{qident(table_name)}")
+                    table_dropped = True
+
+                # Обрабатываем файл
+                if process_file(con, bank, table_name, file_path, log):
+                    ingested_count += 1
+
     con.close()
     log.info("Ingestion complete. New files: %s, skipped: %s", ingested_count, skipped)
     return Output(

@@ -50,8 +50,7 @@ Ensure Docker Desktop → Settings → Resources → File Sharing includes your 
 
 Update `.env` with your actual paths:
 ```env
-IMPORT_CSV_PATH=G:/USER/DATA/FINDNA
-EXPORT_CSV_PATH=G:/USER/DATA/FINDNA/RESULT
+FINANCE_DIR_HOST=G:/USER/DATA/FINDNA
 ```
 
 ### 4. Run the Pipeline
@@ -72,7 +71,7 @@ EXPORT_CSV_PATH=G:/USER/DATA/FINDNA/RESULT
 ### 5. Verify Results
 
 - **DuckDB tables**: Check that staging, core, and marts tables are populated
-- **CSV exports**: Look for files in `EXPORT_CSV_PATH` with dated snapshots and `latest.csv`
+- **CSV exports**: Look for files in `FINANCE_DIR_HOST/exports/csv` with dated snapshots and `latest.csv`
 - **Google Sheets**: Verify incremental data appears in your target sheet
 - **Manifest**: Check `manifest.json` files for metadata (row count, MD5, timestamps)
 
@@ -122,8 +121,8 @@ poetry run pytest export/tests/
 
 ### Customizing Exports
 
-- **CSV exports**: Modify `EXPORT_TABLE` in `.env` to change the source table
-- **Google Sheets**: Update `GOOGLE_SHEET_RANGE` to change the target range
+- **CSV exports**: Modify `EXPORT_FINANCE_TABLE` in `.env` to change the source table
+- **Google Sheets**: Update `GOOGLE_SHEET_NAME` and `GOOGLE_TABLE_NAME` to change the target sheet and table
 - **Schedules**: Modify the cron schedule in `orchestration/dagster_project/src/repo.py`
 
 ## Troubleshooting

@@ -33,11 +33,9 @@ class TestPipelineE2E:
             with patch.dict(
                 "os.environ",
                 {
-                    "RAW_PATH": str(temp_path / "raw"),
+                    "FINANCE_DATA_DIR_CONTAINER": str(temp_path / "finance"),
                     "DUCKDB_PATH": str(db_path),
-                    "EXPORT_CSV_IN_CONTAINER": str(temp_path / "exports" / "csv"),
-                    "EXPORT_META_PATH": str(temp_path / "exports" / "metadata"),
-                    "EXPORT_TABLE": "prod_imart.view_bank_transactions",
+                    "EXPORT_FINANCE_TABLE": "prod_imart.view_bank_transactions",
                 },
             ):
                 # This would test the complete pipeline

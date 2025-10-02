@@ -4,6 +4,7 @@
 .env.*.local
 
 # Python
+.mypy_cache/
 __pycache__/
 *.py[cod]
 *$py.class
@@ -49,13 +50,7 @@ ehthumbs.db
 Thumbs.db
 
 # Data and credentials
-data/warehouse/
-data/exports/
-data/dagster_home/history/
-data/dagster_home/logs/
-data/dagster_home/schedules/
-data/dagster_home/storage/
-data/dagster_home_daemon/logs/
+data/
 credentials/*.json
 *.duckdb
 *.db

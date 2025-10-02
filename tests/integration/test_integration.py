@@ -36,11 +36,9 @@ class TestPipelineIntegration:
             with patch.dict(
                 "os.environ",
                 {
-                    "RAW_PATH": str(temp_path / "raw"),
+                    "FINANCE_DATA_DIR_CONTAINER": str(temp_path / "finance"),
                     "DUCKDB_PATH": str(db_path),
-                    "EXPORT_CSV_IN_CONTAINER": str(temp_path / "exports" / "csv"),
-                    "EXPORT_META_PATH": str(temp_path / "exports" / "metadata"),
-                    "EXPORT_TABLE": "prod_imart.view_bank_transactions",
+                    "EXPORT_FINANCE_TABLE": "prod_imart.view_bank_transactions",
                 },
             ):
                 # Test ingestion
@@ -78,7 +76,11 @@ class TestPipelineIntegration:
             db_path = temp_path / "test.duckdb"
 
             with patch.dict(
-                "os.environ", {"RAW_PATH": str(temp_path / "raw"), "DUCKDB_PATH": str(db_path)}
+                "os.environ",
+                {
+                    "FINANCE_DATA_DIR_CONTAINER": str(temp_path / "finance"),
+                    "DUCKDB_PATH": str(db_path),
+                },
             ):
                 # First ingestion
                 result1 = ingest_csv_to_duckdb()
@@ -110,9 +112,8 @@ class TestPipelineIntegration:
                 "os.environ",
                 {
                     "DUCKDB_PATH": str(db_path),
-                    "EXPORT_CSV_IN_CONTAINER": str(temp_path / "exports" / "csv"),
-                    "EXPORT_META_PATH": str(temp_path / "exports" / "metadata"),
-                    "EXPORT_TABLE": "prod_imart.view_bank_transactions",
+                    "FINANCE_DATA_DIR_CONTAINER": str(temp_path / "finance"),
+                    "EXPORT_FINANCE_TABLE": "prod_imart.view_bank_transactions",
                 },
             ):
                 # Test export
@@ -166,7 +167,11 @@ class TestPipelineIntegration:
             db_path = temp_path / "test.duckdb"
 
             with patch.dict(
-                "os.environ", {"RAW_PATH": str(temp_path / "raw"), "DUCKDB_PATH": str(db_path)}
+                "os.environ",
+                {
+                    "FINANCE_DATA_DIR_CONTAINER": str(temp_path / "finance"),
+                    "DUCKDB_PATH": str(db_path),
+                },
             ):
                 # Should handle empty CSV gracefully
                 result = ingest_csv_to_duckdb()
@@ -194,9 +199,8 @@ class TestPipelineIntegration:
             with patch.dict(
                 "os.environ",
                 {
-                    "RAW_PATH": str(temp_path / "raw"),
+                    "FINANCE_DATA_DIR_CONTAINER": str(temp_path / "finance"),
                     "DUCKDB_PATH": str(db_path),
-                    "RAW_STABILITY_SECONDS": "0",  # No stability check for testing
                 },
             ):
                 # Test ingestion with stability check

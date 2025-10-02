@@ -4,7 +4,7 @@ from dagster import AssetSelection, Definitions, ScheduleDefinition, define_asse
 from .assets_export_csv import export_csv_snapshot
 from .assets_export_sheets import export_to_google_sheets
 from .assets_ingest import ingest_csv_to_duckdb
-from .assets_maintenance import archive_processed_files
+from .assets_maintenance import pipeline_maintenance
 from .assets_quality_ge import run_ge_checkpoints
 from .assets_transform_dbt import dbt_build_models
 
@@ -14,7 +14,7 @@ all_assets = [
     run_ge_checkpoints,
     export_csv_snapshot,
     export_to_google_sheets,
-    archive_processed_files,
+    pipeline_maintenance,
 ]
 
 montly_job = define_asset_job(

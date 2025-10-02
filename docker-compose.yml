@@ -5,33 +5,27 @@ services:
       context: .
       dockerfile: infra/Dockerfile
     environment:
-      - DAGSTER_HOME=${DAGSTER_HOME}
-      - RAW_PATH=${RAW_PATH}
-      - DUCKDB_PATH=${DUCKDB_PATH}
-      - EXPORT_CSV_PATH=${EXPORT_CSV_PATH}
-      - EXPORT_META_PATH=${EXPORT_META_PATH}
-      - RAW_STABILITY_SECONDS=${RAW_STABILITY_SECONDS}
-      - GOOGLE_SA_JSON=${GOOGLE_SA_JSON}
-      - GOOGLE_SHEET_ID=${GOOGLE_SHEET_ID}
-      - GOOGLE_SHEET_RANGE=${GOOGLE_SHEET_RANGE}
-      - EXPORT_TABLE=${EXPORT_TABLE}
+      - FINANCE_DIR_HOST=${FINANCE_DIR_HOST}
+      - FINANCE_DATA_DIR_CONTAINER=${FINANCE_DATA_DIR_CONTAINER}
+      - EXPORT_FINANCE_TABLE=${EXPORT_FINANCE_TABLE}
+      - GOOGLE_SA_JSON_PATH=${GOOGLE_SA_JSON_PATH}
+      - GOOGLE_SPREADSHEET_ID=${GOOGLE_SPREADSHEET_ID}
+      - GOOGLE_SHEET_NAME=${GOOGLE_SHEET_NAME}
+      - GOOGLE_TABLE_NAME=${GOOGLE_TABLE_NAME}
       - DBT_DIR=${DBT_DIR}
       - DBT_PROFILES_DIR=${DBT_PROFILES_DIR}
+      - DAGSTER_HOME_PATH=${DAGSTER_HOME_PATH}
+      - DUCKDB_PATH=${DUCKDB_PATH}
     volumes:
-      # Inputs: default to ./sample_data if INPUT_FINANCE_PATH is not set
+      # Inputs: mount host data directory to container
       - type: bind
-        source: ${INPUT_FINANCE_PATH:-./sample_data}
-        target: /app/data/raw
-
-      # Exports: keep parent-less, explicit targets to avoid overlap
-      - type: bind
-        source: ${EXPORT_CSV_PATH:-./data/exports/csv}
-        target: /app/data/exports/csv
-      - type: bind
-        source: ${EXPORT_META_PATH:-./data/exports/metadata}
-        target: /app/data/exports/metadata
+        source: ${FINANCE_DIR_HOST}
+        target: ${FINANCE_DATA_DIR_CONTAINER}
 
       # Project code & state
+      - type: bind
+        source: ./src
+        target: /app/src
       - type: bind
         source: ./orchestration
         target: /app/orchestration

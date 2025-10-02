@@ -47,14 +47,13 @@ def mock_environment() -> Any:
     from unittest.mock import patch
 
     env_vars = {
-        "RAW_PATH": "/tmp/test_raw",
+        "FINANCE_DATA_DIR_CONTAINER": "/tmp/test_finance",
         "DUCKDB_PATH": "/tmp/test.duckdb",
-        "EXPORT_CSV_IN_CONTAINER": "/tmp/test_exports/csv",
-        "EXPORT_META_PATH": "/tmp/test_exports/metadata",
-        "EXPORT_TABLE": "test_table",
-        "GOOGLE_SHEET_ID": "test_sheet_id",
-        "GOOGLE_SHEET_RANGE": "Test!A1",
-        "GOOGLE_SA_JSON": "/tmp/test_sa.json",
+        "EXPORT_FINANCE_TABLE": "test_table",
+        "GOOGLE_SPREADSHEET_ID": "test_sheet_id",
+        "GOOGLE_SHEET_NAME": "Test",
+        "GOOGLE_TABLE_NAME": "Test Table",
+        "GOOGLE_SA_JSON_PATH": "/tmp/test_sa.json",
     }
 
     with patch.dict(os.environ, env_vars):

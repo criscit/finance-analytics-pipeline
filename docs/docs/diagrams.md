@@ -127,23 +127,18 @@ graph TD
 ```mermaid
 graph LR
     subgraph "Host"
-        A[IMPORT_CSV_PATH]
-        B[EXPORT_CSV_PATH]
+        A[FINANCE_DIR_HOST]
         C[credentials/]
         D[data/warehouse/]
     end
     
     subgraph "Container"
-        E[/app/data/raw]
-        F[/app/data/exports/csv]
-        G[/app/data/exports/metadata]
+        E[/app/data/finance]
         H[/app/credentials]
         I[/app/data/warehouse]
     end
     
     A --> E
-    B --> F
-    B --> G
     C --> H
     D --> I
 ```
