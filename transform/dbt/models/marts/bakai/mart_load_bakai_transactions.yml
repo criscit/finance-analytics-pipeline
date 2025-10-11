@@ -5,7 +5,6 @@ models:
     description: >
       Mart table for bank transactions analytics with successful transactions only.
       This table contains filtered transaction data for analytics purposes with Moscow timezone.
-    tags: [marts, bakai, analytics]
     meta:
       materialization: incremental
       incremental_strategy: delete+insert

@@ -169,10 +169,78 @@ def _validate_contract_for_table(table_nm: str, data_type_dir: Path, log: Any) -
     return None
 
 
+def _should_drop_table_for_fresh_load(
+    con: duckdb.DuckDBPyConnection,
+    contract: DataContract,
+    data_type_dir: Path,
+    seen_tables: set[str],
+    log: Any,
+) -> bool:
+    """
+    Determine if table should be dropped for fresh ingestion.
+
+    Only drops if:
+    1. Table hasn't been seen this run
+    2. AND there are actually files to process (not already ingested)
+
+    This prevents dropping tables when no new data will be loaded,
+    which would leave tables missing if parquets already processed.
+
+    Returns:
+        True if table should be dropped, False otherwise
+    """
+    table_nm = contract.target_table.name
+
+    if table_nm in seen_tables:
+        return False
+
+    # Check if there are any files that would actually be ingested
+    file_pattern = contract.metadata.get("file_pattern", "*.csv")
+    matching_files = list(data_type_dir.rglob(file_pattern))
+
+    # Check if any files are NOT yet in ledger (would be ingested)
+    has_new_files = False
+    for file_path in matching_files:
+        if not file_path.is_file():
+            continue
+
+        file_ext = file_path.suffix.lower()
+        if file_ext not in SUPPORTED_EXTENSIONS:
+            continue
+
+        if not is_file_stable(file_path, STABILITY_S):
+            continue
+
+        file_md5 = md5_hash(file_path)
+        already_ingested = con.execute(
+            "select 1 from prod_meta.ingest_ledger where md5 = ?",
+            [file_md5],
+        ).fetchone()
+
+        if not already_ingested:
+            has_new_files = True
+            break
+
+    if has_new_files:
+        log.info(
+            "Found new files to ingest for %s - will drop table for fresh load",
+            table_nm,
+        )
+        return True
+    log.info(
+        "No new files to ingest for %s - keeping existing table intact",
+        table_nm,
+    )
+    return False
+
+
 def _ensure_fresh_table(
-    con: duckdb.DuckDBPyConnection, table_nm: str, seen_tables: set[str], log: Any
+    con: duckdb.DuckDBPyConnection,
+    table_nm: str,
+    seen_tables: set[str],
+    log: Any,
 ) -> None:
-    """Drop table if not yet seen in this run."""
+    """Drop table and mark as seen in this run."""
     if table_nm not in seen_tables:
         con.execute(f"drop table if exists prod_raw.{qident(table_nm)}")
         seen_tables.add(table_nm)
@@ -280,7 +348,16 @@ def ingest_transactions() -> Output[dict[str, int]]:
                 log.exception("Failed to load contract %s: %s", contract_path, exc)
                 continue
 
-            _ensure_fresh_table(con, contract.target_table.name, seen_tables, log)
+            # Only drop table if we're actually going to load new data
+            should_drop = _should_drop_table_for_fresh_load(
+                con, contract, data_type_dir, seen_tables, log
+            )
+            if should_drop:
+                _ensure_fresh_table(con, contract.target_table.name, seen_tables, log)
+            else:
+                # Mark as seen to avoid checking again
+                seen_tables.add(contract.target_table.name)
+
             i, s, u, err_count = _process_table_files(con, contract, data_type_dir, bank_nm, log)
             ingested += i
             skipped += s

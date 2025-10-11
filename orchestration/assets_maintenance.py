@@ -88,7 +88,7 @@ def pipeline_maintenance() -> Output[dict[str, Any]]:
             """,
         ).fetchall()
 
-        for file_path, bank, _file_name in rows:
+        for bank_nm, table_nm, file_path in rows:
             src = RAW_ROOT / file_path
             if not src.exists():
                 logger.warning("File %s missing at archive time", src)
@@ -116,7 +116,8 @@ def pipeline_maintenance() -> Output[dict[str, Any]]:
                 {
                     "file": file_path,
                     "archived_to": archived_path,
-                    "bank": bank,
+                    "bank": bank_nm,
+                    "table": table_nm,
                 },
             )
             logger.info("Archived %s to %s", file_path, target)

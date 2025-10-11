@@ -10,6 +10,7 @@ trash/
 *.key
 *.p12
 *.pfx
+*/credentials/
 
 # Python bytecode & compiled extensions
 __pycache__/
@@ -82,8 +83,24 @@ ehthumbs.db
 Thumbs.db
 
 # Data & local artifacts
+# Keep contracts/ and quality/ folders fully tracked
 data/
-credentials/**/*.json
+!data/contracts/
+!data/quality/
+!data/sample_data/
+# Ignore contents of other data subdirectories but keep folder structure
+data/credentials/*
+!data/credentials/.gitkeep
+data/dagster_home/*
+!data/dagster_home/.gitkeep
+!data/dagster_home/dagster.yaml
+data/finance/*
+!data/finance/.gitkeep
+data/raw/*
+!data/raw/.gitkeep
+data/warehouse/*
+!data/warehouse/.gitkeep
+
 *.duckdb
 *.db
 *.sqlite
@@ -114,6 +131,9 @@ transform/dbt/graph_summary.json
 # Great Expectations
 quality/gx/uncommitted/
 quality/gx/validations/
+*.gx_store_backend_id
+# Auto-generated checkpoint JSON files (source of truth is in orchestration/quality_gx/)
+quality/gx/checkpoints/*.json
 
 # Logs
 logs/

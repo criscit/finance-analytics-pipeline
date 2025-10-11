@@ -26,7 +26,7 @@ def load_runtime_config() -> dict[str, Any]:
     }
 
 
-@asset(deps=["run_ge_staging_checkpoints"])
+@asset(deps=["build_imart_models"])
 def export_to_google_sheets() -> Output[dict[str, int]]:
     """Export data from DuckDB to Google Sheets with table management."""
     log = get_dagster_logger()

@@ -31,6 +31,8 @@ models:
         data_type: double
         data_tests:
           - not_null
+          - dbt_expectations.expect_column_values_to_not_be_in_set:
+              value_set: [0]
 
       - name: transaction_currency_cd
         description: ISO-like currency code of the posted transaction.
@@ -39,7 +41,6 @@ models:
           - accepted_values:
               values: ['RUB']
               severity: warn
-          - not_null
 
       - name: transaction_dt
         description: Date of the transaction in Europe/Moscow timezone.

@@ -4,18 +4,26 @@
 selectors:
   - name: run_t_bank_transactions
     definition:
-      union:
-        - method: source
-          value: t_bank.transactions
-          children: true
-        - method: resource_type
-          value: seed
+      intersection:
+        - union:
+          - method: source
+            value: t_bank.transactions
+            children: true
+          - method: resource_type
+            value: seed
+        - exclude:
+          - method: config.schema
+            value: imart
 
   - name: run_bakai_transactions
     definition:
-      union:
-        - method: source
-          value: bakai.transactions
-          children: true
-        - method: resource_type
-          value: seed
+      intersection:
+        - union:
+          - method: source
+            value: bakai.transactions
+            children: true
+          - method: resource_type
+            value: seed
+        - exclude:
+          - method: config.schema
+            value: imart

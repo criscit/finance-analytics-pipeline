@@ -33,8 +33,8 @@ services:
         source: ./transform
         target: /app/transform
       - type: bind
-        source: ./quality
-        target: /app/quality
+        source: ./data/quality
+        target: /app/data/quality
       - type: bind
         source: ./docs
         target: /app/docs
@@ -51,10 +51,10 @@ services:
         source: ./data/raw
         target: /app/data/raw
       - type: bind
-        source: ./credentials
-        target: /app/credentials
+        source: ./data/credentials
+        target: /app/data/credentials
         read_only: true
-    command: bash -lc "dagster dev -h 0.0.0.0 -p 3000 --workspace /app/workspace.yaml"
+    command: bash -lc "dagster dev -h 0.0.0.0 -p 3000 -m orchestration.repo"
     ports:
       - "3000:3000"
     healthcheck:

@@ -60,8 +60,23 @@ def read_table_data_with_ordered_columns(db_path: str, schema: str, table: str) 
 
 def convert_cell_value(value: Any) -> str:
     """Convert cell value to string for Google Sheets."""
+    from datetime import date, datetime
+
+    if value is None:
+        return ""
+
+    # Handle datetime objects - extract just the date part
+    if isinstance(value, datetime):
+        return value.date().isoformat()
+
+    # Handle date objects - format as YYYY-MM-DD
+    if isinstance(value, date):
+        return value.isoformat()
+
+    # Handle other objects with isoformat (e.g., time)
     if hasattr(value, "isoformat"):
         return str(value.isoformat())
+
     return str(value)
 
 
@@ -140,6 +155,81 @@ def prepare_ordered_data_for_sheets(
     return values
 
 
+def get_recently_ingested_tables(db_path: str, hours: int = 24) -> dict[str, Any]:
+    """
+    Get list of tables that were ingested in the last N hours.
+
+    Args:
+        db_path: Path to DuckDB database
+        hours: Number of hours to look back (default 24)
+
+    Returns:
+        Dictionary with:
+        - tables_to_process: List of dicts with bank_nm, table_nm, selector_nm, file_count, latest_ingestion
+        - total_tables: Count of tables
+        - detected_at: ISO timestamp
+    """
+    con = connect_readonly(db_path)
+
+    try:
+        # Check if ingest_ledger exists
+        ledger_exists = con.execute(
+            """
+            select 1
+            from information_schema.tables 
+            where table_schema = 'prod_meta'
+                and table_name = 'ingest_ledger'
+            """
+        ).fetchone()
+
+        if not ledger_exists:
+            return {
+                "tables_to_process": [],
+                "total_tables": 0,
+                "detected_at": None,
+            }
+
+        # Get recent ingestions
+        recent_ingestions = con.execute(
+            f"""
+            select 
+                bank_nm,
+                table_nm,
+                count(*) as file_count,
+                max(processed_at) as latest_ingestion
+            from prod_meta.ingest_ledger 
+            where processed_at >= current_timestamp - interval '{hours} hours'
+            group by bank_nm, table_nm
+            order by latest_ingestion desc
+            """
+        ).fetchall()
+
+        # Build result list
+        tables_to_process = []
+        for row in recent_ingestions:
+            bank_nm, table_nm, file_count, latest_ingestion = row
+            tables_to_process.append(
+                {
+                    "bank_nm": bank_nm,
+                    "table_nm": table_nm,
+                    "selector_nm": f"run_{table_nm}",
+                    "file_count": file_count,
+                    "latest_ingestion": latest_ingestion.isoformat() if latest_ingestion else None,
+                }
+            )
+
+        from datetime import datetime
+
+        return {
+            "tables_to_process": tables_to_process,
+            "total_tables": len(tables_to_process),
+            "detected_at": datetime.now().isoformat(),
+        }
+
+    finally:
+        con.close()
+
+
 def ensure_meta_schema(con: duckdb.DuckDBPyConnection) -> None:
     """
     Create metadata schema and tables if they don't exist.
@@ -209,6 +299,75 @@ def table_columns(con: duckdb.DuckDBPyConnection, schema: str, table: str) -> li
     """
     rows = con.execute(f"pragma table_info({qtable(schema, table)})").fetchall()
     return [r[1] for r in rows]  # (cid, name, type, notnull, dflt, pk)
+
+
+def table_exists(con: duckdb.DuckDBPyConnection, schema: str, table: str) -> bool:
+    """
+    Check if a table exists in the database.
+
+    Args:
+        con: DuckDB connection
+        schema: Schema name
+        table: Table name
+
+    Returns:
+        True if table exists, False otherwise
+    """
+    result = con.execute(
+        """
+        select 1
+        from information_schema.tables
+        where table_schema = ?
+            and table_name = ?
+        """,
+        [schema, table],
+    ).fetchone()
+    return result is not None
+
+
+def restore_raw_table_from_parquets(
+    con: duckdb.DuckDBPyConnection,
+    schema: str,
+    table: str,
+    parquet_dir: str,
+) -> int:
+    """
+    Restore a raw table from all cached parquet files.
+
+    This is an idempotent recovery mechanism that rebuilds raw tables
+    from the parquet cache when tables are missing but data exists.
+
+    Args:
+        con: DuckDB connection
+        schema: Target schema name (typically 'prod_raw')
+        table: Target table name
+        parquet_dir: Directory containing cached parquet files for this table
+
+    Returns:
+        Total number of rows restored
+
+    Raises:
+        FileNotFoundError: If parquet_dir doesn't exist or has no parquet files
+    """
+    from pathlib import Path
+
+    parquet_path = Path(parquet_dir)
+    if not parquet_path.exists():
+        raise FileNotFoundError(f"Parquet directory not found: {parquet_dir}")
+
+    parquet_files = list(parquet_path.glob("*.parquet"))
+    if not parquet_files:
+        raise FileNotFoundError(f"No parquet files found in: {parquet_dir}")
+
+    # Drop existing table to ensure clean state
+    con.execute(f"drop table if exists {qtable(schema, table)}")
+
+    total_rows = 0
+    for parquet_file in parquet_files:
+        rows = ingest_parquet_to_duckdb(con, schema, table, str(parquet_file))
+        total_rows += rows
+
+    return total_rows
 
 
 def ingest_parquet_to_duckdb(

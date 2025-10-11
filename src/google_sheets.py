@@ -172,6 +172,69 @@ class GoogleSheetsTableManager:
             print(f"Error creating table structure: {e}")
             raise
 
+    def _format_date_column(self, spreadsheet_id: str, sheet_id: int, updated_range: str) -> None:
+        """
+        Apply date formatting to column A for the updated range.
+
+        Args:
+            spreadsheet_id: The ID of the Google Spreadsheet
+            sheet_id: The ID of the sheet
+            updated_range: The range that was just updated (e.g., "Sheet1!A2:F10")
+        """
+        try:
+            # Parse the updated range to get row numbers
+            # Format: "SheetName!A2:F10"
+            if "!" in updated_range:
+                range_part = updated_range.split("!")[1]
+                # Extract start and end row numbers
+                # Range format: A2:F10
+                start_cell = range_part.split(":")[0]
+                end_cell = range_part.split(":")[1]
+
+                # Extract row numbers (e.g., "A2" -> 2, "F10" -> 10)
+                import re
+
+                start_match = re.search(r"\d+", start_cell)
+                end_match = re.search(r"\d+", end_cell)
+                if not start_match or not end_match:
+                    raise ValueError(f"Invalid range format: {updated_range}")
+
+                start_row = int(start_match.group())
+                end_row = int(end_match.group())
+
+                # Apply date format to column A for the updated rows
+                # Row indices are 0-based in the API
+                format_request = {
+                    "requests": [
+                        {
+                            "repeatCell": {
+                                "range": {
+                                    "sheetId": sheet_id,
+                                    "startRowIndex": start_row - 1,
+                                    "endRowIndex": end_row,
+                                    "startColumnIndex": 0,
+                                    "endColumnIndex": 1,
+                                },
+                                "cell": {
+                                    "userEnteredFormat": {
+                                        "numberFormat": {"type": "DATE", "pattern": "yyyy-mm-dd"}
+                                    }
+                                },
+                                "fields": "userEnteredFormat.numberFormat",
+                            }
+                        }
+                    ]
+                }
+
+                self.sheets_service.spreadsheets().batchUpdate(
+                    spreadsheetId=spreadsheet_id, body=format_request
+                ).execute()
+
+                print(f"Applied date formatting to rows {start_row} to {end_row}")
+        except Exception as e:
+            print(f"Warning: Could not apply date formatting: {e}")
+            # Don't raise - formatting is nice to have but not critical
+
     def read_existing_data(
         self, spreadsheet_id: str, sheet_name: str, table_name: str
     ) -> list[list[str]]:
@@ -281,7 +344,7 @@ class GoogleSheetsTableManager:
 
             body = {"values": values}
 
-            (
+            result = (
                 self.sheets_service.spreadsheets()
                 .values()
                 .append(
@@ -293,6 +356,13 @@ class GoogleSheetsTableManager:
                 )
                 .execute()
             )
+
+            # Apply date formatting to column A (Date column) for all data rows
+            # Get the range of rows that were just appended
+            updated_range = result.get("updates", {}).get("updatedRange", "")
+            if updated_range:
+                # Format the date column (column A) with proper date format
+                self._format_date_column(spreadsheet_id, sheet_id, updated_range)
 
             print(f"Appended {len(sample_data)} rows of data to table '{table_name}'")
             return table_id

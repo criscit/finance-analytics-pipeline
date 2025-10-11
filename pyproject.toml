@@ -8,15 +8,16 @@ requires-python = ">=3.11,<3.13"
 dependencies = [
   "dagster==1.9.0",
   "dagster-webserver==1.9.0",
-  "great-expectations==0.18.12",
   "google-api-python-client==2.142.0",
   "gspread==6.1.2",
   "python-dotenv==1.0.1",
   "dbt-duckdb>=1.9.6,<2.0.0",
+  "duckdb==1.4.1",
   "openpyxl>=3.1.5,<4.0.0",
   "pyarrow (>=21.0.0,<22.0.0)",
   "pyyaml (>=6.0.3,<7.0.0)",
-  "pandas (>=2.3.3,<3.0.0)"
+  "pandas (>=2.3.3,<3.0.0)",
+  "great-expectations (>=1.7.0,<2.0.0)"
 ]
 
 [tool.poetry]

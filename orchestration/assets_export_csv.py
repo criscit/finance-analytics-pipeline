@@ -24,7 +24,7 @@ def _md5(path: Path) -> str:
     return h.hexdigest()
 
 
-@asset(deps=["run_ge_staging_checkpoints"])
+@asset(deps=["build_imart_models"])
 def export_csv_snapshot() -> Output[dict[str, Any]]:
     # Create timestamp for folder and file naming
     now = datetime.datetime.utcnow()
@@ -58,7 +58,8 @@ def export_csv_snapshot() -> Output[dict[str, Any]]:
     con.execute(
         f"COPY (select * from {EXPORT_FINANCE_TABLE}) TO '{results_path.as_posix()}' WITH (HEADER, DELIMITER ',')",
     )
-    row_count = con.execute(f"select count(*) from {EXPORT_FINANCE_TABLE}").fetchone()[0]
+    result = con.execute(f"select count(*) from {EXPORT_FINANCE_TABLE}").fetchone()
+    row_count = result[0] if result else 0
     con.close()
 
     # Calculate checksums
