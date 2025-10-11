@@ -1,0 +1,9 @@
+version: 2
+
+sources:
+  - name: bakai
+    schema: prod_raw
+    tables:
+      - name: transactions
+        identifier: bakai_transactions
+        description: Raw all T-Bank transactions export.

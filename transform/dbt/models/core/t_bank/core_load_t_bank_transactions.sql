@@ -22,14 +22,14 @@ select
   transaction_currency_cd,
   transacted_at_utc,
   total_rewards_amt,
-  current_timestamp at time zone 'UTC' AS __ingested_at
+  current_timestamp at time zone 'UTC' AS processed_at
 from
   {{ ref('stg_load_t_bank_transactions') }}
 
 {% if is_incremental() %}
-  where __ingested_at >= (
+  where processed_at >= (
     select
-      coalesce(max(__ingested_at), '1900-01-02'::timestamp) - interval '1 day'
+      coalesce(max(processed_at), '1900-01-02'::timestamp) - interval '1 day'
     from
       {{ this }}
   )

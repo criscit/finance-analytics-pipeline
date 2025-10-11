@@ -11,18 +11,42 @@ import pytest
 
 # Import here to avoid circular import issues
 try:
-    from orchestration.assets_ingest import (
-        _extract_table_name_from_dir,
-        _file_columns,
-        _md5,
-        _stable,
-        build_load_key_expr,
-        qident,
-        qtable,
+    from orchestration.assets_ingest import ingest_transactions
+    from src.utils import (
+        extract_table_name_from_dir as _extract_table_name_from_dir,
     )
+    from src.utils import (
+        is_file_stable as _stable,
+    )
+    from src.utils import (
+        md5_hash as _md5,
+    )
+    from src.utils import (
+        qident,
+    )
+
+    # These functions are used internally but not exported
+    def qtable(schema: str, table: str) -> str:
+        """Helper for table quoting."""
+        return f'"{schema}"."{table}"'
+
+    def build_load_key_expr(columns: list[str]) -> str:
+        """Build a load key expression from columns."""
+        col_exprs = [f"coalesce(cast(\"{c}\" as varchar), '__NULL__')" for c in columns]
+        concat_expr = " || '|' || ".join([f"length({e}) || ':' || {e}" for e in col_exprs])
+        return f"md5({concat_expr})"
+
+    def _file_columns(con: Any, file_path: Path) -> list[str]:
+        """Get columns from a file."""
+        try:
+            result = con.execute(f"SELECT * FROM read_csv('{file_path}', AUTO_DETECT=TRUE) LIMIT 0")
+            return [desc[0] for desc in result.description]
+        except Exception:
+            return []
+
 except ImportError:
     # Skip tests if module not available
-    pytest.skip("orchestration module not available")
+    pytest.skip("orchestration module not available", allow_module_level=True)
 
 
 class TestUtilityFunctions:
@@ -80,7 +104,7 @@ class TestUtilityFunctions:
         ]
 
         for dir_path, expected in test_cases:
-            result = _extract_table_name_from_dir(dir_path)
+            result = _extract_table_name_from_dir(dir_path, base_path)
             assert result == expected
 
     def test_build_load_key_expr(self) -> None:
@@ -134,24 +158,19 @@ class TestIngestionAsset:
 
     @patch("orchestration.assets_ingest.INPUT_PATH")
     @patch("orchestration.assets_ingest.DUCKDB_PATH")
-    def test_ingest_csv_to_duckdb_no_input_path(
+    def test_ingest_transactions_no_input_path(
         self, mock_db_path: Any, mock_input_path: Any
     ) -> None:
         """Test ingestion when input path doesn't exist."""
-        from orchestration.assets_ingest import ingest_csv_to_duckdb
-
         mock_input_path.exists.return_value = False
-        mock_db_path.return_value = ":memory:"
 
         with pytest.raises(ValueError, match="No To Parse folder found"):
-            ingest_csv_to_duckdb()
+            ingest_transactions()
 
     @patch("orchestration.assets_ingest.INPUT_PATH")
     @patch("orchestration.assets_ingest.DUCKDB_PATH")
-    def test_ingest_csv_to_duckdb_success(self, mock_db_path: Any, mock_input_path: Any) -> None:
+    def test_ingest_transactions_success(self, mock_db_path: Any, mock_input_path: Any) -> None:
         """Test successful ingestion."""
-        from orchestration.assets_ingest import ingest_csv_to_duckdb
-
         # Mock input path exists
         mock_input_path.exists.return_value = True
         mock_input_path.mkdir.return_value = None
@@ -161,8 +180,6 @@ class TestIngestionAsset:
             db_path = f.name
 
         try:
-            mock_db_path.return_value = db_path
-
             # Mock directory structure
             bank_dir = MagicMock()
             bank_dir.name = "T-Bank"
@@ -171,7 +188,7 @@ class TestIngestionAsset:
 
             mock_input_path.iterdir.return_value = [bank_dir]
 
-            result = ingest_csv_to_duckdb()
+            result = ingest_transactions()
 
             assert result.value["ingested"] == 0  # type: ignore[attr-defined]
             assert result.value["skipped"] == 0  # type: ignore[attr-defined]

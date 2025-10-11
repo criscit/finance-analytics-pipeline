@@ -1,0 +1,66 @@
+# file: quality/gx/expectations/staging/stg_t_bank_transactions/duplication_check.yml
+data_asset_type: null
+expectation_suite_name: staging.stg_t_bank_transactions.duplication_check
+expectations:
+  # Check that the __load_key column exists and is unique (this is the primary key for deduplication)
+  - expectation_type: expect_column_to_exist
+    kwargs:
+      column: __load_key
+  - expectation_type: expect_column_values_to_not_be_null
+    kwargs:
+      column: __load_key
+  - expectation_type: expect_column_values_to_be_unique
+    kwargs:
+      column: __load_key
+
+  # Check for potential duplication in the MD5 business key components
+  # The transaction_bk in core is created from: md5(concat_ws('|', 't_bank', transacted_at_utc, transaction_amt, coalesce(card_last4, 'no_card_last4')))
+  # So we need to check for duplicates in the combination of these fields
+  
+  # Check that required columns for MD5 calculation exist
+  - expectation_type: expect_column_to_exist
+    kwargs:
+      column: transacted_at_utc
+  - expectation_type: expect_column_to_exist
+    kwargs:
+      column: transaction_amt
+  - expectation_type: expect_column_to_exist
+    kwargs:
+      column: card_last4
+
+  # Check for null values in required fields for MD5 calculation
+  - expectation_type: expect_column_values_to_not_be_null
+    kwargs:
+      column: transacted_at_utc
+  - expectation_type: expect_column_values_to_not_be_null
+    kwargs:
+      column: transaction_amt
+
+  # Check for potential business key duplication using a custom SQL expectation
+  # This will create the same MD5 hash as in the core model and check for duplicates
+  - expectation_type: expect_table_row_count_to_be_between
+    kwargs:
+      min_value: 1
+      max_value: null
+
+  # Custom expectation to check for duplicate MD5 business keys
+  # This uses a SQL query to replicate the MD5 logic from the core model
+  - expectation_type: expect_table_row_count_to_equal
+    kwargs:
+      value: 0
+      condition: |
+        SELECT COUNT(*) FROM (
+          SELECT 
+            md5(concat_ws('|', 't_bank', transacted_at_utc, transaction_amt, coalesce(card_last4, 'no_card_last4'))) as transaction_bk,
+            COUNT(*) as cnt
+          FROM staging.stg_t_bank_transactions
+          GROUP BY md5(concat_ws('|', 't_bank', transacted_at_utc, transaction_amt, coalesce(card_last4, 'no_card_last4')))
+          HAVING COUNT(*) > 1
+        ) duplicates
+
+ge_cloud_id: null
+meta:
+  great_expectations_version: 0.18.12
+  description: "Checks for duplication in MD5 business key columns used in core model"
+  created_by: "data_engineer"
+  created_at: "2025-01-27"

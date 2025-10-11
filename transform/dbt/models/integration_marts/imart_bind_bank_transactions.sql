@@ -21,3 +21,15 @@ from
   {{ ref('mart_load_t_bank_transactions') }}
 where
   total_rewards_amt > 0
+
+union all
+
+select
+  'BakAi Bank' as bank_nm,
+  null as category_nm,
+  description,
+  transaction_amt,
+  null as transaction_currency_cd,
+  transaction_dt
+from
+  {{ ref('mart_load_bakai_transactions') }}

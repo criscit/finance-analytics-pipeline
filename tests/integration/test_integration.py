@@ -8,7 +8,7 @@ import duckdb
 import pytest
 
 from orchestration.assets_export_csv import export_csv_snapshot
-from orchestration.assets_ingest import ingest_csv_to_duckdb
+from orchestration.assets_ingest import ingest_transactions
 from tests.constants import TEST_DATA_ROWS_2
 
 
@@ -42,7 +42,7 @@ class TestPipelineIntegration:
                 },
             ):
                 # Test ingestion
-                ingest_result = ingest_csv_to_duckdb()
+                ingest_result = ingest_transactions()
                 assert ingest_result.value["ingested"] == 1  # type: ignore[attr-defined]
                 assert ingest_result.value["skipped"] == 0  # type: ignore[attr-defined]
 
@@ -83,12 +83,12 @@ class TestPipelineIntegration:
                 },
             ):
                 # First ingestion
-                result1 = ingest_csv_to_duckdb()
+                result1 = ingest_transactions()
                 assert result1.value["ingested"] == 1  # type: ignore[attr-defined]
                 assert result1.value["skipped"] == 0  # type: ignore[attr-defined]
 
                 # Second ingestion (should skip)
-                result2 = ingest_csv_to_duckdb()
+                result2 = ingest_transactions()
                 assert result2.value["ingested"] == 0  # type: ignore[attr-defined]
                 assert result2.value["skipped"] == 1  # type: ignore[attr-defined]
 
@@ -174,7 +174,7 @@ class TestPipelineIntegration:
                 },
             ):
                 # Should handle empty CSV gracefully
-                result = ingest_csv_to_duckdb()
+                result = ingest_transactions()
                 # Empty CSV might be skipped or processed depending on implementation
                 assert result.value["ingested"] >= 0  # type: ignore[attr-defined]
                 assert result.value["skipped"] >= 0  # type: ignore[attr-defined]
@@ -204,5 +204,5 @@ class TestPipelineIntegration:
                 },
             ):
                 # Test ingestion with stability check
-                result = ingest_csv_to_duckdb()
+                result = ingest_transactions()
                 assert result.value["ingested"] == 1  # type: ignore[attr-defined]

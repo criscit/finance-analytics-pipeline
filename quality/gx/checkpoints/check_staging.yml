@@ -1,0 +1,15 @@
+# file: quality/gx/checkpoints/check_staging.yml
+name: check_staging
+config_version: 1.0
+template_name:
+module_name: great_expectations.checkpoint
+class_name: SimpleCheckpoint
+run_name_template: "%Y%m%d-%H%M%S-check_staging"
+validations:
+  - batch_request:
+      datasource_name: local_duckdb
+      data_connector_name: default_runtime_data_connector
+      data_asset_name: staging.stg_t_bank_transactions
+      batch_identifiers:
+        default_identifier_name: default_identifier
+    expectation_suite_name: staging.stg_t_bank_transactions.duplication_check

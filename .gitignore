@@ -1,15 +1,30 @@
-# Environment files
-.env
-.env.local
-.env.*.local
+trash/
 
-# Python
-.mypy_cache/
+# Environment & secrets
+.env
+.env.*
+!.env.example          # keep a template
+.envrc
+.envrc.local
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Python bytecode & compiled extensions
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Python packaging / build artifacts
 build/
 develop-eggs/
 dist/
@@ -26,34 +41,62 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
+pip-wheel-metadata/
+pip-log.txt
+pip-delete-this-directory.txt
+__pypackages__/        # PEP 582
 
-# Virtual environments
-.venv/
-venv/
-ENV/
-env/
+# Test, coverage, type-checker & lint caches
+.pytest_cache/
+.coverage*
+htmlcov/
+.tox/
+.nox/
+.mypy_cache/
+.ruff_cache/
+.pyrightcache/
+.pyre/
+.pytype/
+.cache/
+.dmypy.json
 
-# IDE
+# IDE / Editor
 .vscode/
 .idea/
+*.iml
 *.swp
 *.swo
 *~
+.spyproject
+.ropeproject
 
-# OS
+# OS junk
 .DS_Store
 .DS_Store?
+Icon?
 ._*
 .Spotlight-V100
 .Trashes
+Desktop.ini
 ehthumbs.db
 Thumbs.db
 
-# Data and credentials
+# Data & local artifacts
 data/
-credentials/*.json
+credentials/**/*.json
 *.duckdb
 *.db
+*.sqlite
+*.sqlite3
+*.parquet
+*.feather
+*.orc
+*.h5
+*.hdf5
+
+# Notebooks
+.ipynb_checkpoints/
+*.nbconvert.ipynb
 
 # dbt
 transform/dbt/target/
@@ -69,20 +112,18 @@ transform/dbt/graph.gpickle
 transform/dbt/graph_summary.json
 
 # Great Expectations
-quality/great_expectations/uncommitted/
-quality/great_expectations/expectations/
-quality/great_expectations/checkpoints/
-quality/great_expectations/validations/
-
-# Docker
-.dockerignore
+quality/gx/uncommitted/
+quality/gx/validations/
 
 # Logs
-*.log
 logs/
+*.log
 
 # Temporary files
+tmp/
+temp/
 *.tmp
 *.temp
 temp.sql
 trash/
+~$*

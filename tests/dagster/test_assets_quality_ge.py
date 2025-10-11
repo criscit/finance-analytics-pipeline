@@ -3,39 +3,48 @@
 from typing import Any
 from unittest.mock import patch
 
-from orchestration.assets_quality_ge import run_ge_checkpoints
+from orchestration.assets_quality_ge import run_ge_raw_checkpoints
 
 
 class TestGreatExpectationsAsset:
     """Test the Great Expectations quality asset."""
 
-    def test_run_ge_checkpoints_success(self) -> None:
+    @patch("orchestration.assets_quality_ge.subprocess.run")
+    def test_run_ge_raw_checkpoints_success(self, mock_run: Any) -> None:
         """Test successful GE checkpoint run."""
-        result = run_ge_checkpoints()
+        from unittest.mock import MagicMock
 
-        # Should return success (currently mocked)
-        assert result.value is None  # type: ignore[attr-defined]
-        assert result.metadata["status"] == "success"  # type: ignore[attr-defined]
-        assert "message" in result.metadata  # type: ignore[attr-defined]
+        mock_run.return_value = MagicMock(returncode=0, stdout="Success", stderr="")
+        result = run_ge_raw_checkpoints()
 
+        # Should return success
+        assert result.value["status"] == "success"  # type: ignore[attr-defined]
+        assert result.value["checkpoint"] == "check_raw"  # type: ignore[attr-defined]
+
+    @patch("orchestration.assets_quality_ge.subprocess.run")
     @patch("orchestration.assets_quality_ge.get_dagster_logger")
-    def test_run_ge_checkpoints_logging(self, mock_logger: Any) -> None:
+    def test_run_ge_checkpoints_logging(self, mock_logger: Any, mock_run: Any) -> None:
         """Test that GE checkpoint logs appropriately."""
-        mock_log = mock_logger.return_value
+        from unittest.mock import MagicMock
 
-        run_ge_checkpoints()
+        mock_log = mock_logger.return_value
+        mock_run.return_value = MagicMock(returncode=0, stdout="Success", stderr="")
+
+        run_ge_raw_checkpoints()
 
         # Verify logging calls
         mock_log.info.assert_called_once()
-        log_message = mock_log.info.call_args[0][0]
-        assert "Skipping GE checkpoints" in log_message
 
-    def test_run_ge_checkpoints_metadata(self) -> None:
+    @patch("orchestration.assets_quality_ge.subprocess.run")
+    def test_run_ge_checkpoints_metadata(self, mock_run: Any) -> None:
         """Test GE checkpoint metadata structure."""
-        result = run_ge_checkpoints()
+        from unittest.mock import MagicMock
+
+        mock_run.return_value = MagicMock(returncode=0, stdout="Success", stderr="")
+        result = run_ge_raw_checkpoints()
 
         # Check metadata structure
         assert "status" in result.metadata  # type: ignore[attr-defined]
-        assert "message" in result.metadata  # type: ignore[attr-defined]
+        assert "checkpoint" in result.metadata  # type: ignore[attr-defined]
         assert result.metadata["status"] == "success"  # type: ignore[attr-defined]
-        assert isinstance(result.metadata["message"], str)  # type: ignore[attr-defined]
+        assert isinstance(result.metadata["checkpoint"], str)  # type: ignore[attr-defined]

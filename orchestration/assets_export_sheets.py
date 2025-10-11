@@ -7,6 +7,7 @@ from dagster import Output, asset, get_dagster_logger
 
 from src.duckdb_utils import read_table_data_with_ordered_columns
 from src.google_sheets import GoogleSheetsTableManager
+from src.utils import filter_new_transactions, get_max_transaction_dates_by_bank
 
 
 def load_runtime_config() -> dict[str, Any]:
@@ -25,7 +26,7 @@ def load_runtime_config() -> dict[str, Any]:
     }
 
 
-@asset(deps=["run_ge_checkpoints"])
+@asset(deps=["run_ge_staging_checkpoints"])
 def export_to_google_sheets() -> Output[dict[str, int]]:
     """Export data from DuckDB to Google Sheets with table management."""
     log = get_dagster_logger()
@@ -49,21 +50,57 @@ def export_to_google_sheets() -> Output[dict[str, int]]:
     schema, table = cfg["export_finance_table"].split(".", 1)
 
     # Read all data from the DuckDB table with proper column ordering
-    values = read_table_data_with_ordered_columns(cfg["duckdb_path"], schema, table)
+    all_values = read_table_data_with_ordered_columns(cfg["duckdb_path"], schema, table)
 
-    if not values:
+    if not all_values:
         log.info("No data found in table %s", cfg["export_finance_table"])
         return Output({"appended": 0}, metadata={"appended": 0})
 
-    # Append data to Google Sheets (creates sheet and table if needed)
+    # Read existing data from Google Sheets to get max transaction dates per bank
+    log.info("Reading existing data from Google Sheets to determine max transaction dates per bank")
+    existing_data = sheets_manager.read_existing_data(
+        spreadsheet_id=cfg["google_spreadsheet_id"],
+        sheet_name=cfg["google_sheet_name"],
+        table_name=cfg["google_table_name"],
+    )
+
+    # Get max transaction dates by bank from existing data
+    max_dates_by_bank = get_max_transaction_dates_by_bank(existing_data)
+    log.info(
+        "Found max transaction dates for %d banks: %s", len(max_dates_by_bank), max_dates_by_bank
+    )
+
+    # Filter new data to only include transactions with dates greater than max date per bank
+    filtered_values = filter_new_transactions(all_values, max_dates_by_bank)
+
+    if not filtered_values:
+        log.info("No new transactions to append (all transactions already exist or are older)")
+        return Output({"appended": 0}, metadata={"appended": 0, "filtered_from": len(all_values)})
+
+    log.info(
+        "Filtered %d new transactions from %d total transactions",
+        len(filtered_values),
+        len(all_values),
+    )
+
+    # Append filtered data to Google Sheets (creates sheet and table if needed)
     table_id = sheets_manager.append_rows(
         spreadsheet_id=cfg["google_spreadsheet_id"],
         sheet_name=cfg["google_sheet_name"],
         table_name=cfg["google_table_name"],
-        sample_data=values,
+        sample_data=filtered_values,
     )
 
-    log.info("Successfully exported %d rows to Google Sheets table: %s", len(values), table_id)
+    log.info(
+        "Successfully exported %d new rows to Google Sheets table: %s",
+        len(filtered_values),
+        table_id,
+    )
     return Output(
-        {"appended": len(values)}, metadata={"appended": len(values), "table_id": table_id}
+        {"appended": len(filtered_values)},
+        metadata={
+            "appended": len(filtered_values),
+            "filtered_from": len(all_values),
+            "table_id": table_id,
+        },
     )

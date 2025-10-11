@@ -38,8 +38,8 @@
       {%- do pieces.append('(' ~ expr ~ ') as ' ~ adapter.quote(target)) -%}
     {%- endfor -%}
 
-    {# __ingested_at #}
-    {%- do pieces.append('current_timestamp at time zone \'UTC\' as __ingested_at') -%}
+    {# processed_at #}
+    {%- do pieces.append('current_timestamp at time zone \'UTC\' as processed_at') -%}
 
     {{ pieces | join(',\n  ') }}
   {% else %}

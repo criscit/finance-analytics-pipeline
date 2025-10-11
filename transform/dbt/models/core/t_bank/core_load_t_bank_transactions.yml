@@ -64,7 +64,7 @@ models:
         description: Total rewards for the transaction, including cashback.
         data_type: double
 
-      - name: __ingested_at
+      - name: processed_at
         description: Timestamp of the ingestion for incremental processing.
         data_type: timestamp
         data_tests:

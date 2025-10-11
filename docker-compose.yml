@@ -39,11 +39,17 @@ services:
         source: ./docs
         target: /app/docs
       - type: bind
-        source: ./data/warehouse
-        target: /app/data/warehouse
+        source: ./data/contracts
+        target: /app/data/contracts
       - type: bind
         source: ./data/dagster_home
         target: /app/dagster_home
+      - type: bind
+        source: ./data/warehouse
+        target: /app/data/warehouse
+      - type: bind
+        source: ./data/raw
+        target: /app/data/raw
       - type: bind
         source: ./credentials
         target: /app/credentials

@@ -24,7 +24,7 @@ def _md5(path: Path) -> str:
     return h.hexdigest()
 
 
-@asset(deps=["run_ge_checkpoints"])
+@asset(deps=["run_ge_staging_checkpoints"])
 def export_csv_snapshot() -> Output[dict[str, Any]]:
     # Create timestamp for folder and file naming
     now = datetime.datetime.utcnow()

@@ -172,6 +172,63 @@ class GoogleSheetsTableManager:
             print(f"Error creating table structure: {e}")
             raise
 
+    def read_existing_data(
+        self, spreadsheet_id: str, sheet_name: str, table_name: str
+    ) -> list[list[str]]:
+        """
+        Read existing data from Google Sheets table.
+
+        Args:
+            spreadsheet_id (str): The ID of the Google Spreadsheet
+            sheet_name (str): Name of the sheet
+            table_name (str): Name of the table to read from
+
+        Returns:
+            list[list[str]]: Existing data rows (without headers)
+        """
+        try:
+            # Get or create sheet
+            sheet_id = self.get_or_create_sheet(spreadsheet_id, sheet_name)
+
+            # Check if table exists
+            existing_table_id = self.find_table_by_name(spreadsheet_id, sheet_id, table_name)
+            if not existing_table_id:
+                print(f"Table '{table_name}' does not exist, returning empty data")
+                return []
+
+            # Get the sheet name for reading data
+            spreadsheet = (
+                self.sheets_service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
+            )
+            actual_sheet_name = None
+            for sheet in spreadsheet.get("sheets", []):
+                if sheet["properties"]["sheetId"] == sheet_id:
+                    actual_sheet_name = sheet["properties"]["title"]
+                    break
+
+            if not actual_sheet_name:
+                raise Exception(f"Could not find sheet with ID {sheet_id}")
+
+            # Read all data from the sheet
+            range_name = f"{actual_sheet_name}!A:F"
+            result = (
+                self.sheets_service.spreadsheets()
+                .values()
+                .get(spreadsheetId=spreadsheet_id, range=range_name)
+                .execute()
+            )
+
+            values = result.get("values", [])
+            if not values:
+                return []
+
+            # Skip header row and return data rows
+            return values[1:] if len(values) > 1 else []
+
+        except Exception as e:
+            print(f"Error reading existing data: {e}")
+            return []
+
     def append_rows(
         self, spreadsheet_id: str, sheet_name: str, table_name: str, sample_data: list[list[Any]]
     ) -> str:

@@ -13,6 +13,10 @@ dependencies = [
   "gspread==6.1.2",
   "python-dotenv==1.0.1",
   "dbt-duckdb>=1.9.6,<2.0.0",
+  "openpyxl>=3.1.5,<4.0.0",
+  "pyarrow (>=21.0.0,<22.0.0)",
+  "pyyaml (>=6.0.3,<7.0.0)",
+  "pandas (>=2.3.3,<3.0.0)"
 ]
 
 [tool.poetry]
@@ -27,6 +31,7 @@ black = "24.8.0"
 pytest = "8.3.2"
 mypy = "^1.18.2"
 pre-commit = "^4.3.0"
+types-PyYAML = "^6.0.12"
 
 [build-system]
 requires = ["poetry-core"]
@@ -42,10 +47,11 @@ line-length = 100
 
 [tool.ruff.lint]
 # Core errors + imports + modernizations + bugbear + simplicities + ruff extras
-select = ["E","F","I","UP","B","SIM","C4","RET","PL","RUF"]
+select = ["E","F","I","UP","B","SIM","C4","RET","PL","RUF","G","PTH"]
 ignore = [
   "E501", # Let Black handle line length
-  "RUF001" # ignore ambiguous character warnings
+  "RUF001", # ignore ambiguous character warnings
+  "UP032"  # .format(...) to f-strings globally
 ]
 
 [tool.mypy]
@@ -55,12 +61,3 @@ ignore_missing_imports = true
 warn_unused_ignores = true
 disallow_untyped_defs = true
 show_error_codes = true
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-markers = [
-  "unit: fast, no external I/O",
-  "dagster: dagster-focused tests",
-  "integration: uses db/files/external processes",
-  "e2e: runs full pipeline",
-]

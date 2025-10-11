@@ -75,21 +75,27 @@ def pipeline_maintenance() -> Output[dict[str, Any]]:
     with duckdb.connect(DUCKDB_PATH) as con:
         rows = con.execute(
             """
-            select src_path, bank, file_name
-            from prod_meta.ingest_ledger
-            where archived_at is null
-            order by ingested_at
+            select
+                bank_nm,
+                table_nm,
+                file_path
+            from
+                prod_meta.ingest_ledger
+            where
+                archived_at is null
+            order by
+                processed_at desc
             """,
         ).fetchall()
 
-        for src_path, bank, _file_name in rows:
-            src = RAW_ROOT / src_path
+        for file_path, bank, _file_name in rows:
+            src = RAW_ROOT / file_path
             if not src.exists():
                 logger.warning("File %s missing at archive time", src)
                 continue
 
             # Replace "To Parse" with "Archive" in the path
-            archived_path = src_path.replace("To Parse", "Archive")
+            archived_path = file_path.replace("To Parse", "Archive")
             target = RAW_ROOT / archived_path
             _ensure_parent(target)
 
@@ -98,20 +104,22 @@ def pipeline_maintenance() -> Output[dict[str, Any]]:
             con.execute(
                 """
                 update prod_meta.ingest_ledger
-                set archived_at = current_timestamp at time zone 'UTC'
-                where src_path = ?
+                set
+                    archived_at = current_timestamp at time zone 'UTC'
+                where
+                    file_path = ?
                 """,
-                [src_path],
+                [file_path],
             )
 
             summary.append(
                 {
-                    "file": src_path,
+                    "file": file_path,
                     "archived_to": archived_path,
                     "bank": bank,
                 },
             )
-            logger.info("Archived %s to %s", src_path, target)
+            logger.info("Archived %s to %s", file_path, target)
 
     # Clean up export directory
     cleanup_result = _cleanup_export_directory()

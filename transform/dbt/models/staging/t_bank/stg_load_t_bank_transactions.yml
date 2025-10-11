@@ -88,7 +88,7 @@ models:
         description: Round-up amount sent to the investment jar.
         data_type: double
 
-      - name: __ingested_at
+      - name: processed_at
         description: timestamp of the ingestion.
         data_type: timestamp
         data_tests:

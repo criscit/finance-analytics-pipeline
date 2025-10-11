@@ -80,7 +80,7 @@ def test_database(temp_db: Path) -> duckdb.DuckDBPyConnection:
             id INTEGER,
             name VARCHAR,
             amount DECIMAL,
-            __ingested_at TIMESTAMP
+            processed_at TIMESTAMP
         )
     """
     )
@@ -91,7 +91,7 @@ def test_database(temp_db: Path) -> duckdb.DuckDBPyConnection:
             id INTEGER,
             name VARCHAR,
             amount DECIMAL,
-            __ingested_at TIMESTAMP
+            processed_at TIMESTAMP
         )
     """
     )
@@ -103,7 +103,7 @@ def test_database(temp_db: Path) -> duckdb.DuckDBPyConnection:
             name VARCHAR,
             amount DECIMAL,
             transaction_type VARCHAR,
-            __ingested_at TIMESTAMP
+            processed_at TIMESTAMP
         )
     """
     )
@@ -115,7 +115,7 @@ def test_database(temp_db: Path) -> duckdb.DuckDBPyConnection:
             name VARCHAR,
             amount DECIMAL,
             transaction_type VARCHAR,
-            __ingested_at TIMESTAMP
+            processed_at TIMESTAMP
         )
     """
     )

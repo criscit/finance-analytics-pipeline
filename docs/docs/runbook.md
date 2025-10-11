@@ -28,16 +28,16 @@
 1. **Great Expectations failures:**
    ```bash
    # Check GE validation results
-   ls quality/great_expectations/validations/
+   ls quality/gx/validations/
    
    # Review specific validation
-   cat quality/great_expectations/validations/[validation_id]/[asset_name]/[checkpoint_name].json
+   cat quality/gx/validations/[validation_id]/[asset_name]/[checkpoint_name].json
    ```
 
 2. **Reset GE checkpoint:**
    ```bash
    # Clear validation history (if needed)
-   rm -rf quality/great_expectations/validations/*
+   rm -rf quality/gx/validations/*
    ```
 
 ### Export Issues

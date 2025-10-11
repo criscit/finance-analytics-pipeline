@@ -4,7 +4,7 @@ from typing import Any
 
 import duckdb
 
-from src.utils import qident, qtable
+from src.utils import build_load_key_expr, qident, qtable
 
 
 def connect_readonly(db_path: str) -> duckdb.DuckDBPyConnection:
@@ -138,3 +138,125 @@ def prepare_ordered_data_for_sheets(
         values.append(ordered_row)
 
     return values
+
+
+def ensure_meta_schema(con: duckdb.DuckDBPyConnection) -> None:
+    """
+    Create metadata schema and tables if they don't exist.
+
+    Creates:
+        - prod_meta schema
+        - prod_raw schema
+        - prod_meta.ingest_ledger table for tracking ingested files
+    """
+    con.execute("create schema if not exists prod_meta;")
+    con.execute("create schema if not exists prod_raw;")
+    con.execute(
+        """
+        create table if not exists prod_meta.ingest_ledger (
+            bank_nm varchar(32),
+            table_nm varchar(128),
+            file_path varchar(512),
+            file_size bigint,
+            md5 varchar(32),
+            processed_at timestamp,
+            archived_at timestamp
+        )
+        """
+    )
+
+
+def ensure_raw_table(
+    con: duckdb.DuckDBPyConnection,
+    schema: str,
+    table: str,
+    file_cols: list[str],
+) -> None:
+    """
+    Create raw table with TEXT-only columns plus __load_key and processed_at.
+
+    Args:
+        con: DuckDB connection
+        schema: Schema name (typically 'prod_raw')
+        table: Table name
+        file_cols: List of column names from source file
+    """
+    cols_ddl = ", ".join(f"{qident(c)} text" for c in file_cols)
+    con.execute(f"create schema if not exists {qident(schema)};")
+    con.execute(
+        f"""
+        create table if not exists {qtable(schema, table)} (
+          __load_key varchar(32),
+          {cols_ddl},
+          processed_at timestamp
+        );
+        """
+    )
+    con.execute(f"create index if not exists ix_{table}_bk on {qtable(schema, table)}(__load_key);")
+
+
+def table_columns(con: duckdb.DuckDBPyConnection, schema: str, table: str) -> list[str]:
+    """
+    Get column names from a database table using pragma table_info.
+
+    Args:
+        con: DuckDB connection
+        schema: Schema name
+        table: Table name
+
+    Returns:
+        List of column names
+    """
+    rows = con.execute(f"pragma table_info({qtable(schema, table)})").fetchall()
+    return [r[1] for r in rows]  # (cid, name, type, notnull, dflt, pk)
+
+
+def ingest_parquet_to_duckdb(
+    con: duckdb.DuckDBPyConnection,
+    schema: str,
+    table: str,
+    parquet_path: str,
+) -> int:
+    """
+    Insert DISTINCT rows from parquet into raw table, aligning columns and casting to text.
+
+    The __load_key is derived via build_load_key_expr to create deterministic row hashes.
+
+    Args:
+        con: DuckDB connection
+        schema: Target schema name
+        table: Target table name
+        parquet_path: Path to source parquet file
+
+    Returns:
+        Number of rows inserted
+    """
+    read_expr = f"read_parquet('{parquet_path}')"
+    file_cols = [r[0] for r in con.execute(f"describe select * from {read_expr}").fetchall()]
+
+    ensure_raw_table(con, schema, table, file_cols)
+
+    tgt_cols = table_columns(con, schema, table)  # includes __load_key, processed_at
+    load_key_expr = build_load_key_expr(file_cols)
+
+    select_list = []
+    for c in tgt_cols:
+        if c == "__load_key":
+            select_list.append(f"{load_key_expr} as {qident(c)}")
+        elif c == "processed_at":
+            select_list.append(f"(current_timestamp at time zone 'UTC') as {qident(c)}")
+        else:
+            select_list.append(
+                f"cast({qident(c)} as text) as {qident(c)}"
+                if c in file_cols
+                else f"NULL as {qident(c)}"
+            )
+
+    result = con.execute(
+        f"""
+        insert into {qtable(schema, table)}
+        select distinct {", ".join(select_list)}
+        from {read_expr};
+        """
+    )
+    return int(result.rowcount)

@@ -1,4 +1,5 @@
 packages:
-  - package: calogica/dbt_expectations
-    version: 0.10.1
-
+  - package: metaplane/dbt_expectations
+    version: 0.10.9
+  - package: godatadriven/dbt_date
+    version: 0.15.0

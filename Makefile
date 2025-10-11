@@ -99,8 +99,8 @@ clean: ## Clean up generated files
 	rm -rf data/warehouse/*.duckdb
 	rm -rf data/exports/csv/*
 	rm -rf data/exports/metadata/*
-	rm -rf quality/great_expectations/uncommitted/
-	rm -rf quality/great_expectations/validations/
+	rm -rf quality/gx/uncommitted/
+	rm -rf quality/gx/validations/
 	rm -rf transform/dbt/target/
 	rm -rf transform/dbt/dbt_packages/
 	rm -rf transform/dbt/logs/

@@ -25,7 +25,3 @@ models:
 seeds:
   +schema: seed
   +delimiter: "\t"
-
-on-run-start:
-  - "{{ assert_env() }}"
-  - "{{ assert_source('prod_raw','t_bank_transactions') }}"

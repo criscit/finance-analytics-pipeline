@@ -54,7 +54,7 @@ models:
         data_tests:
           - not_null
 
-      - name: __ingested_at
+      - name: processed_at
         description: Timestamp of the ingestion for incremental processing.
         data_type: timestamp
         data_tests:
