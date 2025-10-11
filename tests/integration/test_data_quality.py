@@ -6,7 +6,6 @@ from typing import Any
 from unittest.mock import MagicMock, patch
 
 import duckdb
-import pytest
 
 from tests.constants import (
     TEST_AMOUNT_MAX,
@@ -27,11 +26,10 @@ class TestDataQualityChecks:
 
     def test_column_completeness_check(self) -> None:
         """Test column completeness validation."""
-        with tempfile.NamedTemporaryFile(suffix=".duckdb", delete=False) as f:
-            db_path = f.name
+        with tempfile.TemporaryDirectory() as temp_dir:
+            db_path = Path(temp_dir) / "test.duckdb"
 
-        try:
-            with duckdb.connect(db_path) as con:
+            with duckdb.connect(str(db_path)) as con:
                 # Create test table with some NULL values
                 con.execute(
                     """
@@ -71,16 +69,12 @@ class TestDataQualityChecks:
                 assert completeness_results[2] == TEST_COMPLETENESS_3  # amount_complete (1 NULL)
                 assert completeness_results[3] == TEST_COMPLETENESS_3  # status_complete (1 NULL)
 
-        finally:
-            Path(db_path).unlink(missing_ok=True)
-
     def test_data_type_validation(self) -> None:
         """Test data type validation."""
-        with tempfile.NamedTemporaryFile(suffix=".duckdb", delete=False) as f:
-            db_path = f.name
+        with tempfile.TemporaryDirectory() as temp_dir:
+            db_path = Path(temp_dir) / "test.duckdb"
 
-        try:
-            with duckdb.connect(db_path) as con:
+            with duckdb.connect(str(db_path)) as con:
                 # Create test table
                 con.execute(
                     """
@@ -108,19 +102,16 @@ class TestDataQualityChecks:
 
                 assert column_types["id"] == "INTEGER"
                 assert column_types["name"] == "VARCHAR"
-                assert column_types["amount"] == "DECIMAL"
+                # DuckDB returns DECIMAL with precision
+                assert column_types["amount"].startswith("DECIMAL")
                 assert column_types["created_at"] == "TIMESTAMP"
-
-        finally:
-            Path(db_path).unlink(missing_ok=True)
 
     def test_range_validation(self) -> None:
         """Test value range validation."""
-        with tempfile.NamedTemporaryFile(suffix=".duckdb", delete=False) as f:
-            db_path = f.name
+        with tempfile.TemporaryDirectory() as temp_dir:
+            db_path = Path(temp_dir) / "test.duckdb"
 
-        try:
-            with duckdb.connect(db_path) as con:
+            with duckdb.connect(str(db_path)) as con:
                 # Create test table
                 con.execute(
                     """
@@ -161,16 +152,12 @@ class TestDataQualityChecks:
                 assert range_results[3] == 1.00  # max_percentage
                 assert range_results[4] == 0  # invalid_percentages
 
-        finally:
-            Path(db_path).unlink(missing_ok=True)
-
     def test_uniqueness_validation(self) -> None:
         """Test uniqueness constraint validation."""
-        with tempfile.NamedTemporaryFile(suffix=".duckdb", delete=False) as f:
-            db_path = f.name
+        with tempfile.TemporaryDirectory() as temp_dir:
+            db_path = Path(temp_dir) / "test.duckdb"
 
-        try:
-            with duckdb.connect(db_path) as con:
+            with duckdb.connect(str(db_path)) as con:
                 # Create test table
                 con.execute(
                     """
@@ -207,16 +194,12 @@ class TestDataQualityChecks:
                 assert uniqueness_results[1] == TEST_UNIQUE_COUNT_3  # unique_names (1 duplicate)
                 assert uniqueness_results[2] == TEST_DATA_ROWS_4  # total_rows
 
-        finally:
-            Path(db_path).unlink(missing_ok=True)
-
     def test_referential_integrity(self) -> None:
         """Test referential integrity validation."""
-        with tempfile.NamedTemporaryFile(suffix=".duckdb", delete=False) as f:
-            db_path = f.name
+        with tempfile.TemporaryDirectory() as temp_dir:
+            db_path = Path(temp_dir) / "test.duckdb"
 
-        try:
-            with duckdb.connect(db_path) as con:
+            with duckdb.connect(str(db_path)) as con:
                 # Create parent table
                 con.execute(
                     """
@@ -272,44 +255,35 @@ class TestDataQualityChecks:
                 assert integrity_results[1] == TEST_VALID_REFERENCES_2  # valid_references
                 assert integrity_results[2] == TEST_INVALID_REFERENCES_1  # invalid_references
 
-        finally:
-            Path(db_path).unlink(missing_ok=True)
-
 
 class TestGreatExpectationsIntegration:
     """Test Great Expectations integration."""
 
-    @patch("orchestration.dagster_project.src.assets_quality_ge.run_ge_checkpoints")
-    def test_ge_checkpoint_execution(self, mock_ge: Any) -> None:
+    @patch("orchestration.assets_quality_ge.subprocess.run")
+    @patch("orchestration.assets_quality_ge.os.chdir")
+    def test_ge_checkpoint_execution(self, mock_chdir: Any, mock_run: Any) -> None:
         """Test Great Expectations checkpoint execution."""
-        # Import here to avoid circular import issues
-        try:
-            from orchestration.dagster_project.src.assets_quality_ge import run_ge_checkpoints
-        except ImportError:
-            pytest.skip("orchestration module not available")
+
+        from orchestration.assets_quality_ge import run_ge_raw_checkpoints
 
         # Mock successful GE execution
-        mock_ge.return_value = MagicMock(
-            value=None, metadata={"status": "success", "message": "All checks passed"}
-        )
+        mock_run.return_value = MagicMock(returncode=0, stdout="All checks passed", stderr="")
 
-        result = run_ge_checkpoints()
+        result = run_ge_raw_checkpoints()
 
         # Verify GE was called
-        mock_ge.assert_called_once()
+        mock_run.assert_called_once()
 
         # Verify result structure
-        assert result.value is None
-        assert "status" in result.metadata
-        assert "message" in result.metadata
+        assert result.value["status"] == "success"  # type: ignore[attr-defined]
+        assert result.value["checkpoint"] == "check_raw"  # type: ignore[attr-defined]
 
     def test_data_quality_metrics(self) -> None:
         """Test data quality metrics calculation."""
-        with tempfile.NamedTemporaryFile(suffix=".duckdb", delete=False) as f:
-            db_path = f.name
+        with tempfile.TemporaryDirectory() as temp_dir:
+            db_path = Path(temp_dir) / "test.duckdb"
 
-        try:
-            with duckdb.connect(db_path) as con:
+            with duckdb.connect(str(db_path)) as con:
                 # Create test table
                 con.execute(
                     """
@@ -353,6 +327,3 @@ class TestGreatExpectationsIntegration:
                 assert quality_metrics[3] == TEST_PERCENTAGE_80  # status_completeness (4/5)
                 assert quality_metrics[4] is not None  # avg_amount
                 assert quality_metrics[5] is not None  # amount_stddev
-
-        finally:
-            Path(db_path).unlink(missing_ok=True)

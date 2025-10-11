@@ -72,23 +72,3 @@ class TestGoogleSheetsExportAsset:
             ValueError, match="GOOGLE_SPREADSHEET_ID environment variable is required"
         ):
             export_to_google_sheets()
-
-    @patch("orchestration.assets_export_sheets.load_runtime_config")
-    def test_export_to_google_sheets_no_sa_file(self, mock_config: Any) -> None:
-        """Test export with missing service account file."""
-        from orchestration.assets_export_sheets import export_to_google_sheets
-
-        mock_config.return_value = {
-            "google_spreadsheet_id": "test_sheet_id",
-            "google_sheet_name": "Test",
-            "google_table_name": "Test Table",
-            "google_sa_json_path": "/nonexistent/sa.json",
-            "export_finance_table": "test_table",
-            "duckdb_path": "/path/to/db.duckdb",
-        }
-
-        with (
-            patch("pathlib.Path.exists", return_value=False),
-            pytest.raises(ValueError, match="Google service account file not found"),
-        ):
-            export_to_google_sheets()

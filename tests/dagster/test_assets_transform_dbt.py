@@ -3,8 +3,6 @@
 from typing import Any
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from orchestration.assets_transform_dbt import build_dbt_models
 from tests.constants import SUBPROCESS_CALLS_2
 
@@ -57,8 +55,10 @@ class TestDBTTransformAsset:
         }
 
         context = build_asset_context()
-        with pytest.raises(RuntimeError, match="deps failed"):
-            build_dbt_models(context, mock_detect_result)
+        # The function now catches errors and returns them in the Output
+        result = build_dbt_models(context, mock_detect_result)
+        assert result.value["status"] == "error"  # type: ignore[attr-defined]
+        assert "dbt deps failed" in result.value["error"]  # type: ignore[attr-defined]
 
     @patch("orchestration.assets_transform_dbt.subprocess.run")
     def test_dbt_build_models_build_failure(self, mock_run: Any) -> None:
