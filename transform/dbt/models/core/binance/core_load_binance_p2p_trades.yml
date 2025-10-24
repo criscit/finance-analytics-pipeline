@@ -1,0 +1,94 @@
+version: 2
+
+models:
+  - name: core_load_binance_p2p_trades
+    description: >
+      Core fact table for Binance P2P trades with parsed numeric fields and timestamps.
+      Tracks peer-to-peer cryptocurrency trades with fiat currencies.
+    tags: [core, binance, fact, p2p]
+    meta:
+      materialization: incremental
+      incremental_strategy: delete+insert
+      unique_key: p2p_trade_bk
+
+    columns:
+      - name: p2p_trade_bk
+        description: Business key for the trade, generated from MD5 hash of order_number.
+        data_type: varchar(32)
+        data_tests:
+          - not_null
+          - unique
+
+      - name: adv_no
+        description: Advertisement number for the P2P listing.
+        data_type: varchar(64)
+
+      - name: created_at
+        description: Timestamp when the trade was created (converted from milliseconds).
+        data_type: timestamp
+
+      - name: additional_kyc_verify
+        description: Additional KYC verification indicator.
+        data_type: double
+
+      - name: amount
+        description: Cryptocurrency amount traded.
+        data_type: double
+
+      - name: commission
+        description: Trading commission charged.
+        data_type: double
+
+      - name: fiat
+        description: Fiat currency code.
+        data_type: varchar(16)
+
+      - name: taker_amt
+        description: Amount received by the taker.
+        data_type: double
+
+      - name: taker_commission
+        description: Commission charged to the taker.
+        data_type: double
+
+      - name: taker_commission_rate
+        description: Commission rate percentage for the taker.
+        data_type: double
+
+      - name: total_price
+        description: Total price for the trade.
+        data_type: double
+
+      - name: unit_price
+        description: Price per unit of cryptocurrency.
+        data_type: double
+
+      - name: asset
+        description: Cryptocurrency symbol traded (e.g., USDT, BTC).
+        data_type: varchar(32)
+
+      - name: counterparty_nickname
+        description: Nickname of the trading counterparty.
+        data_type: varchar(128)
+
+      - name: fiat_symbol
+        description: Fiat currency symbol (e.g., USD, RUB, KGS).
+        data_type: varchar(16)
+
+      - name: order_status
+        description: Status of the P2P order (e.g., Completed, Cancelled).
+        data_type: varchar(32)
+
+      - name: pay_method_name
+        description: Payment method used for the trade.
+        data_type: varchar(64)
+
+      - name: trade_type
+        description: Type of trade (BUY or SELL from user perspective).
+        data_type: varchar(16)
+
+      - name: processed_at
+        description: Timestamp of the ingestion for incremental processing.
+        data_type: timestamp
+        data_tests:
+          - not_null

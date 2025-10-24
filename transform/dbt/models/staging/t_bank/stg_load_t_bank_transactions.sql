@@ -5,7 +5,7 @@
 ) }}
 
 select
-  {{ get_stg_columns_list_map('t_bank') }}
+  {{ get_stg_columns_list_map('t_bank_transactions') }}
 from 
   {{ source('t_bank', 'transactions') }} as raw_transactions
 

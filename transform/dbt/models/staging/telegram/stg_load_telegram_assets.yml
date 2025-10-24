@@ -1,0 +1,46 @@
+version: 2
+
+models:
+  - name: stg_load_telegram_assets
+    description: >
+      Staging over prod_raw.telegram_assets using seed-based column mapping.
+    tags: [staging, telegram]
+    meta:
+      source_table: prod_raw.telegram_assets
+      seed_name: telegram_assets
+
+    columns:
+      - name: __load_key
+        description: Load key for the Telegram asset snapshot row.
+        data_type: varchar(32)
+        data_tests: [not_null, unique]
+
+      - name: asset_full_name
+        description: Full asset name provided by the Telegram bot.
+        data_type: varchar(128)
+
+      - name: asset_short_name
+        description: Short asset ticker reported by the bot.
+        data_type: varchar(32)
+
+      - name: price_usd
+        description: USD price used to value the asset.
+        data_type: double
+
+      - name: change_24h_pct
+        description: Percentage change over the last 24 hours.
+        data_type: double
+
+      - name: balance
+        description: Asset balance tracked by the bot.
+        data_type: double
+
+      - name: value_usd
+        description: USD-denominated value of the balance.
+        data_type: double
+
+      - name: processed_at
+        description: Timestamp of the ingestion.
+        data_type: timestamp
+        data_tests:
+          - not_null

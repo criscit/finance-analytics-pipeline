@@ -1,0 +1,142 @@
+version: 2
+
+models:
+  - name: stg_load_bybit_spot_orders
+    description: >
+      Staging over prod_raw.bybit_spot_orders using seed-based column mapping.
+    tags: [staging, bybit]
+    meta:
+      source_table: prod_raw.bybit_spot_orders
+      seed_name: bybit_spot_orders
+
+    columns:
+      - name: __load_key
+        description: Load key for the spot execution record.
+        data_type: varchar(32)
+        data_tests: [not_null, unique]
+
+      - name: block_trade_id
+        description: Identifier of the block trade, if applicable.
+        data_type: varchar(64)
+
+      - name: closed_size
+        description: Closed quantity on the order.
+        data_type: double
+
+      - name: exec_fee
+        description: Execution fee charged for the fill.
+        data_type: double
+
+      - name: exec_fee_v2
+        description: Alternative fee metric provided by Bybit.
+        data_type: double
+
+      - name: exec_id
+        description: Execution identifier supplied by Bybit.
+        data_type: varchar(128)
+
+      - name: exec_price
+        description: Execution price for the fill.
+        data_type: double
+
+      - name: exec_qty
+        description: Executed quantity for the fill.
+        data_type: double
+
+      - name: exec_time
+        description: Timestamp of the execution event (UTC).
+        data_type: timestamp
+
+      - name: exec_type
+        description: Execution type classification.
+        data_type: varchar(32)
+
+      - name: exec_value
+        description: Executed value of the fill.
+        data_type: double
+
+      - name: extra_fees
+        description: Any extra fees associated with the fill.
+        data_type: double
+
+      - name: fee_currency
+        description: Currency in which fees were charged.
+        data_type: varchar(32)
+
+      - name: fee_rate
+        description: Fee rate applied to the execution.
+        data_type: double
+
+      - name: index_price
+        description: Index price reported at execution time.
+        data_type: double
+
+      - name: is_maker
+        description: Maker flag reported by Bybit.
+        data_type: varchar(8)
+
+      - name: leaves_qty
+        description: Remaining quantity after the execution.
+        data_type: double
+
+      - name: mark_iv
+        description: Implied volatility at execution time.
+        data_type: double
+
+      - name: mark_price
+        description: Mark price reported at execution time.
+        data_type: double
+
+      - name: market_unit
+        description: Market unit descriptor.
+        data_type: varchar(32)
+
+      - name: order_id
+        description: Order identifier supplied by Bybit.
+        data_type: varchar(64)
+
+      - name: order_link_id
+        description: Client-provided order link identifier.
+        data_type: varchar(64)
+
+      - name: order_price
+        description: Submitted order price.
+        data_type: double
+
+      - name: order_qty
+        description: Submitted order quantity.
+        data_type: double
+
+      - name: order_type
+        description: Order type classification.
+        data_type: varchar(32)
+
+      - name: sequence_no
+        description: Sequence number for the event stream.
+        data_type: bigint
+
+      - name: side
+        description: Order side (BUY or SELL).
+        data_type: varchar(16)
+
+      - name: stop_order_type
+        description: Stop order type when applicable.
+        data_type: varchar(32)
+
+      - name: symbol
+        description: Trading symbol for the order.
+        data_type: varchar(32)
+
+      - name: trade_iv
+        description: Trade implied volatility metric.
+        data_type: double
+
+      - name: underlying_price
+        description: Underlying price associated with the execution.
+        data_type: double
+
+      - name: processed_at
+        description: Timestamp of the ingestion.
+        data_type: timestamp
+        data_tests:
+          - not_null

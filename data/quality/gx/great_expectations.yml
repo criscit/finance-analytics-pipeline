@@ -1,0 +1,137 @@
+# gx/great_expectations.yml
+# Production-grade, file-context config for GX Core V1
+# Notes:
+# - Stores are filesystem-based (GX Core V1 focus).
+# - Use config_variables_file_path for secrets & env-specific values.
+
+config_version: 4.0
+
+# Keep credentials & env-specific values outside VCS
+config_variables_file_path: uncommitted/config_variables.yml
+
+# Turn off product analytics in prod
+analytics_enabled: false
+
+# Optional: pin a stable ID for lineage/observability
+# data_context_id: "00000000-0000-0000-0000-000000000000"
+
+# --- Fluent Datasources (V1) ---
+# DuckDB via SQLAlchemy: treat as generic SQL "type: sql".
+# DUCKDB_URL examples:
+#   duckdb:///data/warehouse.duckdb
+#   duckdb:///:memory:
+fluent_datasources:
+  local_duckdb:
+    type: sql
+    id: 1fe8e694-76a4-42c0-a600-22f4fab855cb
+    assets:
+      raw_load_t_bank_transactions:
+        type: table
+        id: a6ffc1b2-c549-413e-a2af-789d6c74c9e2
+        batch_definitions:
+          t_bank_transactions_batch:
+            id: 2c490146-6b0f-44bf-b772-805ff332907f
+            partitioner:
+          raw_load_t_bank_transactions_batch:
+            id: 47ced70c-2275-4661-bd45-4378f52aaf84
+            partitioner:
+        table_name: t_bank_transactions
+        schema_name: prod_raw
+      stg_load_t_bank_transactions:
+        type: table
+        id: 545f9565-920c-4971-be1c-c2afdbbcd51b
+        batch_definitions:
+          stg_load_t_bank_transactions_batch:
+            id: 06bd1c2a-4612-4c69-b4e6-712df2efe7a8
+            partitioner:
+        table_name: t_bank_transactions
+        schema_name: prod_stg
+      mart_load_bakai_transactions:
+        type: table
+        id: 617a0f73-d728-4ee3-ba4e-8e26f52a7d19
+        batch_definitions:
+          mart_load_bakai_transactions_batch:
+            id: 138767d6-442a-4024-9d4e-9f9cd8819ace
+            partitioner:
+        table_name: bakai_transactions
+        schema_name: prod_mart
+    connection_string: ${DUCKDB_URL}
+  temp_pandas_raw_load_t_bank_transactions:
+    type: pandas
+    id: 955632e0-88b4-4440-81dd-15b5b11e21ab
+    assets:
+      df_raw_load_t_bank_transactions:
+        type: dataframe
+        id: 131a4348-e33b-43ff-b9d8-7c2ed91f8a0d
+        batch_metadata: {}
+        batch_definitions:
+          df_raw_load_t_bank_transactions_batch:
+            id: f8079117-4840-4d88-826e-fb07d9d2a93f
+            partitioner:
+  temp_pandas_raw_load_bakai_transactions:
+    type: pandas
+    id: 80c4f7a9-26e5-4248-950c-c1e4f794292c
+    assets:
+      df_raw_load_bakai_transactions:
+        type: dataframe
+        id: f138d7e7-ad3e-4068-9f42-9a7958906742
+        batch_metadata: {}
+        batch_definitions:
+          df_raw_load_bakai_transactions_batch:
+            id: e58c379f-215c-4014-aac8-8e9d8976d901
+            partitioner:
+  temp_pandas_mart_bakai_transactions_exchange_rate:
+    type: pandas
+    id: 0dab769a-f81c-48fe-8f95-f7fec3d10161
+    assets:
+      df_mart_bakai_transactions_exchange_rate:
+        type: dataframe
+        id: 7da24ac8-800a-4c0f-bf46-5d1f97d06e4e
+        batch_metadata: {}
+        batch_definitions:
+          df_mart_bakai_transactions_exchange_rate_batch:
+            id: 2acb42f1-4fdb-4053-b545-bf805f720e59
+            partitioner:
+stores:
+  expectations_store:
+    class_name: ExpectationsStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: expectations/
+
+  validation_results_store:
+    class_name: ValidationResultsStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: uncommitted/validations/
+
+  checkpoint_store:
+    class_name: CheckpointStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: checkpoints/
+
+  validation_definition_store:
+    class_name: ValidationDefinitionStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: uncommitted/validation_definitions/
+
+# Required top-level pointers (note the V1 rename)
+expectations_store_name: expectations_store
+validation_results_store_name: validation_results_store
+checkpoint_store_name: checkpoint_store
+
+# --- Data Docs ---
+data_docs_sites:
+  local_site:
+    class_name: SiteBuilder
+    show_how_to_buttons: false
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: uncommitted/data_docs/local_site/
+    site_index_builder:
+      class_name: DefaultSiteIndexBuilder
+
+plugins_directory: plugins/
+data_context_id: cde23199-aaf6-4c0d-b73b-ce59235b9bd4

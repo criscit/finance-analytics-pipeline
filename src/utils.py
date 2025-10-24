@@ -6,7 +6,7 @@ import time
 from datetime import UTC, date, datetime
 from pathlib import Path
 
-# Minimum row length for transaction data (Date, Bank Name)
+# Minimum row length for transaction data (Date, Platform Name)
 MIN_TRANSACTION_ROW_LENGTH = 2
 
 
@@ -79,7 +79,7 @@ def get_max_transaction_dates_by_bank(existing_data: list[list[str]]) -> dict[st
 
     Args:
         existing_data: List of data rows from Google Sheets (without headers)
-                      Expected format: [Date, Bank Name, Category, Description, Amount, Currency]
+                      Expected format: [Date, Platform Name, Category, Description, Amount, Currency]
 
     Returns:
         dict: Bank name -> max transaction date
@@ -87,7 +87,7 @@ def get_max_transaction_dates_by_bank(existing_data: list[list[str]]) -> dict[st
     max_dates: dict[str, date] = {}
 
     for row in existing_data:
-        if len(row) < MIN_TRANSACTION_ROW_LENGTH:  # Need at least Date and Bank Name
+        if len(row) < MIN_TRANSACTION_ROW_LENGTH:  # Need at least Date and Platform Name
             continue
 
         date_str = row[0]
@@ -111,7 +111,7 @@ def filter_new_transactions(
 
     Args:
         new_data: New transaction data from DuckDB
-                 Expected format: [Date, Bank Name, Category, Description, Amount, Currency]
+                 Expected format: [Date, Platform Name, Category, Description, Amount, Currency]
         max_dates_by_bank: Dictionary of bank name -> max transaction date
 
     Returns:
@@ -120,7 +120,7 @@ def filter_new_transactions(
     filtered_data = []
 
     for row in new_data:
-        if len(row) < MIN_TRANSACTION_ROW_LENGTH:  # Need at least Date and Bank Name
+        if len(row) < MIN_TRANSACTION_ROW_LENGTH:  # Need at least Date and Platform Name
             continue
 
         date_str = row[0]

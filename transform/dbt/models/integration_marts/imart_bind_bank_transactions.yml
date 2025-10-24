@@ -12,7 +12,7 @@ models:
         enforced: true
 
     columns:
-      - name: bank_nm
+      - name: source_system_nm
         description: Name of the bank.
         data_type: varchar(16)
         data_tests:

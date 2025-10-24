@@ -1,0 +1,65 @@
+version: 1.0.0
+dataset: bybit_convert_trades
+description: Raw convert trades export from Bybit crypto platform
+owner: finance-analytics-team
+domain: crypto
+source_system: Bybit
+format: CSV
+delimiter: ","
+encoding: utf-8
+skip_header_rows: 0
+skip_footer_rows: 0
+
+target_table:
+  schema: prod_raw
+  name: bybit_convert_trades
+  
+columns:
+  - name: 'createdTime'
+    type: varchar
+    nullable: true
+    description: 'Raw createdTime value from Bybit convert trades export'
+    source_column_index: 1
+
+  - name: 'exchangeRate'
+    type: varchar
+    nullable: true
+    description: 'Raw exchangeRate value from Bybit convert trades export'
+    source_column_index: 2
+
+  - name: 'exchangeTxId'
+    type: varchar
+    nullable: true
+    description: 'Raw exchangeTxId value from Bybit convert trades export'
+    source_column_index: 3
+
+  - name: 'fromAmount'
+    type: varchar
+    nullable: true
+    description: 'Raw fromAmount value from Bybit convert trades export'
+    source_column_index: 4
+
+  - name: 'fromCoin'
+    type: varchar
+    nullable: true
+    description: 'Raw fromCoin value from Bybit convert trades export'
+    source_column_index: 5
+
+  - name: 'toAmount'
+    type: varchar
+    nullable: true
+    description: 'Raw toAmount value from Bybit convert trades export'
+    source_column_index: 6
+
+  - name: 'toCoin'
+    type: varchar
+    nullable: true
+    description: 'Raw toCoin value from Bybit convert trades export'
+    source_column_index: 7
+
+metadata:
+  refresh_frequency: monthly
+  data_classification: internal
+  retention_period_days: 1825  # 5 years retention for crypto records
+  pii_fields: []
+  file_pattern: '*.csv'

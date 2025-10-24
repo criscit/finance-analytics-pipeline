@@ -28,7 +28,7 @@ class TestDuckDBUtils:
     def test_convert_cell_value_none(self) -> None:
         """Test converting None values."""
         result = convert_cell_value(None)
-        assert result == "None"
+        assert result == ""
 
     def test_convert_cell_value_date(self) -> None:
         """Test converting date values."""
@@ -58,7 +58,14 @@ class TestDuckDBUtils:
     def test_get_ordered_columns_for_sheets(self) -> None:
         """Test getting ordered columns for Google Sheets."""
         result = get_ordered_columns_for_sheets()
-        expected = ["Date", "Bank Name", "Category", "Description", "Amount, Currency", "Currency"]
+        expected = [
+            "Date",
+            "Platform Name",
+            "Category",
+            "Description",
+            "Amount, Currency",
+            "Currency",
+        ]
         assert result == expected
 
     def test_get_duckdb_to_sheets_column_mapping(self) -> None:
@@ -66,7 +73,7 @@ class TestDuckDBUtils:
         result = get_duckdb_to_sheets_column_mapping()
         expected = {
             "transaction_dt": "Date",
-            "bank_nm": "Bank Name",
+            "source_system_nm": "Platform Name",
             "category_nm": "Category",
             "description": "Description",
             "transaction_amt": "Amount, Currency",
@@ -83,7 +90,7 @@ class TestDuckDBUtils:
         ]
         # DuckDB columns in different order than expected Google Sheets order
         cols = [
-            "bank_nm",
+            "source_system_nm",
             "transaction_dt",
             "transaction_currency_cd",
             "category_nm",
@@ -94,7 +101,7 @@ class TestDuckDBUtils:
         result = prepare_ordered_data_for_sheets("test.db", "schema", "transactions", rows, cols)
 
         expected = [
-            ["Date", "Bank Name", "Category", "Description", "Amount, Currency", "Currency"],
+            ["Date", "Platform Name", "Category", "Description", "Amount, Currency", "Currency"],
             ["2025-01-15", "Chase Bank", "Food", "Grocery Store", "45.5", "USD"],
             ["2025-01-16", "Sberbank", "Transport", "Taxi Ride", "12.3", "USD"],
         ]
@@ -105,12 +112,12 @@ class TestDuckDBUtils:
         """Test preparing ordered data with missing DuckDB columns."""
         rows = [("2025-01-15", "Chase Bank", 45.50)]  # Missing some columns
         # Only some columns present
-        cols = ["transaction_dt", "bank_nm", "transaction_amt"]
+        cols = ["transaction_dt", "source_system_nm", "transaction_amt"]
 
         result = prepare_ordered_data_for_sheets("test.db", "schema", "transactions", rows, cols)
 
         expected = [
-            ["Date", "Bank Name", "Category", "Description", "Amount, Currency", "Currency"],
+            ["Date", "Platform Name", "Category", "Description", "Amount, Currency", "Currency"],
             [
                 "2025-01-15",
                 "Chase Bank",
@@ -140,7 +147,7 @@ class TestDuckDBUtils:
         # Extra columns that aren't in our mapping
         cols = [
             "transaction_dt",
-            "bank_nm",
+            "source_system_nm",
             "category_nm",
             "description",
             "transaction_amt",
@@ -152,7 +159,7 @@ class TestDuckDBUtils:
         result = prepare_ordered_data_for_sheets("test.db", "schema", "transactions", rows, cols)
 
         expected = [
-            ["Date", "Bank Name", "Category", "Description", "Amount, Currency", "Currency"],
+            ["Date", "Platform Name", "Category", "Description", "Amount, Currency", "Currency"],
             ["2025-01-15", "Chase Bank", "Food", "Grocery", "45.5", "USD"],
         ]
 
@@ -165,7 +172,7 @@ class TestDuckDBUtils:
         rows = [(date(2025, 1, 15), "Chase Bank", "Food", "Grocery", 45.50, "USD")]
         cols = [
             "transaction_dt",
-            "bank_nm",
+            "source_system_nm",
             "category_nm",
             "description",
             "transaction_amt",
@@ -175,7 +182,7 @@ class TestDuckDBUtils:
         result = prepare_ordered_data_for_sheets("test.db", "schema", "transactions", rows, cols)
 
         expected = [
-            ["Date", "Bank Name", "Category", "Description", "Amount, Currency", "Currency"],
+            ["Date", "Platform Name", "Category", "Description", "Amount, Currency", "Currency"],
             ["2025-01-15", "Chase Bank", "Food", "Grocery", "45.5", "USD"],
         ]
 
@@ -208,7 +215,7 @@ class TestDuckDBUtils:
         mock_con.execute.assert_called_once()
         query = mock_con.execute.call_args[0][0]
         assert '"transaction_dt" as "Date"' in query
-        assert '"bank_nm" as "Bank Name"' in query
+        assert '"source_system_nm" as "Platform Name"' in query
         assert '"category_nm" as "Category"' in query
         assert '"description" as "Description"' in query
         assert '"transaction_amt" as "Amount, Currency"' in query

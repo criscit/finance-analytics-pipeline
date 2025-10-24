@@ -1,0 +1,50 @@
+version: 2
+
+models:
+  - name: core_load_bybit_convert_trades
+    description: >
+      Core fact table for Bybit convert trades with parsed timestamps and numeric values.
+      Tracks cryptocurrency conversion transactions with exchange rates.
+    tags: [core, bybit, fact, convert]
+    meta:
+      materialization: incremental
+      incremental_strategy: delete+insert
+      unique_key: convert_trade_bk
+
+    columns:
+      - name: convert_trade_bk
+        description: Business key for the trade, generated from MD5 hash of exchange_tx_id.
+        data_type: varchar(32)
+        data_tests:
+          - not_null
+          - unique
+
+      - name: created_at
+        description: Timestamp when the convert trade was executed (converted from milliseconds).
+        data_type: timestamp
+
+      - name: exchange_rate
+        description: Exchange rate used for the conversion.
+        data_type: double
+
+      - name: from_amt
+        description: Amount of source cryptocurrency converted.
+        data_type: double
+
+      - name: from_coin
+        description: Source cryptocurrency symbol.
+        data_type: varchar(32)
+
+      - name: to_amt
+        description: Amount of target cryptocurrency received.
+        data_type: double
+
+      - name: to_coin
+        description: Target cryptocurrency symbol.
+        data_type: varchar(32)
+
+      - name: processed_at
+        description: Timestamp of the ingestion for incremental processing.
+        data_type: timestamp
+        data_tests:
+          - not_null

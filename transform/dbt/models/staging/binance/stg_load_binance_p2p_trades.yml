@@ -1,0 +1,94 @@
+version: 2
+
+models:
+  - name: stg_load_binance_p2p_trades
+    description: >
+      Staging over prod_raw.binance_p2p_trades using seed-based column mapping.
+    tags: [staging, binance]
+    meta:
+      source_table: prod_raw.binance_p2p_trades
+      seed_name: binance_p2p_trades
+
+    columns:
+      - name: __load_key
+        description: Load key for the P2P trade record.
+        data_type: varchar(32)
+        data_tests: [not_null, unique]
+
+      - name: additional_kyc_verify
+        description: Flag indicating whether extra KYC verification was required.
+        data_type: double
+
+      - name: adv_no
+        description: Advertisement identifier for the trade.
+        data_type: varchar(64)
+
+      - name: amount
+        description: Crypto amount filled in the trade.
+        data_type: double
+
+      - name: asset
+        description: Crypto asset symbol traded.
+        data_type: varchar(32)
+
+      - name: commission
+        description: Commission collected for the trade.
+        data_type: double
+
+      - name: counterparty_nickname
+        description: Counterparty nickname reported by Binance.
+        data_type: varchar(128)
+
+      - name: created_at
+        description: Creation timestamp of the P2P order (UTC).
+        data_type: timestamp
+
+      - name: fiat_amount
+        description: Fiat amount exchanged in the trade.
+        data_type: double
+
+      - name: fiat_symbol
+        description: Fiat currency symbol.
+        data_type: varchar(16)
+
+      - name: order_number
+        description: Binance P2P order identifier.
+        data_type: varchar(64)
+
+      - name: order_status
+        description: Current status of the P2P order.
+        data_type: varchar(32)
+
+      - name: pay_method_name
+        description: Payment method name selected for the trade.
+        data_type: varchar(64)
+
+      - name: taker_amount
+        description: Quantity filled on the taker side.
+        data_type: double
+
+      - name: taker_commission
+        description: Commission charged to the taker.
+        data_type: double
+
+      - name: taker_commission_rate
+        description: Commission rate applied to the taker.
+        data_type: double
+
+      - name: total_price
+        description: Total fiat price of the trade.
+        data_type: double
+
+      - name: trade_type
+        description: Trade direction (BUY or SELL).
+        data_type: varchar(16)
+
+      - name: unit_price
+        description: Unit fiat price for the asset.
+        data_type: double
+
+      - name: processed_at
+        description: Timestamp of the ingestion.
+        data_type: timestamp
+        data_tests:
+          - not_null

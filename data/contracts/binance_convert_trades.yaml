@@ -1,0 +1,101 @@
+version: 1.0.0
+dataset: binance_convert_trades
+description: Raw convert trades export from Binance crypto platform
+owner: finance-analytics-team
+domain: crypto
+source_system: Binance
+format: CSV
+delimiter: ","
+encoding: utf-8
+skip_header_rows: 0
+skip_footer_rows: 0
+
+target_table:
+  schema: prod_raw
+  name: binance_convert_trades
+  
+columns:
+  - name: 'createTime'
+    type: varchar
+    nullable: true
+    description: 'Raw createTime value from Binance convert trades export'
+    source_column_index: 1
+
+  - name: 'fromAmount'
+    type: varchar
+    nullable: true
+    description: 'Raw fromAmount value from Binance convert trades export'
+    source_column_index: 2
+
+  - name: 'fromAsset'
+    type: varchar
+    nullable: true
+    description: 'Raw fromAsset value from Binance convert trades export'
+    source_column_index: 3
+
+  - name: 'inverseRatio'
+    type: varchar
+    nullable: true
+    description: 'Raw inverseRatio value from Binance convert trades export'
+    source_column_index: 4
+
+  - name: 'orderId'
+    type: varchar
+    nullable: true
+    description: 'Raw orderId value from Binance convert trades export'
+    source_column_index: 5
+
+  - name: 'orderStatus'
+    type: varchar
+    nullable: true
+    description: 'Raw orderStatus value from Binance convert trades export'
+    source_column_index: 6
+
+  - name: 'orderType'
+    type: varchar
+    nullable: true
+    description: 'Raw orderType value from Binance convert trades export'
+    source_column_index: 7
+
+  - name: 'quoteId'
+    type: varchar
+    nullable: true
+    description: 'Raw quoteId value from Binance convert trades export'
+    source_column_index: 8
+
+  - name: 'ratio'
+    type: varchar
+    nullable: true
+    description: 'Raw ratio value from Binance convert trades export'
+    source_column_index: 9
+
+  - name: 'side'
+    type: varchar
+    nullable: true
+    description: 'Raw side value from Binance convert trades export'
+    source_column_index: 10
+
+  - name: 'toAmount'
+    type: varchar
+    nullable: true
+    description: 'Raw toAmount value from Binance convert trades export'
+    source_column_index: 11
+
+  - name: 'toAsset'
+    type: varchar
+    nullable: true
+    description: 'Raw toAsset value from Binance convert trades export'
+    source_column_index: 12
+
+  - name: 'walletType'
+    type: varchar
+    nullable: true
+    description: 'Raw walletType value from Binance convert trades export'
+    source_column_index: 13
+
+metadata:
+  refresh_frequency: monthly
+  data_classification: internal
+  retention_period_days: 1825  # 5 years retention for crypto records
+  pii_fields: []
+  file_pattern: '*.csv'

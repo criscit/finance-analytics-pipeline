@@ -1,0 +1,74 @@
+version: 2
+
+models:
+  - name: stg_load_telegram_p2p_trades
+    description: >
+      Staging over prod_raw.telegram_p2p_trades using seed-based column mapping.
+    tags: [staging, telegram]
+    meta:
+      source_table: prod_raw.telegram_p2p_trades
+      seed_name: telegram_p2p_trades
+
+    columns:
+      - name: __load_key
+        description: Load key for the Telegram P2P trade record.
+        data_type: varchar(32)
+        data_tests: [not_null, unique]
+
+      - name: ad_number
+        description: P2P advertisement number.
+        data_type: varchar(32)
+
+      - name: ad_type
+        description: P2P advertisement type (BUY or SELL).
+        data_type: varchar(32)
+
+      - name: order_number
+        description: Telegram bot order identifier.
+        data_type: varchar(32)
+
+      - name: role
+        description: Trading role of the user in the deal.
+        data_type: varchar(16)
+
+      - name: net_crypto_amount
+        description: Net crypto quantity transacted.
+        data_type: double
+
+      - name: paid_fee_crypto_amount
+        description: Crypto fee amount paid.
+        data_type: double
+
+      - name: crypto_currency
+        description: Crypto asset involved in the trade.
+        data_type: varchar(16)
+
+      - name: fiat_amount
+        description: Fiat amount exchanged.
+        data_type: double
+
+      - name: fiat_currency
+        description: Fiat currency code used.
+        data_type: varchar(16)
+
+      - name: price
+        description: Executed price for the trade.
+        data_type: double
+
+      - name: payment_method
+        description: Payment method selected for settlement.
+        data_type: varchar(64)
+
+      - name: created_at
+        description: Order creation timestamp (UTC).
+        data_type: timestamp
+
+      - name: completed_at
+        description: Order completion timestamp (UTC).
+        data_type: timestamp
+
+      - name: processed_at
+        description: Timestamp of the ingestion.
+        data_type: timestamp
+        data_tests:
+          - not_null

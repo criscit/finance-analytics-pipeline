@@ -190,6 +190,7 @@ class TestDataValidation:
             """
             ).fetchone()
 
+            assert completeness_results is not None
             assert completeness_results[0] == TEST_DATA_ROWS_4  # total_rows
             assert completeness_results[1] == TEST_COMPLETENESS_3  # name_complete (1 NULL)
             assert completeness_results[2] == TEST_COMPLETENESS_3  # amount_complete (1 NULL)
@@ -267,6 +268,7 @@ class TestDataValidation:
             """
             ).fetchone()
 
+            assert range_results is not None
             assert range_results[0] == TEST_AMOUNT_MIN  # min_amount
             assert range_results[1] == TEST_AMOUNT_MAX  # max_amount
             assert range_results[2] == 0.00  # min_percentage

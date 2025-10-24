@@ -94,14 +94,14 @@ def prepare_data_for_sheets(rows: list[tuple[Any, ...]], cols: list[str]) -> lis
 
 def get_ordered_columns_for_sheets() -> list[str]:
     """Get the ordered column names for Google Sheets export."""
-    return ["Date", "Bank Name", "Category", "Description", "Amount, Currency", "Currency"]
+    return ["Date", "Platform Name", "Category", "Description", "Amount, Currency", "Currency"]
 
 
 def get_duckdb_to_sheets_column_mapping() -> dict[str, str]:
     """Get mapping from DuckDB column names to Google Sheets column names."""
     return {
         "transaction_dt": "Date",
-        "bank_nm": "Bank Name",
+        "source_system_nm": "Platform Name",
         "category_nm": "Category",
         "description": "Description",
         "transaction_amt": "Amount, Currency",
@@ -165,7 +165,7 @@ def get_recently_ingested_tables(db_path: str, hours: int = 24) -> dict[str, Any
 
     Returns:
         Dictionary with:
-        - tables_to_process: List of dicts with bank_nm, table_nm, selector_nm, file_count, latest_ingestion
+        - tables_to_process: List of dicts with source_system_nm, table_nm, selector_nm, file_count, latest_ingestion
         - total_tables: Count of tables
         - detected_at: ISO timestamp
     """
@@ -193,13 +193,13 @@ def get_recently_ingested_tables(db_path: str, hours: int = 24) -> dict[str, Any
         recent_ingestions = con.execute(
             f"""
             select 
-                bank_nm,
+                source_system_nm,
                 table_nm,
                 count(*) as file_count,
                 max(processed_at) as latest_ingestion
             from prod_meta.ingest_ledger 
             where processed_at >= current_timestamp - interval '{hours} hours'
-            group by bank_nm, table_nm
+            group by source_system_nm, table_nm
             order by latest_ingestion desc
             """
         ).fetchall()
@@ -207,10 +207,10 @@ def get_recently_ingested_tables(db_path: str, hours: int = 24) -> dict[str, Any
         # Build result list
         tables_to_process = []
         for row in recent_ingestions:
-            bank_nm, table_nm, file_count, latest_ingestion = row
+            source_system_nm, table_nm, file_count, latest_ingestion = row
             tables_to_process.append(
                 {
-                    "bank_nm": bank_nm,
+                    "source_system_nm": source_system_nm,
                     "table_nm": table_nm,
                     "selector_nm": f"run_{table_nm}",
                     "file_count": file_count,
@@ -244,7 +244,7 @@ def ensure_meta_schema(con: duckdb.DuckDBPyConnection) -> None:
     con.execute(
         """
         create table if not exists prod_meta.ingest_ledger (
-            bank_nm varchar(32),
+            source_system_nm varchar(32),
             table_nm varchar(128),
             file_path varchar(512),
             file_size bigint,

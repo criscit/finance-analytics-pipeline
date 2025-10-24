@@ -1,0 +1,144 @@
+version: 2
+
+models:
+  - name: core_load_bybit_spot_orders
+    description: >
+      Core fact table for Bybit spot order executions with parsed numeric fields and timestamps.
+      Contains detailed execution information for spot market orders.
+    tags: [core, bybit, fact, spot_orders]
+    meta:
+      materialization: incremental
+      incremental_strategy: delete+insert
+      unique_key: spot_order_bk
+
+    columns:
+      - name: spot_order_bk
+        description: Business key for the order execution, generated from MD5 hash of order_id and exec_id.
+        data_type: varchar(32)
+        data_tests:
+          - not_null
+          - unique
+
+      - name: exec_id
+        description: Unique identifier for the specific execution.
+        data_type: varchar(128)
+        data_tests:
+          - not_null
+
+      - name: block_trade_id
+        description: Block trade identifier if applicable.
+        data_type: varchar(64)
+
+      - name: closed_size
+        description: Size of the position closed by this execution.
+        data_type: double
+
+      - name: exec_fee
+        description: Execution fee charged for the trade.
+        data_type: double
+
+      - name: exec_fee_v2
+        description: Alternative execution fee calculation.
+        data_type: double
+
+      - name: exec_price
+        description: Price at which the order was executed.
+        data_type: double
+
+      - name: exec_qty
+        description: Quantity executed in this fill.
+        data_type: double
+
+      - name: exec_value
+        description: Total value of the execution (price * quantity).
+        data_type: double
+
+      - name: extra_fees
+        description: Additional fees beyond standard execution fee.
+        data_type: double
+
+      - name: fee_rate
+        description: Fee rate applied to the execution.
+        data_type: double
+
+      - name: index_price
+        description: Index price at time of execution.
+        data_type: double
+
+      - name: leaves_qty
+        description: Remaining unfilled quantity on the order.
+        data_type: double
+
+      - name: mark_iv
+        description: Mark implied volatility (for options).
+        data_type: double
+
+      - name: mark_price
+        description: Mark price at time of execution.
+        data_type: double
+
+      - name: order_price
+        description: Original limit price of the order.
+        data_type: double
+
+      - name: order_qty
+        description: Original quantity of the order.
+        data_type: double
+
+      - name: trade_iv
+        description: Trade implied volatility (for options).
+        data_type: double
+
+      - name: underlying_price
+        description: Underlying asset price (for derivatives).
+        data_type: double
+
+      - name: exec_time
+        description: Timestamp when the execution occurred (converted from milliseconds).
+        data_type: timestamp
+
+      - name: exec_type
+        description: Type of execution (e.g., Trade, Funding, Liquidation).
+        data_type: varchar(32)
+
+      - name: fee_currency
+        description: Currency in which fees were charged.
+        data_type: varchar(32)
+
+      - name: is_maker
+        description: Whether this execution was a maker order (true/false).
+        data_type: varchar(8)
+
+      - name: market_unit
+        description: Market unit or contract multiplier.
+        data_type: varchar(32)
+
+      - name: order_link_id
+        description: User-defined order link ID for tracking.
+        data_type: varchar(64)
+
+      - name: order_type
+        description: Type of order (e.g., Limit, Market).
+        data_type: varchar(32)
+
+      - name: seq
+        description: Sequence number for the execution.
+        data_type: varchar(64)
+
+      - name: side
+        description: Order side (Buy or Sell).
+        data_type: varchar(16)
+
+      - name: stop_order_type
+        description: Stop order type if applicable.
+        data_type: varchar(32)
+
+      - name: symbol
+        description: Trading pair symbol (e.g., BTCUSDT).
+        data_type: varchar(32)
+
+      - name: processed_at
+        description: Timestamp of the ingestion for incremental processing.
+        data_type: timestamp
+        data_tests:
+          - not_null

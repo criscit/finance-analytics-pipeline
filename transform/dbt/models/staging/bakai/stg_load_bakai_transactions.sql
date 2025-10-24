@@ -5,7 +5,7 @@
 ) }}
 
 select
-  {{ get_stg_columns_list_map('bakai') }}
+  {{ get_stg_columns_list_map('bakai_transactions') }}
 from 
   {{ source('bakai', 'transactions') }} as raw_transactions
 

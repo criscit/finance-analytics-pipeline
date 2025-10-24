@@ -1,0 +1,83 @@
+version: 1.0.0
+dataset: binance_fiat_orders
+description: Raw fiat orders export from Binance crypto platform
+owner: finance-analytics-team
+domain: crypto
+source_system: Binance
+format: CSV
+delimiter: ","
+encoding: utf-8
+skip_header_rows: 0
+skip_footer_rows: 0
+
+target_table:
+  schema: prod_raw
+  name: binance_fiat_orders
+  
+columns:
+  - name: 'amount'
+    type: varchar
+    nullable: true
+    description: 'Raw amount value from Binance fiat orders export'
+    source_column_index: 1
+
+  - name: 'createTime'
+    type: varchar
+    nullable: true
+    description: 'Raw createTime value from Binance fiat orders export'
+    source_column_index: 2
+
+  - name: 'fiatCurrency'
+    type: varchar
+    nullable: true
+    description: 'Raw fiatCurrency value from Binance fiat orders export'
+    source_column_index: 3
+
+  - name: 'indicatedAmount'
+    type: varchar
+    nullable: true
+    description: 'Raw indicatedAmount value from Binance fiat orders export'
+    source_column_index: 4
+
+  - name: 'method'
+    type: varchar
+    nullable: true
+    description: 'Raw method value from Binance fiat orders export'
+    source_column_index: 5
+
+  - name: 'orderNo'
+    type: varchar
+    nullable: true
+    description: 'Raw orderNo value from Binance fiat orders export'
+    source_column_index: 6
+
+  - name: 'status'
+    type: varchar
+    nullable: true
+    description: 'Raw status value from Binance fiat orders export'
+    source_column_index: 7
+
+  - name: 'totalFee'
+    type: varchar
+    nullable: true
+    description: 'Raw totalFee value from Binance fiat orders export'
+    source_column_index: 8
+
+  - name: 'transactionType'
+    type: varchar
+    nullable: true
+    description: 'Raw transactionType value from Binance fiat orders export'
+    source_column_index: 9
+
+  - name: 'updateTime'
+    type: varchar
+    nullable: true
+    description: 'Raw updateTime value from Binance fiat orders export'
+    source_column_index: 10
+
+metadata:
+  refresh_frequency: monthly
+  data_classification: internal
+  retention_period_days: 1825  # 5 years retention for crypto records
+  pii_fields: []
+  file_pattern: '*.csv'

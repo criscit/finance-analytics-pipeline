@@ -95,12 +95,9 @@ demo: ## Run demo with sample data
 
 # Cleanup
 clean: ## Clean up generated files
-	docker compose down -v
-	rm -rf data/warehouse/*.duckdb
-	rm -rf data/exports/csv/*
-	rm -rf data/exports/metadata/*
-	rm -rf quality/gx/uncommitted/
-	rm -rf quality/gx/validations/
+
+	rm -rf data/quality/gx/uncommitted/
+	rm -rf data/quality/gx/validations/
 	rm -rf transform/dbt/target/
 	rm -rf transform/dbt/dbt_packages/
 	rm -rf transform/dbt/logs/

@@ -1,0 +1,95 @@
+version: 1.0.0
+dataset: binance_spot_orders
+description: Raw spot orders export from Binance crypto platform
+owner: finance-analytics-team
+domain: crypto
+source_system: Binance
+format: CSV
+delimiter: ","
+encoding: utf-8
+skip_header_rows: 0
+skip_footer_rows: 0
+
+target_table:
+  schema: prod_raw
+  name: binance_spot_orders
+  
+columns:
+  - name: 'Date(UTC)'
+    type: varchar
+    nullable: true
+    description: 'Raw Date(UTC) value from Binance spot orders export'
+    source_column_index: 1
+
+  - name: 'OrderNo'
+    type: varchar
+    nullable: true
+    description: 'Raw OrderNo value from Binance spot orders export'
+    source_column_index: 2
+
+  - name: 'Pair'
+    type: varchar
+    nullable: true
+    description: 'Raw Pair value from Binance spot orders export'
+    source_column_index: 3
+
+  - name: 'Type'
+    type: varchar
+    nullable: true
+    description: 'Raw Type value from Binance spot orders export'
+    source_column_index: 4
+
+  - name: 'Side'
+    type: varchar
+    nullable: true
+    description: 'Raw Side value from Binance spot orders export'
+    source_column_index: 5
+
+  - name: 'Order Price'
+    type: varchar
+    nullable: true
+    description: 'Raw Order Price value from Binance spot orders export'
+    source_column_index: 6
+
+  - name: 'Order Amount'
+    type: varchar
+    nullable: true
+    description: 'Raw Order Amount value from Binance spot orders export'
+    source_column_index: 7
+
+  - name: 'Time'
+    type: varchar
+    nullable: true
+    description: 'Raw Time value from Binance spot orders export'
+    source_column_index: 8
+
+  - name: 'Executed'
+    type: varchar
+    nullable: true
+    description: 'Raw Executed value from Binance spot orders export'
+    source_column_index: 9
+
+  - name: 'Average Price'
+    type: varchar
+    nullable: true
+    description: 'Raw Average Price value from Binance spot orders export'
+    source_column_index: 10
+
+  - name: 'Trading total'
+    type: varchar
+    nullable: true
+    description: 'Raw Trading total value from Binance spot orders export'
+    source_column_index: 11
+
+  - name: 'Status'
+    type: varchar
+    nullable: true
+    description: 'Raw Status value from Binance spot orders export'
+    source_column_index: 12
+
+metadata:
+  refresh_frequency: monthly
+  data_classification: internal
+  retention_period_days: 1825  # 5 years retention for crypto records
+  pii_fields: []
+  file_pattern: '*.csv'

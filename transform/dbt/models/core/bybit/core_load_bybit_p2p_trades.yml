@@ -1,0 +1,61 @@
+version: 2
+
+models:
+  - name: core_load_bybit_p2p_trades
+    description: >
+      Core fact table for Bybit P2P trades with parsed quantity, amount, price, and fee fields.
+      Tracks peer-to-peer cryptocurrency trades with fiat currencies.
+      Raw fields like "123.45 USDT" are split into numeric amount and currency code.
+    tags: [core, bybit, fact, p2p]
+    meta:
+      materialization: incremental
+      incremental_strategy: delete+insert
+      unique_key: trade_bk
+
+    columns:
+      - name: trade_bk
+        description: Business key for the trade, generated from MD5 hash of order_no.
+        data_type: varchar(32)
+        data_tests:
+          - not_null
+          - unique
+
+      - name: order_no
+        description: Unique order number for the P2P trade.
+        data_type: varchar(64)
+        data_tests:
+          - not_null
+
+      - name: qty
+        description: Quantity of cryptocurrency traded (raw varchar value).
+        data_type: varchar(64)
+
+      - name: amount
+        description: Fiat amount paid/received (raw varchar value).
+        data_type: varchar(64)
+
+      - name: price
+        description: Exchange rate between crypto and fiat (raw varchar value).
+        data_type: varchar(64)
+
+      - name: fee
+        description: Trading fee amount (raw varchar value).
+        data_type: varchar(64)
+
+      - name: type
+        description: Type of trade (BUY or SELL from user perspective).
+        data_type: varchar(16)
+
+      - name: status
+        description: Status of the P2P trade.
+        data_type: varchar(16)
+
+      - name: executed_at
+        description: Timestamp when the trade was executed.
+        data_type: timestamp
+
+      - name: processed_at
+        description: Timestamp of the ingestion for incremental processing.
+        data_type: timestamp
+        data_tests:
+          - not_null

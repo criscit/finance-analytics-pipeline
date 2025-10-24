@@ -1,0 +1,50 @@
+version: 2
+
+models:
+  - name: stg_load_bybit_internal_transfers
+    description: >
+      Staging over prod_raw.bybit_internal_transfers using seed-based column mapping.
+    tags: [staging, bybit]
+    meta:
+      source_table: prod_raw.bybit_internal_transfers
+      seed_name: bybit_internal_transfers
+
+    columns:
+      - name: __load_key
+        description: Load key for the internal transfer record.
+        data_type: varchar(32)
+        data_tests: [not_null, unique]
+
+      - name: amount
+        description: Amount transferred between internal accounts.
+        data_type: double
+
+      - name: coin
+        description: Coin symbol moved in the transfer.
+        data_type: varchar(32)
+
+      - name: from_account_type
+        description: Source account type within Bybit.
+        data_type: varchar(32)
+
+      - name: status
+        description: Transfer status reported by Bybit.
+        data_type: varchar(32)
+
+      - name: transferred_at
+        description: Timestamp when the transfer occurred (UTC).
+        data_type: timestamp
+
+      - name: to_account_type
+        description: Destination account type within Bybit.
+        data_type: varchar(32)
+
+      - name: transfer_id
+        description: Bybit internal transfer identifier.
+        data_type: varchar(128)
+
+      - name: processed_at
+        description: Timestamp of the ingestion.
+        data_type: timestamp
+        data_tests:
+          - not_null

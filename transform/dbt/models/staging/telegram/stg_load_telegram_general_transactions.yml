@@ -1,0 +1,94 @@
+version: 2
+
+models:
+  - name: stg_load_telegram_general_transactions
+    description: >
+      Staging over prod_raw.telegram_general_transactions using seed-based column mapping.
+    tags: [staging, telegram]
+    meta:
+      source_table: prod_raw.telegram_general_transactions
+      seed_name: telegram_general_transactions
+
+    columns:
+      - name: __load_key
+        description: Load key for the Telegram transaction record.
+        data_type: varchar(32)
+        data_tests: [not_null, unique]
+
+      - name: transaction_type
+        description: Transaction type label reported by the bot.
+        data_type: varchar(64)
+
+      - name: status
+        description: Current status of the transaction.
+        data_type: varchar(32)
+
+      - name: amount_in
+        description: Incoming amount for the transaction.
+        data_type: double
+
+      - name: currency_in
+        description: Currency code for the incoming amount.
+        data_type: varchar(16)
+
+      - name: amount_out
+        description: Outgoing amount for the transaction.
+        data_type: double
+
+      - name: currency_out
+        description: Currency code for the outgoing amount.
+        data_type: varchar(16)
+
+      - name: ex_rate_base
+        description: Base currency component of the exchange rate.
+        data_type: varchar(16)
+
+      - name: ex_rate_quote
+        description: Quote currency component of the exchange rate.
+        data_type: varchar(16)
+
+      - name: ex_rate_value
+        description: Exchange rate value applied to the transaction.
+        data_type: double
+
+      - name: counterparty
+        description: Counterparty associated with the transaction.
+        data_type: varchar(128)
+
+      - name: order_id
+        description: Order identifier provided by the bot.
+        data_type: varchar(64)
+
+      - name: source
+        description: Source system or channel of the transaction.
+        data_type: varchar(64)
+
+      - name: fee_amount
+        description: Fee amount charged.
+        data_type: double
+
+      - name: fee_currency
+        description: Currency for the fee amount.
+        data_type: varchar(16)
+
+      - name: raw_payload
+        description: Raw payload text captured for the transaction.
+        data_type: varchar(512)
+
+      - name: processed_at
+        description: Timestamp of the ingestion.
+        data_type: timestamp
+        data_tests:
+          - not_null
+
+      - name: transacted_at
+        description: Transaction timestamp provided by the bot.
+        data_type: timestamp
+
+      - name: transaction_date
+        description: Transaction calendar date.
+        data_type: date
+
+      - name: transaction_time_text
+        description: Transaction time string as delivered by the bot.
+        data_type: varchar(16)

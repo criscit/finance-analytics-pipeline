@@ -1,0 +1,46 @@
+version: 2
+
+models:
+  - name: stg_load_binance_assets
+    description: >
+      Staging over prod_raw.binance_assets using seed-based column mapping.
+    tags: [staging, binance]
+    meta:
+      source_table: prod_raw.binance_assets
+      seed_name: binance_assets
+
+    columns:
+      - name: __load_key
+        description: Load key for the asset snapshot row.
+        data_type: varchar(32)
+        data_tests: [not_null, unique]
+
+      - name: asset
+        description: Asset symbol reported by Binance.
+        data_type: varchar(64)
+
+      - name: free
+        description: Free balance available for trading.
+        data_type: double
+
+      - name: locked
+        description: Locked balance currently unavailable.
+        data_type: double
+
+      - name: total
+        description: Total balance combining free and locked amounts.
+        data_type: double
+
+      - name: usdt_equivalent
+        description: Notional USDT value for the asset position.
+        data_type: double
+
+      - name: usdt_price
+        description: Spot USDT price used for valuation.
+        data_type: double
+
+      - name: processed_at
+        description: Timestamp of the ingestion.
+        data_type: timestamp
+        data_tests:
+          - not_null

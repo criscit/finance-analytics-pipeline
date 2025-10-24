@@ -1,0 +1,59 @@
+version: 1.0.0
+dataset: binance_assets
+description: Raw assets export from Binance crypto platform
+owner: finance-analytics-team
+domain: crypto
+source_system: Binance
+format: CSV
+delimiter: ","
+encoding: utf-8
+skip_header_rows: 0
+skip_footer_rows: 0
+
+target_table:
+  schema: prod_raw
+  name: binance_assets
+  
+columns:
+  - name: 'asset'
+    type: varchar
+    nullable: true
+    description: 'Raw asset value from Binance assets export'
+    source_column_index: 1
+
+  - name: 'free'
+    type: varchar
+    nullable: true
+    description: 'Raw free value from Binance assets export'
+    source_column_index: 2
+
+  - name: 'locked'
+    type: varchar
+    nullable: true
+    description: 'Raw locked value from Binance assets export'
+    source_column_index: 3
+
+  - name: 'total'
+    type: varchar
+    nullable: true
+    description: 'Raw total value from Binance assets export'
+    source_column_index: 4
+
+  - name: 'usdt_equivalent'
+    type: varchar
+    nullable: true
+    description: 'Raw usdt_equivalent value from Binance assets export'
+    source_column_index: 5
+
+  - name: 'usdt_price'
+    type: varchar
+    nullable: true
+    description: 'Raw usdt_price value from Binance assets export'
+    source_column_index: 6
+
+metadata:
+  refresh_frequency: monthly
+  data_classification: internal
+  retention_period_days: 1825  # 5 years retention for crypto records
+  pii_fields: []
+  file_pattern: '*.csv'

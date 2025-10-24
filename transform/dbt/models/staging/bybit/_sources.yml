@@ -1,0 +1,27 @@
+version: 2
+
+sources:
+  - name: bybit
+    schema: prod_raw
+    tables:
+      - name: assets
+        identifier: bybit_assets
+        description: Raw Bybit asset balances export.
+      - name: convert_trades
+        identifier: bybit_convert_trades
+        description: Raw Bybit convert trade executions export.
+      - name: deposits
+        identifier: bybit_deposits
+        description: Raw Bybit deposits export.
+      - name: internal_transfers
+        identifier: bybit_internal_transfers
+        description: Raw Bybit internal transfer records export.
+      - name: p2p_trades
+        identifier: bybit_p2p_trades
+        description: Raw Bybit peer-to-peer trades export.
+      - name: spot_orders
+        identifier: bybit_spot_orders
+        description: Raw Bybit spot order history export.
+      - name: withdrawals
+        identifier: bybit_withdrawals
+        description: Raw Bybit withdrawal records export.

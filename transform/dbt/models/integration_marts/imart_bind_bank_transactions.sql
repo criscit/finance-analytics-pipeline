@@ -1,5 +1,5 @@
 select
-  'T Bank' as bank_nm,
+  'T Bank' as source_system_nm,
   category_nm,
   description,
   transaction_amt,
@@ -11,7 +11,7 @@ from
 union all
 
 select
-  'T Bank' as bank_nm,
+  'T Bank' as source_system_nm,
   'Cashback' as category_nm,
   'Cashback and other rewards' as description,
   total_rewards_amt as transaction_amt,
@@ -25,7 +25,7 @@ where
 union all
 
 select
-  'BakAi Bank' as bank_nm,
+  'BakAi Bank' as source_system_nm,
   null as category_nm,
   description,
   transaction_amt,

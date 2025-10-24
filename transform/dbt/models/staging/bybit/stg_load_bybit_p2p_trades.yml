@@ -1,0 +1,70 @@
+version: 2
+
+models:
+  - name: stg_load_bybit_p2p_trades
+    description: >
+      Staging over prod_raw.bybit_p2p_trades using seed-based column mapping.
+    tags: [staging, bybit]
+    meta:
+      source_table: prod_raw.bybit_p2p_trades
+      seed_name: bybit_p2p_trades
+
+    columns:
+      - name: __load_key
+        description: Load key for the P2P trade record.
+        data_type: varchar(32)
+        data_tests: [not_null, unique]
+
+      - name: quantity
+        description: Crypto quantity filled in the P2P trade.
+        data_type: double
+
+      - name: quantity_asset
+        description: Asset symbol associated with the quantity.
+        data_type: varchar(32)
+
+      - name: amount
+        description: Fiat amount exchanged in the trade.
+        data_type: double
+
+      - name: amount_currency
+        description: Fiat currency code for the amount.
+        data_type: varchar(16)
+
+      - name: price
+        description: Executed price for the trade.
+        data_type: double
+
+      - name: price_pair
+        description: Reported price pair string.
+        data_type: varchar(32)
+
+      - name: trade_type
+        description: Trade direction (BUY or SELL).
+        data_type: varchar(16)
+
+      - name: trade_status
+        description: Current status of the P2P order.
+        data_type: varchar(16)
+
+      - name: fee
+        description: Fee charged on the trade.
+        data_type: double
+
+      - name: fee_currency
+        description: Currency in which the fee was charged.
+        data_type: varchar(16)
+
+      - name: executed_at
+        description: Execution timestamp of the trade (UTC).
+        data_type: timestamp
+
+      - name: order_no
+        description: Bybit P2P order identifier.
+        data_type: varchar(64)
+
+      - name: processed_at
+        description: Timestamp of the ingestion.
+        data_type: timestamp
+        data_tests:
+          - not_null

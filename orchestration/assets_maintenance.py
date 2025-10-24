@@ -76,7 +76,7 @@ def pipeline_maintenance() -> Output[dict[str, Any]]:
         rows = con.execute(
             """
             select
-                bank_nm,
+                source_system_nm,
                 table_nm,
                 file_path
             from
@@ -88,7 +88,7 @@ def pipeline_maintenance() -> Output[dict[str, Any]]:
             """,
         ).fetchall()
 
-        for bank_nm, table_nm, file_path in rows:
+        for source_system_nm, table_nm, file_path in rows:
             src = RAW_ROOT / file_path
             if not src.exists():
                 logger.warning("File %s missing at archive time", src)
@@ -116,7 +116,7 @@ def pipeline_maintenance() -> Output[dict[str, Any]]:
                 {
                     "file": file_path,
                     "archived_to": archived_path,
-                    "bank": bank_nm,
+                    "bank": source_system_nm,
                     "table": table_nm,
                 },
             )

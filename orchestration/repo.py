@@ -3,7 +3,7 @@ from dagster import AssetSelection, Definitions, ScheduleDefinition, define_asse
 
 from .assets_export_csv import export_csv_snapshot
 from .assets_export_sheets import export_to_google_sheets
-from .assets_ingest import ingest_transactions
+from .assets_ingest import ingest_bank, ingest_crypto
 from .assets_maintenance import pipeline_maintenance
 from .assets_quality_ge import (
     run_ge_mart_checkpoints,
@@ -12,7 +12,8 @@ from .assets_quality_ge import (
 from .assets_transform_dbt import build_dbt_models, build_imart_models
 
 all_assets = [
-    ingest_transactions,
+    ingest_bank,
+    ingest_crypto,
     run_ge_raw_checkpoints,
     build_dbt_models,
     run_ge_mart_checkpoints,
@@ -24,13 +25,14 @@ all_assets = [
 
 # -------------------------
 # Pipeline 1: Build Pipeline
-# Ingest → QE raw checks → build dbt models (stg, core, mart) → QE mart checks
+# Ingest (bank, crypto) → QE raw checks → build dbt models (stg, core, mart) → QE mart checks
 # -------------------------
-build_pipeline = define_asset_job(
-    name="build_pipeline",
+build_finance_data_pipeline = define_asset_job(
+    name="build_finance_data_pipeline",
     description="Build pipeline: ingest data, run quality checks, build dbt models (stg, core, mart layers only)",
     selection=AssetSelection.assets(
-        ingest_transactions,
+        ingest_bank,
+        ingest_crypto,
         run_ge_raw_checkpoints,
         build_dbt_models,
         run_ge_mart_checkpoints,
@@ -71,7 +73,8 @@ monthly_job = define_asset_job(
     name="monthly_full_pipeline",
     description="Complete monthly pipeline: build (stg/core/mart) → export (imart + data) → maintenance",
     selection=AssetSelection.assets(
-        ingest_transactions,
+        ingest_bank,
+        ingest_crypto,
         run_ge_raw_checkpoints,
         build_dbt_models,
         run_ge_mart_checkpoints,
@@ -89,6 +92,11 @@ monthly_schedule = ScheduleDefinition(
 
 defs = Definitions(
     assets=all_assets,
-    jobs=[build_pipeline, export_pipeline, maintenance_pipeline, monthly_job],
+    jobs=[
+        build_finance_data_pipeline,
+        export_pipeline,
+        maintenance_pipeline,
+        monthly_job,
+    ],
     schedules=[monthly_schedule],
 )

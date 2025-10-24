@@ -1,0 +1,94 @@
+version: 2
+
+models:
+  - name: stg_load_bybit_deposits
+    description: >
+      Staging over prod_raw.bybit_deposits using seed-based column mapping.
+    tags: [staging, bybit]
+    meta:
+      source_table: prod_raw.bybit_deposits
+      seed_name: bybit_deposits
+
+    columns:
+      - name: __load_key
+        description: Load key for the deposit record.
+        data_type: varchar(32)
+        data_tests: [not_null, unique]
+
+      - name: amount
+        description: Deposit amount credited by Bybit.
+        data_type: double
+
+      - name: batch_release_limit
+        description: Batch release limit associated with the deposit.
+        data_type: double
+
+      - name: block_hash
+        description: Blockchain hash of the deposit transaction.
+        data_type: varchar(128)
+
+      - name: chain
+        description: Blockchain network identifier.
+        data_type: varchar(32)
+
+      - name: coin
+        description: Coin symbol of the deposited asset.
+        data_type: varchar(32)
+
+      - name: confirmations
+        description: Number of blockchain confirmations observed.
+        data_type: bigint
+
+      - name: deposit_fee
+        description: Fee charged for processing the deposit.
+        data_type: double
+
+      - name: deposit_type
+        description: Type of deposit as reported by Bybit.
+        data_type: varchar(32)
+
+      - name: from_address
+        description: Blockchain address funds originated from.
+        data_type: varchar(256)
+
+      - name: deposit_id
+        description: Bybit deposit identifier.
+        data_type: varchar(64)
+
+      - name: status
+        description: Current deposit status.
+        data_type: varchar(32)
+
+      - name: success_at
+        description: Timestamp when Bybit marked the deposit successful (UTC).
+        data_type: timestamp
+
+      - name: tag
+        description: Destination tag or memo for the deposit.
+        data_type: varchar(64)
+
+      - name: tax_deposit_records_id
+        description: Identifier of the associated tax record.
+        data_type: varchar(64)
+
+      - name: tax_status
+        description: Tax handling status for the deposit.
+        data_type: varchar(32)
+
+      - name: to_address
+        description: Blockchain address funds were sent to.
+        data_type: varchar(256)
+
+      - name: tx_id
+        description: Blockchain transaction identifier.
+        data_type: varchar(128)
+
+      - name: tx_index
+        description: Transaction index within the block.
+        data_type: bigint
+
+      - name: processed_at
+        description: Timestamp of the ingestion.
+        data_type: timestamp
+        data_tests:
+          - not_null

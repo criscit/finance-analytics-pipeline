@@ -1,0 +1,38 @@
+version: 2
+
+models:
+  - name: stg_load_telegram_earn
+    description: >
+      Staging over prod_raw.telegram_earn using seed-based column mapping.
+    tags: [staging, telegram]
+    meta:
+      source_table: prod_raw.telegram_earn
+      seed_name: telegram_earn
+
+    columns:
+      - name: __load_key
+        description: Load key for the Telegram earn portfolio row.
+        data_type: varchar(32)
+        data_tests: [not_null, unique]
+
+      - name: asset
+        description: Asset symbol enrolled in the earn program.
+        data_type: varchar(32)
+
+      - name: apy_pct
+        description: Reported APY percentage.
+        data_type: double
+
+      - name: value_usd
+        description: USD-denominated position value.
+        data_type: double
+
+      - name: yield_usd
+        description: USD yield accrued.
+        data_type: double
+
+      - name: processed_at
+        description: Timestamp of the ingestion.
+        data_type: timestamp
+        data_tests:
+          - not_null

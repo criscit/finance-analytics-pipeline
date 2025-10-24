@@ -41,7 +41,7 @@ def sample_transaction_data() -> list[tuple[Any, ...]]:
 
 
 @pytest.fixture
-def test_database(temp_db: Path) -> duckdb.DuckDBPyConnection:
+def test_database(temp_db: Path) -> Generator[duckdb.DuckDBPyConnection, None, None]:
     """Create a test database with sample data."""
     con = duckdb.connect(str(temp_db))
 

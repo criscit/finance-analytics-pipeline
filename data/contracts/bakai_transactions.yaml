@@ -1,0 +1,70 @@
+version: 1.0.0
+dataset: bakai_transactions
+description: Raw transaction export from Bakai Bank containing account-based transactions with debit/credit entries and exchange rates
+owner: finance-analytics-team
+domain: banking
+source_system: Bakai Bank
+format: XLSX
+encoding: utf-8
+skip_header_rows: 16 # any top rows before header
+skip_footer_rows: 6  # 6 botton not fully empty rows
+
+target_table:
+  schema: prod_raw
+  name: bakai_transactions
+  
+columns:
+  - name: "№ док."
+    type: varchar
+    nullable: true
+    description: Bank document number referencing the transaction in the source system
+    source_column_index: 1
+    
+  - name: "Дата"
+    type: varchar
+    nullable: false
+    description: Transaction timestamp in format 'DD.MM.YYYY HH:MM:SS'
+    source_column_index: 2
+    constraints:
+      - type: not_null
+    format: "%d.%m.%Y %H:%M:%S"
+    
+  - name: "Счет-корреспондент"
+    type: varchar
+    nullable: true
+    description: Correspondent account identifier for the counterparty in the transaction
+    source_column_index: 3
+    
+  - name: "Дебет"
+    type: varchar
+    nullable: true
+    description: Debit amount for outgoing transactions (money leaving the account) as string with comma separator
+    source_column_index: 4
+    format: "decimal with comma separator, empty string for null"
+    
+  - name: "Кредит"
+    type: varchar
+    nullable: true
+    description: Credit amount for incoming transactions (money entering the account) as string with comma separator
+    source_column_index: 5
+    format: "decimal with comma separator, empty string for null"
+    
+  - name: "Назначение платежа"
+    type: varchar
+    nullable: true
+    description: Payment purpose or transaction description from bank export
+    source_column_index: 6
+    
+  - name: "Курс"
+    type: varchar
+    nullable: true
+    description: Exchange rate applied to the transaction for currency conversion as string with comma separator
+    source_column_index: 7
+    format: "decimal with comma separator, empty string for null"
+
+metadata:
+  refresh_frequency: monthly
+  data_classification: internal
+  retention_period_days: 2555  # ~7 years for financial data
+  pii_fields: ['Счет-корреспондент']
+  file_pattern: "*.xlsx"

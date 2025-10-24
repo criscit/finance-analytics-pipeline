@@ -1,0 +1,70 @@
+version: 2
+
+models:
+  - name: core_load_binance_fiat_payments
+    description: >
+      Core fact table for Binance fiat payment transactions with parsed amounts.
+      Tracks crypto purchases with fiat currency payments.
+    tags: [core, binance, fact, fiat_payments]
+    meta:
+      materialization: incremental
+      incremental_strategy: delete+insert
+      unique_key: fiat_payment_bk
+
+    columns:
+      - name: fiat_payment_bk
+        description: Business key for the payment, generated from MD5 hash of order_no.
+        data_type: varchar(32)
+        data_tests:
+          - not_null
+          - unique
+
+      - name: created_at
+        description: Timestamp when the payment was created (converted from milliseconds).
+        data_type: timestamp
+
+      - name: updated_at
+        description: Timestamp when the payment was last updated (converted from milliseconds).
+        data_type: timestamp
+
+      - name: obtain_amt
+        description: Amount of cryptocurrency obtained.
+        data_type: double
+
+      - name: source_amt
+        description: Amount of fiat currency paid.
+        data_type: double
+
+      - name: price
+        description: Exchange price between fiat and crypto.
+        data_type: double
+
+      - name: total_fee
+        description: Total fees charged for the payment.
+        data_type: double
+
+      - name: crypto_currency
+        description: Cryptocurrency symbol purchased (e.g., BTC, ETH).
+        data_type: varchar(16)
+
+      - name: fiat_currency
+        description: Fiat currency code used for payment (e.g., USD, EUR).
+        data_type: varchar(16)
+
+      - name: payment_method
+        description: Payment method used (e.g., credit card, bank transfer).
+        data_type: varchar(64)
+
+      - name: status
+        description: Current status of the payment (e.g., Completed, Processing).
+        data_type: varchar(32)
+
+      - name: transaction_type
+        description: Type of transaction (typically Buy).
+        data_type: varchar(32)
+
+      - name: processed_at
+        description: Timestamp of the ingestion for incremental processing.
+        data_type: timestamp
+        data_tests:
+          - not_null

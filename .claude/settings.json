@@ -1,0 +1,64 @@
+{
+  "projectName": "Finance Analytics Pipeline",
+  "codeConventions": [
+    "Follow PEP 8 style guide",
+    "Maximum line length: 100 characters (Black/Ruff enforced)",
+    "Use type hints on all functions (mypy strict mode)",
+    "Prefer double quotes for strings",
+    "Use absolute imports from src/",
+    "Add docstrings to all public functions",
+    "Sort imports with Ruff"
+  ],
+  "testingGuidelines": [
+    "Run full test suite: poetry run pytest -v",
+    "Use fixtures from conftest.py for DuckDB connections",
+    "Mock Dagster context in asset tests",
+    "Integration tests use isolated test databases",
+    "Always test with sample data in data/sample_data/"
+  ],
+  "beforeCommit": [
+    "Run: poetry run ruff check --fix .",
+    "Run: poetry run black .",
+    "Run: poetry run mypy src/",
+    "Run: poetry run pytest",
+    "Ensure all checks pass before committing"
+  ],
+  "commonPaths": {
+    "contracts": "data/contracts/",
+    "raw_data": "data/raw/",
+    "warehouse": "data/warehouse/analytics.duckdb",
+    "dbt_models": "transform/dbt/models/",
+    "dbt_seeds": "transform/dbt/seeds/",
+    "ingestion": "src/ingestion/",
+    "orchestration": "orchestration/",
+    "tests": "tests/",
+    "utils": "src/"
+  },
+  "importantPatterns": {
+    "data_contract": "Create YAML in data/contracts/ before ingesting new sources",
+    "dbt_naming": "stg_load_{source}_{type}, core_load_{source}_{type}, mart_load_{source}_{type}",
+    "table_naming": "Tables named by directory: {source}_{transaction_type}",
+    "schemas": "prod_meta, prod_raw, prod_stg, prod_core, prod_mart, prod_imart, seed",
+    "idempotency": "MD5 hashing in prod_meta.ingest_ledger prevents duplicate ingestion"
+  },
+  "dockerCommands": {
+    "start": "docker compose up --build -d",
+    "stop": "docker compose down",
+    "logs": "docker compose logs worker -f",
+    "restart": "docker compose down && docker compose up --build -d",
+    "dagster_ui": "http://localhost:3000"
+  },
+  "dbtCommands": {
+    "run_all": "cd transform/dbt && poetry run dbt run",
+    "run_model": "cd transform/dbt && poetry run dbt run --select {model_name}",
+    "run_downstream": "cd transform/dbt && poetry run dbt run --select {model_name}+",
+    "test": "cd transform/dbt && poetry run dbt test"
+  },
+  "environmentNotes": [
+    "Python 3.11+ required",
+    "Uses Poetry for dependency management",
+    "DuckDB is single-file warehouse (no lake)",
+    "All paths in .env use forward slashes (even on Windows)",
+    "Pipeline runs entirely locally in Docker"
+  ]
+}

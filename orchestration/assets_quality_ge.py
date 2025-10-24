@@ -132,7 +132,7 @@ def _handle_unexpected_exception(checkpoint_name: str, error: Exception) -> None
     ) from error
 
 
-@asset(deps=["ingest_transactions"])
+@asset(deps=["ingest_bank"])
 def run_ge_raw_checkpoints() -> Output[dict[str, str]]:
     """
     Run Great Expectations checkpoints on raw tables.

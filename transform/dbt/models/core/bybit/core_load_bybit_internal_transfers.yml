@@ -1,0 +1,50 @@
+version: 2
+
+models:
+  - name: core_load_bybit_internal_transfers
+    description: >
+      Core fact table for Bybit internal account transfers with parsed amounts.
+      Tracks movements between different account types within Bybit (e.g., spot to derivatives).
+    tags: [core, bybit, fact, transfers]
+    meta:
+      materialization: incremental
+      incremental_strategy: delete+insert
+      unique_key: transfer_bk
+
+    columns:
+      - name: transfer_bk
+        description: Business key for the transfer, generated from MD5 hash of transfer_id.
+        data_type: varchar(32)
+        data_tests:
+          - not_null
+          - unique
+
+      - name: amount
+        description: Amount of cryptocurrency transferred.
+        data_type: double
+
+      - name: coin
+        description: Cryptocurrency symbol transferred.
+        data_type: varchar(32)
+
+      - name: from_account_type
+        description: Source account type (e.g., SPOT, CONTRACT, UNIFIED).
+        data_type: varchar(32)
+
+      - name: to_account_type
+        description: Destination account type (e.g., SPOT, CONTRACT, UNIFIED).
+        data_type: varchar(32)
+
+      - name: status
+        description: Status of the transfer (e.g., SUCCESS, PENDING).
+        data_type: varchar(32)
+
+      - name: transferred_at
+        description: Timestamp when the transfer was executed (converted from milliseconds).
+        data_type: timestamp
+
+      - name: processed_at
+        description: Timestamp of the ingestion for incremental processing.
+        data_type: timestamp
+        data_tests:
+          - not_null

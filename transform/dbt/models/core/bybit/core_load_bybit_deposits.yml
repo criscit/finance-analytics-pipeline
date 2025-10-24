@@ -1,0 +1,94 @@
+version: 2
+
+models:
+  - name: core_load_bybit_deposits
+    description: >
+      Core fact table for Bybit deposit transactions with parsed amounts and timestamps.
+      Tracks incoming cryptocurrency deposits to Bybit wallets.
+    tags: [core, bybit, fact, deposits]
+    meta:
+      materialization: incremental
+      incremental_strategy: delete+insert
+      unique_key: deposit_bk
+
+    columns:
+      - name: deposit_bk
+        description: Business key for the deposit, generated from MD5 hash of deposit_id.
+        data_type: varchar(32)
+        data_tests:
+          - not_null
+          - unique
+
+      - name: amount
+        description: Amount of cryptocurrency deposited.
+        data_type: double
+
+      - name: batch_release_limit
+        description: Batch release limit for the deposit.
+        data_type: double
+
+      - name: deposit_fee
+        description: Fee charged for the deposit transaction.
+        data_type: double
+
+      - name: block_hash
+        description: Blockchain block hash containing the transaction.
+        data_type: varchar(128)
+
+      - name: chain
+        description: Blockchain network used for the deposit (e.g., ETH, BSC, TRX).
+        data_type: varchar(32)
+
+      - name: coin
+        description: Cryptocurrency symbol deposited.
+        data_type: varchar(32)
+
+      - name: confirmations
+        description: Number of blockchain confirmations received.
+        data_type: bigint
+
+      - name: deposit_type
+        description: Type of deposit transaction.
+        data_type: varchar(32)
+
+      - name: from_address
+        description: Blockchain address the deposit originated from.
+        data_type: varchar(256)
+
+      - name: status
+        description: Current status of the deposit (e.g., success, pending).
+        data_type: varchar(32)
+
+      - name: success_at
+        description: Timestamp when the deposit was successfully completed (converted from milliseconds).
+        data_type: timestamp
+
+      - name: tag
+        description: Memo or tag used for the deposit (if applicable).
+        data_type: varchar(64)
+
+      - name: tax_deposit_records_id
+        description: Tax record identifier for the deposit.
+        data_type: varchar(64)
+
+      - name: tax_status
+        description: Tax processing status for the deposit.
+        data_type: varchar(32)
+
+      - name: to_address
+        description: Bybit wallet address that received the deposit.
+        data_type: varchar(256)
+
+      - name: tx_id
+        description: Blockchain transaction ID.
+        data_type: varchar(128)
+
+      - name: tx_index
+        description: Transaction index in the block.
+        data_type: bigint
+
+      - name: processed_at
+        description: Timestamp of the ingestion for incremental processing.
+        data_type: timestamp
+        data_tests:
+          - not_null

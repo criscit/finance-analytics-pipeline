@@ -1,0 +1,70 @@
+version: 2
+
+models:
+  - name: core_load_binance_spot_orders
+    description: >
+      Core fact table for Binance spot order executions with parsed amounts and prices.
+      Contains order execution details for spot market trades.
+    tags: [core, binance, fact, spot_orders]
+    meta:
+      materialization: incremental
+      incremental_strategy: delete+insert
+      unique_key: spot_order_bk
+
+    columns:
+      - name: spot_order_bk
+        description: Business key for the order, generated from MD5 hash of order_no and execution_time_utc.
+        data_type: varchar(32)
+        data_tests:
+          - not_null
+          - unique
+
+      - name: pair
+        description: Trading pair symbol (e.g., BTCUSDT, ETHUSDT).
+        data_type: varchar(32)
+
+      - name: order_price
+        description: Limit price set for the order.
+        data_type: double
+
+      - name: order_amt
+        description: Quantity ordered.
+        data_type: double
+
+      - name: executed_amt
+        description: Quantity actually filled/executed.
+        data_type: double
+
+      - name: average_price
+        description: Average execution price across all fills.
+        data_type: double
+
+      - name: trading_total
+        description: Total value of the trade (executed_amount * average_price).
+        data_type: double
+
+      - name: order_type
+        description: Type of order (e.g., Limit, Market, Stop-Limit).
+        data_type: varchar(16)
+
+      - name: order_side
+        description: Order side (Buy or Sell).
+        data_type: varchar(16)
+
+      - name: order_status
+        description: Status of the order (e.g., Filled, Partially Filled, Cancelled).
+        data_type: varchar(16)
+
+      - name: order_placed_at_utc
+        description: Timestamp when the order was placed (UTC).
+        data_type: timestamp
+
+      - name: executed_at_utc
+        description: Timestamp when the order was executed (UTC).
+        data_type: timestamp
+
+      - name: processed_at
+        description: Timestamp of the ingestion for incremental processing.
+        data_type: timestamp
+        data_tests:
+          - not_null

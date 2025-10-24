@@ -1,0 +1,82 @@
+version: 2
+
+models:
+  - name: core_load_bybit_withdrawals
+    description: >
+      Core fact table for Bybit withdrawal transactions with parsed amounts and timestamps.
+      Tracks outgoing cryptocurrency withdrawals from Bybit wallets.
+    tags: [core, bybit, fact, withdrawals]
+    meta:
+      materialization: incremental
+      incremental_strategy: delete+insert
+      unique_key: withdrawal_bk
+
+    columns:
+      - name: withdrawal_bk
+        description: Business key for the withdrawal, generated from MD5 hash of withdraw_id.
+        data_type: varchar(32)
+        data_tests:
+          - not_null
+          - unique
+
+      - name: amount
+        description: Amount of cryptocurrency withdrawn.
+        data_type: double
+
+      - name: tax
+        description: Tax amount applied to the withdrawal.
+        data_type: double
+
+      - name: tax_rate
+        description: Tax rate percentage applied.
+        data_type: double
+
+      - name: withdraw_fee
+        description: Network fee charged for the withdrawal.
+        data_type: double
+
+      - name: chain
+        description: Blockchain network used for withdrawal (e.g., ETH, BSC, TRX).
+        data_type: varchar(32)
+
+      - name: coin
+        description: Cryptocurrency symbol withdrawn.
+        data_type: varchar(32)
+
+      - name: created_at
+        description: Timestamp when the withdrawal was initiated (converted from milliseconds).
+        data_type: timestamp
+
+      - name: updated_at
+        description: Timestamp when the withdrawal status was last updated (converted from milliseconds).
+        data_type: timestamp
+
+      - name: status
+        description: Current status of the withdrawal (e.g., success, pending, rejected).
+        data_type: varchar(32)
+
+      - name: tag
+        description: Memo or tag used for the withdrawal (if applicable).
+        data_type: varchar(64)
+
+      - name: tax_type
+        description: Type of tax applied to the withdrawal.
+        data_type: varchar(32)
+
+      - name: to_address
+        description: Blockchain address receiving the withdrawal.
+        data_type: varchar(256)
+
+      - name: tx_id
+        description: Blockchain transaction ID.
+        data_type: varchar(128)
+
+      - name: withdraw_type
+        description: Type of withdrawal (e.g., on-chain, internal).
+        data_type: varchar(32)
+
+      - name: processed_at
+        description: Timestamp of the ingestion for incremental processing.
+        data_type: timestamp
+        data_tests:
+          - not_null

@@ -123,7 +123,7 @@ class GoogleSheetsTableManager:
                                 },
                                 {
                                     "columnIndex": 1,
-                                    "columnName": "Bank Name",
+                                    "columnName": "Platform Name",
                                     "columnType": "DROPDOWN",
                                     "dataValidationRule": {
                                         "condition": {

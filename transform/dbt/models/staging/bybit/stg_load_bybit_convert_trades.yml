@@ -1,0 +1,50 @@
+version: 2
+
+models:
+  - name: stg_load_bybit_convert_trades
+    description: >
+      Staging over prod_raw.bybit_convert_trades using seed-based column mapping.
+    tags: [staging, bybit]
+    meta:
+      source_table: prod_raw.bybit_convert_trades
+      seed_name: bybit_convert_trades
+
+    columns:
+      - name: __load_key
+        description: Load key for the convert trade record.
+        data_type: varchar(32)
+        data_tests: [not_null, unique]
+
+      - name: created_at
+        description: Creation timestamp of the convert trade (UTC).
+        data_type: timestamp
+
+      - name: exchange_rate
+        description: Conversion rate applied to the trade.
+        data_type: double
+
+      - name: exchange_tx_id
+        description: Conversion transaction identifier from Bybit.
+        data_type: varchar(64)
+
+      - name: from_amt
+        description: Quantity of the asset sold in the conversion.
+        data_type: double
+
+      - name: from_coin
+        description: Asset symbol converted from.
+        data_type: varchar(32)
+
+      - name: to_amt
+        description: Quantity of the asset received in the conversion.
+        data_type: double
+
+      - name: to_coin
+        description: Asset symbol converted to.
+        data_type: varchar(32)
+
+      - name: processed_at
+        description: Timestamp of the ingestion.
+        data_type: timestamp
+        data_tests:
+          - not_null

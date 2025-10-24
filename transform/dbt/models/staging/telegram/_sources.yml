@@ -1,0 +1,18 @@
+version: 2
+
+sources:
+  - name: telegram
+    schema: prod_raw
+    tables:
+      - name: assets
+        identifier: telegram_assets
+        description: Raw Telegram bot asset balances export.
+      - name: earn
+        identifier: telegram_earn
+        description: Raw Telegram bot earn portfolio export.
+      - name: general_transactions
+        identifier: telegram_general_transactions
+        description: Raw Telegram bot general transactions feed export.
+      - name: p2p_trades
+        identifier: telegram_p2p_trades
+        description: Raw Telegram bot P2P trades export.

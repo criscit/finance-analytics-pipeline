@@ -2,6 +2,7 @@
 # Centralized selectors for clean orchestration
 
 selectors:
+  # Bank sources
   - name: run_t_bank_transactions
     definition:
       intersection:
@@ -21,6 +22,230 @@ selectors:
         - union:
           - method: source
             value: bakai.transactions
+            children: true
+          - method: resource_type
+            value: seed
+        - exclude:
+          - method: config.schema
+            value: imart
+
+  # Telegram sources
+  - name: run_telegram_assets
+    definition:
+      intersection:
+        - union:
+          - method: source
+            value: telegram.assets
+            children: true
+          - method: resource_type
+            value: seed
+        - exclude:
+          - method: config.schema
+            value: imart
+
+  - name: run_telegram_earn
+    definition:
+      intersection:
+        - union:
+          - method: source
+            value: telegram.earn
+            children: true
+          - method: resource_type
+            value: seed
+        - exclude:
+          - method: config.schema
+            value: imart
+
+  - name: run_telegram_general_transactions
+    definition:
+      intersection:
+        - union:
+          - method: source
+            value: telegram.general_transactions
+            children: true
+          - method: resource_type
+            value: seed
+        - exclude:
+          - method: config.schema
+            value: imart
+
+  - name: run_telegram_p2p_trades
+    definition:
+      intersection:
+        - union:
+          - method: source
+            value: telegram.p2p_trades
+            children: true
+          - method: resource_type
+            value: seed
+        - exclude:
+          - method: config.schema
+            value: imart
+
+  # Binance sources
+  - name: run_binance_assets
+    definition:
+      intersection:
+        - union:
+          - method: source
+            value: binance.assets
+            children: true
+          - method: resource_type
+            value: seed
+        - exclude:
+          - method: config.schema
+            value: imart
+
+  - name: run_binance_convert_trades
+    definition:
+      intersection:
+        - union:
+          - method: source
+            value: binance.convert_trades
+            children: true
+          - method: resource_type
+            value: seed
+        - exclude:
+          - method: config.schema
+            value: imart
+
+  - name: run_binance_fiat_orders
+    definition:
+      intersection:
+        - union:
+          - method: source
+            value: binance.fiat_orders
+            children: true
+          - method: resource_type
+            value: seed
+        - exclude:
+          - method: config.schema
+            value: imart
+
+  - name: run_binance_fiat_payments
+    definition:
+      intersection:
+        - union:
+          - method: source
+            value: binance.fiat_payments
+            children: true
+          - method: resource_type
+            value: seed
+        - exclude:
+          - method: config.schema
+            value: imart
+
+  - name: run_binance_p2p_trades
+    definition:
+      intersection:
+        - union:
+          - method: source
+            value: binance.p2p_trades
+            children: true
+          - method: resource_type
+            value: seed
+        - exclude:
+          - method: config.schema
+            value: imart
+
+  - name: run_binance_spot_orders
+    definition:
+      intersection:
+        - union:
+          - method: source
+            value: binance.spot_orders
+            children: true
+          - method: resource_type
+            value: seed
+        - exclude:
+          - method: config.schema
+            value: imart
+
+  # Bybit sources
+  - name: run_bybit_assets
+    definition:
+      intersection:
+        - union:
+          - method: source
+            value: bybit.assets
+            children: true
+          - method: resource_type
+            value: seed
+        - exclude:
+          - method: config.schema
+            value: imart
+
+  - name: run_bybit_convert_trades
+    definition:
+      intersection:
+        - union:
+          - method: source
+            value: bybit.convert_trades
+            children: true
+          - method: resource_type
+            value: seed
+        - exclude:
+          - method: config.schema
+            value: imart
+
+  - name: run_bybit_deposits
+    definition:
+      intersection:
+        - union:
+          - method: source
+            value: bybit.deposits
+            children: true
+          - method: resource_type
+            value: seed
+        - exclude:
+          - method: config.schema
+            value: imart
+
+  - name: run_bybit_internal_transfers
+    definition:
+      intersection:
+        - union:
+          - method: source
+            value: bybit.internal_transfers
+            children: true
+          - method: resource_type
+            value: seed
+        - exclude:
+          - method: config.schema
+            value: imart
+
+  - name: run_bybit_p2p_trades
+    definition:
+      intersection:
+        - union:
+          - method: source
+            value: bybit.p2p_trades
+            children: true
+          - method: resource_type
+            value: seed
+        - exclude:
+          - method: config.schema
+            value: imart
+
+  - name: run_bybit_spot_orders
+    definition:
+      intersection:
+        - union:
+          - method: source
+            value: bybit.spot_orders
+            children: true
+          - method: resource_type
+            value: seed
+        - exclude:
+          - method: config.schema
+            value: imart
+
+  - name: run_bybit_withdrawals
+    definition:
+      intersection:
+        - union:
+          - method: source
+            value: bybit.withdrawals
             children: true
           - method: resource_type
             value: seed

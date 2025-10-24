@@ -1,0 +1,70 @@
+version: 2
+
+models:
+  - name: stg_load_binance_fiat_payments
+    description: >
+      Staging over prod_raw.binance_fiat_payments using seed-based column mapping.
+    tags: [staging, binance]
+    meta:
+      source_table: prod_raw.binance_fiat_payments
+      seed_name: binance_fiat_payments
+
+    columns:
+      - name: __load_key
+        description: Load key for the fiat payment record.
+        data_type: varchar(32)
+        data_tests: [not_null, unique]
+
+      - name: created_at
+        description: Creation timestamp of the payment (UTC).
+        data_type: timestamp
+
+      - name: crypto_currency
+        description: Crypto currency involved in the payment.
+        data_type: varchar(16)
+
+      - name: fiat_currency
+        description: Fiat currency used in the payment.
+        data_type: varchar(16)
+
+      - name: obtain_amount
+        description: Crypto amount obtained in the trade.
+        data_type: double
+
+      - name: order_no
+        description: Binance order identifier.
+        data_type: varchar(64)
+
+      - name: payment_method
+        description: Payment method name supplied by Binance.
+        data_type: varchar(64)
+
+      - name: price
+        description: Execution price reported for the payment.
+        data_type: double
+
+      - name: source_amount
+        description: Source fiat amount in the payment.
+        data_type: double
+
+      - name: status
+        description: Current status of the payment.
+        data_type: varchar(32)
+
+      - name: total_fee
+        description: Total fees charged for the payment.
+        data_type: double
+
+      - name: transaction_type
+        description: Payment direction (BUY or SELL).
+        data_type: varchar(32)
+
+      - name: updated_at
+        description: Last update timestamp for the payment (UTC).
+        data_type: timestamp
+
+      - name: processed_at
+        description: Timestamp of the ingestion.
+        data_type: timestamp
+        data_tests:
+          - not_null

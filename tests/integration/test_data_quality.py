@@ -3,7 +3,7 @@
 import tempfile
 from pathlib import Path
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import duckdb
 
@@ -64,6 +64,7 @@ class TestDataQualityChecks:
                 """
                 ).fetchone()
 
+                assert completeness_results is not None
                 assert completeness_results[0] == TEST_DATA_ROWS_4  # total_rows
                 assert completeness_results[1] == TEST_COMPLETENESS_3  # name_complete (1 NULL)
                 assert completeness_results[2] == TEST_COMPLETENESS_3  # amount_complete (1 NULL)
@@ -146,6 +147,7 @@ class TestDataQualityChecks:
                 """
                 ).fetchone()
 
+                assert range_results is not None
                 assert range_results[0] == TEST_AMOUNT_MIN  # min_amount
                 assert range_results[1] == TEST_AMOUNT_MAX  # max_amount
                 assert range_results[2] == 0.00  # min_percentage
@@ -190,6 +192,7 @@ class TestDataQualityChecks:
                 """
                 ).fetchone()
 
+                assert uniqueness_results is not None
                 assert uniqueness_results[0] == TEST_UNIQUE_COUNT_3  # unique_emails (1 duplicate)
                 assert uniqueness_results[1] == TEST_UNIQUE_COUNT_3  # unique_names (1 duplicate)
                 assert uniqueness_results[2] == TEST_DATA_ROWS_4  # total_rows
@@ -251,6 +254,7 @@ class TestDataQualityChecks:
                 """
                 ).fetchone()
 
+                assert integrity_results is not None
                 assert integrity_results[0] == TEST_TOTAL_TRANSACTIONS_3  # total_transactions
                 assert integrity_results[1] == TEST_VALID_REFERENCES_2  # valid_references
                 assert integrity_results[2] == TEST_INVALID_REFERENCES_1  # invalid_references
@@ -259,20 +263,28 @@ class TestDataQualityChecks:
 class TestGreatExpectationsIntegration:
     """Test Great Expectations integration."""
 
-    @patch("orchestration.assets_quality_ge.subprocess.run")
-    @patch("orchestration.assets_quality_ge.os.chdir")
-    def test_ge_checkpoint_execution(self, mock_chdir: Any, mock_run: Any) -> None:
+    @patch("orchestration.assets_quality_ge._run_checkpoint")
+    @patch("src.duckdb_utils.get_recently_ingested_tables")
+    def test_ge_checkpoint_execution(self, mock_get_tables: Any, mock_run_checkpoint: Any) -> None:
         """Test Great Expectations checkpoint execution."""
-
         from orchestration.assets_quality_ge import run_ge_raw_checkpoints
 
-        # Mock successful GE execution
-        mock_run.return_value = MagicMock(returncode=0, stdout="All checks passed", stderr="")
+        # Mock recently ingested tables
+        mock_get_tables.return_value = {
+            "tables_to_process": [{"table_nm": "test_table", "selector_nm": "run_test_table"}]
+        }
+
+        # Mock successful checkpoint run
+        mock_run_checkpoint.return_value = {
+            "success": True,
+            "checkpoint_name": "check_raw",
+            "validation_count": 5,
+        }
 
         result = run_ge_raw_checkpoints()
 
-        # Verify GE was called
-        mock_run.assert_called_once()
+        # Verify checkpoint was called
+        mock_run_checkpoint.assert_called_once()
 
         # Verify result structure
         assert result.value["status"] == "success"  # type: ignore[attr-defined]
@@ -321,6 +333,7 @@ class TestGreatExpectationsIntegration:
                 """
                 ).fetchone()
 
+                assert quality_metrics is not None
                 assert quality_metrics[0] == TEST_DATA_ROWS_5  # total_rows
                 assert quality_metrics[1] == TEST_PERCENTAGE_80  # name_completeness (4/5)
                 assert quality_metrics[2] == TEST_PERCENTAGE_80  # amount_completeness (4/5)

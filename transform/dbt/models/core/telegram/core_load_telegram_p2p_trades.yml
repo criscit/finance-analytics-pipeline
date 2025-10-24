@@ -1,0 +1,68 @@
+version: 2
+
+models:
+  - name: core_load_telegram_p2p_trades
+    description: >
+      Core fact table for Telegram wallet P2P trades with parsed crypto and fiat amounts.
+      Tracks peer-to-peer cryptocurrency trades facilitated through Telegram wallet.
+    tags: [core, telegram, fact, p2p]
+    meta:
+      materialization: incremental
+      incremental_strategy: delete+insert
+      unique_key: trade_bk
+
+    columns:
+      - name: trade_bk
+        description: Business key for the trade, generated from MD5 hash of order_number.
+        data_type: varchar(32)
+        data_tests:
+          - not_null
+          - unique
+
+      - name: ad_number
+        description: Advertisement number for the P2P listing.
+        data_type: varchar(32)
+
+      - name: ad_type
+        description: Type of advertisement (e.g., Buy, Sell).
+        data_type: varchar(32)
+
+      - name: role
+        description: User's role in the trade (Maker or Taker).
+        data_type: varchar(16)
+
+      - name: net_crypto_amt
+        description: Net cryptocurrency amount after fees.
+        data_type: double
+
+      - name: paid_fee_crypto_amt
+        description: Trading fee paid in cryptocurrency.
+        data_type: double
+
+      - name: fiat_amt
+        description: Fiat currency amount for the trade.
+        data_type: double
+
+      - name: price
+        description: Exchange rate between crypto and fiat.
+        data_type: double
+
+      - name: crypto_currency
+        description: Cryptocurrency symbol traded (e.g., USDT, TON).
+        data_type: varchar(16)
+
+      - name: fiat_currency
+        description: Fiat currency code (e.g., USD, RUB, KGS).
+        data_type: varchar(16)
+
+      - name: payment_method
+        description: Payment method used for the fiat transfer.
+        data_type: varchar(64)
+
+      - name: created_at
+        description: Timestamp when the trade was created.
+        data_type: timestamp
+
+      - name: completed_at
+        description: Timestamp when the trade was completed.
+        data_type: timestamp

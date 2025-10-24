@@ -8,8 +8,29 @@ import duckdb
 import pytest
 
 from orchestration.assets_export_csv import export_csv_snapshot
-from orchestration.assets_ingest import ingest_transactions
+from orchestration.assets_ingest import ingest_bank
+from src.ingestion.service import IngestionContext, IngestionSourceConfig
 from tests.constants import TEST_DATA_ROWS_2
+
+
+def _make_test_config(
+    db_path: Path, input_path: Path, stability_s: int = 0
+) -> tuple[IngestionContext, IngestionSourceConfig]:
+    """Create test ingestion config objects."""
+    test_context = IngestionContext(
+        duckdb_path=str(db_path), finance_data_root=input_path.parent, stability_seconds=stability_s
+    )
+    test_config = IngestionSourceConfig(
+        name="test_bank",
+        root_path=input_path,
+        source_label="source",
+        leaf_label="data_type",
+        structure_hint="Bank/{source}/<transaction_type>/",
+        leaf_options_factory=lambda p: type(
+            "opts", (), {"latest_only": False, "merge_pending": False}
+        )(),
+    )
+    return test_context, test_config
 
 
 @pytest.mark.integration
@@ -65,14 +86,15 @@ columns:
                 con.execute("CREATE SCHEMA IF NOT EXISTS prod_raw")
                 con.execute("CREATE SCHEMA IF NOT EXISTS prod_meta")
 
+            test_context, test_config = _make_test_config(db_path, raw_path, stability_s=0)
+
             with (
-                patch("orchestration.assets_ingest.DUCKDB_PATH", str(db_path)),
-                patch("orchestration.assets_ingest.INPUT_PATH", raw_path),
-                patch("orchestration.assets_ingest.STABILITY_S", 0),
+                patch("orchestration.assets_ingest.INGESTION_CONTEXT", test_context),
+                patch("orchestration.assets_ingest.BANK_CONFIG", test_config),
                 patch.dict("os.environ", {"DATA_CONTRACTS_PATH": str(contracts_dir)}),
             ):
                 # Test ingestion
-                ingest_result = ingest_transactions()
+                ingest_result = ingest_bank()
                 # Check ingestion completed without exceptions
                 assert "ingested" in ingest_result.value  # type: ignore[attr-defined]
                 assert "skipped" in ingest_result.value  # type: ignore[attr-defined]
@@ -127,27 +149,27 @@ columns:
                 con.execute("CREATE SCHEMA IF NOT EXISTS prod_raw")
                 con.execute("CREATE SCHEMA IF NOT EXISTS prod_meta")
 
+            test_context, test_config = _make_test_config(db_path, raw_path, stability_s=0)
+
             with (
-                patch("orchestration.assets_ingest.DUCKDB_PATH", str(db_path)),
-                patch("orchestration.assets_ingest.INPUT_PATH", raw_path),
-                patch("orchestration.assets_ingest.STABILITY_S", 0),
+                patch("orchestration.assets_ingest.INGESTION_CONTEXT", test_context),
+                patch("orchestration.assets_ingest.BANK_CONFIG", test_config),
                 patch.dict("os.environ", {"DATA_CONTRACTS_PATH": str(contracts_dir)}),
             ):
                 # First ingestion
-                result1 = ingest_transactions()
+                result1 = ingest_bank()
 
             # Check result structure exists
             assert "ingested" in result1.value  # type: ignore[attr-defined]
             assert "skipped" in result1.value  # type: ignore[attr-defined]
 
             with (
-                patch("orchestration.assets_ingest.DUCKDB_PATH", str(db_path)),
-                patch("orchestration.assets_ingest.INPUT_PATH", raw_path),
-                patch("orchestration.assets_ingest.STABILITY_S", 0),
+                patch("orchestration.assets_ingest.INGESTION_CONTEXT", test_context),
+                patch("orchestration.assets_ingest.BANK_CONFIG", test_config),
                 patch.dict("os.environ", {"DATA_CONTRACTS_PATH": str(contracts_dir)}),
             ):
                 # Second ingestion (should handle duplicates)
-                result2 = ingest_transactions()
+                result2 = ingest_bank()
 
             # Check second result structure exists
             assert "ingested" in result2.value  # type: ignore[attr-defined]
@@ -250,13 +272,15 @@ columns:
                 con.execute("CREATE SCHEMA IF NOT EXISTS prod_raw")
                 con.execute("CREATE SCHEMA IF NOT EXISTS prod_meta")
 
+            test_context, test_config = _make_test_config(db_path, raw_path)
+
             with (
-                patch("orchestration.assets_ingest.DUCKDB_PATH", str(db_path)),
-                patch("orchestration.assets_ingest.INPUT_PATH", raw_path),
+                patch("orchestration.assets_ingest.INGESTION_CONTEXT", test_context),
+                patch("orchestration.assets_ingest.BANK_CONFIG", test_config),
                 patch.dict("os.environ", {"DATA_CONTRACTS_PATH": str(contracts_dir)}),
             ):
                 # Should handle empty CSV gracefully
-                result = ingest_transactions()
+                result = ingest_bank()
 
             # Empty CSV might be skipped or processed depending on implementation
             assert result.value["ingested"] >= 0  # type: ignore[attr-defined]
@@ -311,14 +335,15 @@ columns:
                 con.execute("CREATE SCHEMA IF NOT EXISTS prod_raw")
                 con.execute("CREATE SCHEMA IF NOT EXISTS prod_meta")
 
+            test_context, test_config = _make_test_config(db_path, raw_path, stability_s=0)
+
             with (
-                patch("orchestration.assets_ingest.DUCKDB_PATH", str(db_path)),
-                patch("orchestration.assets_ingest.INPUT_PATH", raw_path),
-                patch("orchestration.assets_ingest.STABILITY_S", 0),
+                patch("orchestration.assets_ingest.INGESTION_CONTEXT", test_context),
+                patch("orchestration.assets_ingest.BANK_CONFIG", test_config),
                 patch.dict("os.environ", {"DATA_CONTRACTS_PATH": str(contracts_dir)}),
             ):
                 # Test ingestion with stability check
-                result = ingest_transactions()
+                result = ingest_bank()
 
             # Check result structure exists
             assert "ingested" in result.value  # type: ignore[attr-defined]

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(poetry run python -c \"\nimport duckdb\ncon = duckdb.connect('':memory:'')\n\n# Test the actual expression from the CSV\ntest_cases = [\n    ''33 APY'',\n    ''5.25% APY'',\n    ''1.271e-05'',\n    ''100.50 USD'',\n    ''0.123'',\n]\n\nfor test in test_cases:\n    result = con.execute(f\"\"\"\"\"\"\n    SELECT cast(nullif(replace(regexp_replace(trim(''{test}''), ''[^0-9,.eE+-]'', '''', ''g''), '','', ''''), '''') as double) as cleaned\n    \"\"\"\"\"\").fetchone()[0]\n    print(f''{test:20} -> {result}'')\n\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

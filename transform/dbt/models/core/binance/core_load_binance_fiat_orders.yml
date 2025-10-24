@@ -1,0 +1,62 @@
+version: 2
+
+models:
+  - name: core_load_binance_fiat_orders
+    description: >
+      Core fact table for Binance fiat deposit/withdrawal orders with parsed amounts.
+      Tracks fiat currency transactions in and out of Binance.
+    tags: [core, binance, fact, fiat_orders]
+    meta:
+      materialization: incremental
+      incremental_strategy: delete+insert
+      unique_key: fiat_order_bk
+
+    columns:
+      - name: fiat_order_bk
+        description: Business key for the order, generated from MD5 hash of order_no.
+        data_type: varchar(32)
+        data_tests:
+          - not_null
+          - unique
+
+      - name: created_at
+        description: Timestamp when the order was created (converted from milliseconds).
+        data_type: timestamp
+
+      - name: updated_at
+        description: Timestamp when the order was last updated (converted from milliseconds).
+        data_type: timestamp
+
+      - name: amount
+        description: Cryptocurrency amount involved in the transaction.
+        data_type: double
+
+      - name: indicated_amt
+        description: Indicated or estimated amount for the transaction.
+        data_type: double
+
+      - name: total_fee
+        description: Total fees charged for the transaction.
+        data_type: double
+
+      - name: fiat_currency
+        description: Fiat currency code (e.g., USD, EUR, RUB).
+        data_type: varchar(16)
+
+      - name: method
+        description: Payment method used (e.g., bank transfer, card).
+        data_type: varchar(32)
+
+      - name: status
+        description: Current status of the order (e.g., Completed, Processing, Failed).
+        data_type: varchar(32)
+
+      - name: transaction_type
+        description: Type of transaction (Deposit or Withdrawal).
+        data_type: varchar(32)
+
+      - name: processed_at
+        description: Timestamp of the ingestion for incremental processing.
+        data_type: timestamp
+        data_tests:
+          - not_null

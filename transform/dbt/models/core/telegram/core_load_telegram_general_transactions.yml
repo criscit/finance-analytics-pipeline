@@ -1,0 +1,92 @@
+version: 2
+
+models:
+  - name: core_load_telegram_general_transactions
+    description: >
+      Core fact table for Telegram wallet general transactions with parsed amounts and exchange rates.
+      Tracks various transaction types including swaps, deposits, withdrawals, and transfers.
+    tags: [core, telegram, fact, general_transactions]
+    meta:
+      materialization: incremental
+      incremental_strategy: delete+insert
+      unique_key: transaction_bk
+
+    columns:
+      - name: transaction_bk
+        description: Business key for the transaction, generated from MD5 hash of order_id and transacted_at.
+        data_type: varchar(32)
+        data_tests:
+          - not_null
+          - unique
+
+      - name: transaction_type
+        description: Type of transaction (e.g., Swap, Deposit, Withdrawal, Transfer).
+        data_type: varchar(64)
+
+      - name: status
+        description: Current status of the transaction (e.g., Completed, Pending).
+        data_type: varchar(32)
+
+      - name: amount_in
+        description: Amount of cryptocurrency received/input.
+        data_type: double
+
+      - name: currency_in
+        description: Currency code for the input amount.
+        data_type: varchar(16)
+
+      - name: amount_out
+        description: Amount of cryptocurrency sent/output.
+        data_type: double
+
+      - name: currency_out
+        description: Currency code for the output amount.
+        data_type: varchar(16)
+
+      - name: ex_rate_value
+        description: Exchange rate value applied to the transaction.
+        data_type: double
+
+      - name: ex_rate_base
+        description: Base currency for the exchange rate.
+        data_type: varchar(16)
+
+      - name: ex_rate_quote
+        description: Quote currency for the exchange rate.
+        data_type: varchar(16)
+
+      - name: fee_amt
+        description: Fee amount charged for the transaction.
+        data_type: double
+
+      - name: fee_currency
+        description: Currency in which the fee was charged.
+        data_type: varchar(16)
+
+      - name: counterparty
+        description: Counterparty involved in the transaction (if applicable).
+        data_type: varchar(128)
+
+      - name: source
+        description: Source of the transaction (e.g., internal, external).
+        data_type: varchar(64)
+
+      - name: raw_payload
+        description: Raw transaction data from Telegram export.
+        data_type: varchar(512)
+
+      - name: transacted_at
+        description: Timestamp when the transaction occurred.
+        data_type: timestamp
+
+      - name: transaction_date
+        description: Date portion of the transaction timestamp.
+        data_type: date
+
+      - name: transaction_time
+        description: Time portion of the transaction as text.
+        data_type: varchar(16)
+
+      - name: parsed_at
+        description: Processing timestamp from the source data.
+        data_type: timestamp

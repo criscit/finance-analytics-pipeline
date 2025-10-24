@@ -1,0 +1,62 @@
+version: 2
+
+models:
+  - name: stg_load_binance_fiat_orders
+    description: >
+      Staging over prod_raw.binance_fiat_orders using seed-based column mapping.
+    tags: [staging, binance]
+    meta:
+      source_table: prod_raw.binance_fiat_orders
+      seed_name: binance_fiat_orders
+
+    columns:
+      - name: __load_key
+        description: Load key for the fiat order record.
+        data_type: varchar(32)
+        data_tests: [not_null, unique]
+
+      - name: amount
+        description: Settled crypto amount for the order.
+        data_type: double
+
+      - name: created_at
+        description: Creation timestamp of the order (UTC).
+        data_type: timestamp
+
+      - name: fiat_currency
+        description: Fiat currency used in the order.
+        data_type: varchar(16)
+
+      - name: indicated_amount
+        description: Indicated fiat amount reported by Binance.
+        data_type: double
+
+      - name: method
+        description: Payment method selected for the order.
+        data_type: varchar(32)
+
+      - name: order_no
+        description: Binance order identifier.
+        data_type: varchar(64)
+
+      - name: status
+        description: Current status of the fiat order.
+        data_type: varchar(32)
+
+      - name: total_fee
+        description: Total fees charged for the order.
+        data_type: double
+
+      - name: transaction_type
+        description: Order direction (BUY or SELL).
+        data_type: varchar(32)
+
+      - name: updated_at
+        description: Last update timestamp for the order (UTC).
+        data_type: timestamp
+
+      - name: processed_at
+        description: Timestamp of the ingestion.
+        data_type: timestamp
+        data_tests:
+          - not_null

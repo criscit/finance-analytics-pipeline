@@ -1,0 +1,24 @@
+version: 2
+
+sources:
+  - name: binance
+    schema: prod_raw
+    tables:
+      - name: assets
+        identifier: binance_assets
+        description: Raw Binance asset balances export.
+      - name: convert_trades
+        identifier: binance_convert_trades
+        description: Raw Binance convert trade executions export.
+      - name: fiat_orders
+        identifier: binance_fiat_orders
+        description: Raw Binance fiat order history export.
+      - name: fiat_payments
+        identifier: binance_fiat_payments
+        description: Raw Binance fiat payment records export.
+      - name: p2p_trades
+        identifier: binance_p2p_trades
+        description: Raw Binance P2P trades export.
+      - name: spot_orders
+        identifier: binance_spot_orders
+        description: Raw Binance spot order history export.

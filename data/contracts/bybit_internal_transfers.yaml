@@ -1,0 +1,65 @@
+version: 1.0.0
+dataset: bybit_internal_transfers
+description: Raw internal transfers export from Bybit crypto platform
+owner: finance-analytics-team
+domain: crypto
+source_system: Bybit
+format: CSV
+delimiter: ","
+encoding: utf-8
+skip_header_rows: 0
+skip_footer_rows: 0
+
+target_table:
+  schema: prod_raw
+  name: bybit_internal_transfers
+  
+columns:
+  - name: 'amount'
+    type: varchar
+    nullable: true
+    description: 'Raw amount value from Bybit internal transfers export'
+    source_column_index: 1
+
+  - name: 'coin'
+    type: varchar
+    nullable: true
+    description: 'Raw coin value from Bybit internal transfers export'
+    source_column_index: 2
+
+  - name: 'fromAccountType'
+    type: varchar
+    nullable: true
+    description: 'Raw fromAccountType value from Bybit internal transfers export'
+    source_column_index: 3
+
+  - name: 'status'
+    type: varchar
+    nullable: true
+    description: 'Raw status value from Bybit internal transfers export'
+    source_column_index: 4
+
+  - name: 'timestamp'
+    type: varchar
+    nullable: true
+    description: 'Raw timestamp value from Bybit internal transfers export'
+    source_column_index: 5
+
+  - name: 'toAccountType'
+    type: varchar
+    nullable: true
+    description: 'Raw toAccountType value from Bybit internal transfers export'
+    source_column_index: 6
+
+  - name: 'transferId'
+    type: varchar
+    nullable: true
+    description: 'Raw transferId value from Bybit internal transfers export'
+    source_column_index: 7
+
+metadata:
+  refresh_frequency: monthly
+  data_classification: internal
+  retention_period_days: 1825  # 5 years retention for crypto records
+  pii_fields: []
+  file_pattern: '*.csv'

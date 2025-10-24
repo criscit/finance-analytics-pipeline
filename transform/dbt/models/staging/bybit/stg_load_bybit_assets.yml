@@ -1,0 +1,46 @@
+version: 2
+
+models:
+  - name: stg_load_bybit_assets
+    description: >
+      Staging over prod_raw.bybit_assets using seed-based column mapping.
+    tags: [staging, bybit]
+    meta:
+      source_table: prod_raw.bybit_assets
+      seed_name: bybit_assets
+
+    columns:
+      - name: __load_key
+        description: Load key for the asset snapshot row.
+        data_type: varchar(32)
+        data_tests: [not_null, unique]
+
+      - name: coin
+        description: Asset symbol provided by Bybit.
+        data_type: varchar(64)
+
+      - name: equity
+        description: Total equity quantity reported by Bybit.
+        data_type: double
+
+      - name: free
+        description: Free balance available for trading.
+        data_type: double
+
+      - name: locked
+        description: Locked balance not currently tradable.
+        data_type: double
+
+      - name: usd_value
+        description: USD-denominated value of the asset position.
+        data_type: double
+
+      - name: wallet_balance
+        description: Wallet balance reported by Bybit.
+        data_type: double
+
+      - name: processed_at
+        description: Timestamp of the ingestion.
+        data_type: timestamp
+        data_tests:
+          - not_null

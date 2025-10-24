@@ -11,7 +11,7 @@ import pytest
 
 # Import here to avoid circular import issues
 try:
-    from orchestration.assets_ingest import ingest_transactions
+    from orchestration.assets_ingest import ingest_bank
     from src.utils import (
         extract_table_name_from_dir as _extract_table_name_from_dir,
     )
@@ -157,18 +157,37 @@ class TestFileColumns:
 class TestIngestionAsset:
     """Test the main ingestion asset."""
 
-    @patch("orchestration.assets_ingest.INPUT_PATH")
-    @patch("orchestration.assets_ingest.DUCKDB_PATH")
-    def test_ingest_transactions_no_input_path(
-        self, mock_db_path: Any, mock_input_path: Any
-    ) -> None:
+    def test_ingest_bank_no_input_path(self) -> None:
         """Test ingestion when input path doesn't exist."""
-        mock_input_path.exists.return_value = False
+        from src.ingestion.service import IngestionContext, IngestionSourceConfig
 
-        with pytest.raises(ValueError, match="No To Parse folder found"):
-            ingest_transactions()
+        fake_path = Path("/nonexistent/path")
+        test_context = IngestionContext(
+            duckdb_path="/tmp/test.duckdb",
+            finance_data_root=fake_path.parent,
+            stability_seconds=0,
+        )
+        test_config = IngestionSourceConfig(
+            name="test_bank",
+            root_path=fake_path,
+            source_label="source",
+            leaf_label="data_type",
+            structure_hint="Bank/{source}/<transaction_type>/",
+            leaf_options_factory=lambda p: type(
+                "opts", (), {"latest_only": False, "merge_pending": False}
+            )(),
+        )
 
-    def test_ingest_transactions_success(self) -> None:
+        with (
+            patch("orchestration.assets_ingest.INGESTION_CONTEXT", test_context),
+            patch("orchestration.assets_ingest.BANK_CONFIG", test_config),
+        ):
+            # Should handle nonexistent path gracefully (no files to process)
+            result = ingest_bank()
+            assert result.value["ingested"] == 0  # type: ignore[attr-defined]
+            assert result.value["errors"] == 0  # type: ignore[attr-defined]
+
+    def test_ingest_bank_success(self) -> None:
         """Test successful ingestion."""
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
@@ -183,11 +202,30 @@ class TestIngestionAsset:
             # Create temporary database
             db_path = temp_path / "test.duckdb"
 
+            # Need to import to create patched configs
+            from src.ingestion.service import IngestionContext, IngestionSourceConfig
+
+            test_context = IngestionContext(
+                duckdb_path=str(db_path),
+                finance_data_root=input_path.parent,
+                stability_seconds=0,
+            )
+            test_config = IngestionSourceConfig(
+                name="test_bank",
+                root_path=input_path,
+                source_label="source",
+                leaf_label="data_type",
+                structure_hint="Bank/{source}/<transaction_type>/",
+                leaf_options_factory=lambda p: type(
+                    "opts", (), {"latest_only": False, "merge_pending": False}
+                )(),
+            )
+
             with (
-                patch("orchestration.assets_ingest.DUCKDB_PATH", str(db_path)),
-                patch("orchestration.assets_ingest.INPUT_PATH", input_path),
+                patch("orchestration.assets_ingest.INGESTION_CONTEXT", test_context),
+                patch("orchestration.assets_ingest.BANK_CONFIG", test_config),
             ):
-                result = ingest_transactions()
+                result = ingest_bank()
 
                 assert result.value["ingested"] == 0  # type: ignore[attr-defined]
                 assert result.value["skipped"] == 0  # type: ignore[attr-defined]

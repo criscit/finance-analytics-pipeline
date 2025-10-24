@@ -1,0 +1,52 @@
+version: 2
+
+models:
+  - name: core_load_binance_assets
+    description: >
+      Core snapshot table for Binance asset balances with parsed numeric values.
+      Contains current holdings in spot wallet with USDT equivalent valuations.
+    tags: [core, binance, snapshot, assets]
+    meta:
+      materialization: incremental
+      incremental_strategy: delete+insert
+      unique_key: asset_bk
+
+    columns:
+      - name: asset_bk
+        description: Business key for the asset snapshot, generated from MD5 hash of asset and processed_at.
+        data_type: varchar(32)
+        data_tests:
+          - not_null
+          - unique
+
+      - name: asset
+        description: Cryptocurrency or asset symbol (e.g., BTC, USDT, BNB).
+        data_type: varchar(64)
+        data_tests:
+          - not_null
+
+      - name: free
+        description: Available balance that can be used for trading.
+        data_type: double
+
+      - name: locked
+        description: Balance locked in open orders.
+        data_type: double
+
+      - name: total
+        description: Total balance (free + locked).
+        data_type: double
+
+      - name: usdt_equivalent
+        description: Total USDT equivalent value of the asset.
+        data_type: double
+
+      - name: usdt_price
+        description: Current USDT price for 1 unit of the asset.
+        data_type: double
+
+      - name: processed_at
+        description: Timestamp of the ingestion for incremental processing.
+        data_type: timestamp
+        data_tests:
+          - not_null

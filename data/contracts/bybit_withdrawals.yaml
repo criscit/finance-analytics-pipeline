@@ -1,0 +1,113 @@
+version: 1.0.0
+dataset: bybit_withdrawals
+description: Raw withdrawals export from Bybit crypto platform
+owner: finance-analytics-team
+domain: crypto
+source_system: Bybit
+format: CSV
+delimiter: ","
+encoding: utf-8
+skip_header_rows: 0
+skip_footer_rows: 0
+
+target_table:
+  schema: prod_raw
+  name: bybit_withdrawals
+  
+columns:
+  - name: 'amount'
+    type: varchar
+    nullable: true
+    description: 'Raw amount value from Bybit withdrawals export'
+    source_column_index: 1
+
+  - name: 'chain'
+    type: varchar
+    nullable: true
+    description: 'Raw chain value from Bybit withdrawals export'
+    source_column_index: 2
+
+  - name: 'coin'
+    type: varchar
+    nullable: true
+    description: 'Raw coin value from Bybit withdrawals export'
+    source_column_index: 3
+
+  - name: 'createTime'
+    type: varchar
+    nullable: true
+    description: 'Raw createTime value from Bybit withdrawals export'
+    source_column_index: 4
+
+  - name: 'status'
+    type: varchar
+    nullable: true
+    description: 'Raw status value from Bybit withdrawals export'
+    source_column_index: 5
+
+  - name: 'tag'
+    type: varchar
+    nullable: true
+    description: 'Raw tag value from Bybit withdrawals export'
+    source_column_index: 6
+
+  - name: 'tax'
+    type: varchar
+    nullable: true
+    description: 'Raw tax value from Bybit withdrawals export'
+    source_column_index: 7
+
+  - name: 'taxRate'
+    type: varchar
+    nullable: true
+    description: 'Raw taxRate value from Bybit withdrawals export'
+    source_column_index: 8
+
+  - name: 'taxType'
+    type: varchar
+    nullable: true
+    description: 'Raw taxType value from Bybit withdrawals export'
+    source_column_index: 9
+
+  - name: 'toAddress'
+    type: varchar
+    nullable: true
+    description: 'Raw toAddress value from Bybit withdrawals export'
+    source_column_index: 10
+
+  - name: 'txID'
+    type: varchar
+    nullable: true
+    description: 'Raw txID value from Bybit withdrawals export'
+    source_column_index: 11
+
+  - name: 'updateTime'
+    type: varchar
+    nullable: true
+    description: 'Raw updateTime value from Bybit withdrawals export'
+    source_column_index: 12
+
+  - name: 'withdrawFee'
+    type: varchar
+    nullable: true
+    description: 'Raw withdrawFee value from Bybit withdrawals export'
+    source_column_index: 13
+
+  - name: 'withdrawId'
+    type: varchar
+    nullable: true
+    description: 'Raw withdrawId value from Bybit withdrawals export'
+    source_column_index: 14
+
+  - name: 'withdrawType'
+    type: varchar
+    nullable: true
+    description: 'Raw withdrawType value from Bybit withdrawals export'
+    source_column_index: 15
+
+metadata:
+  refresh_frequency: monthly
+  data_classification: internal
+  retention_period_days: 1825  # 5 years retention for crypto records
+  pii_fields: []
+  file_pattern: '*.csv'
