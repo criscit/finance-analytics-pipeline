@@ -1,0 +1,55 @@
+version: 2
+models:
+- name: mart_load_binance_fiat_orders
+  description: 'Mart table for Binance fiat deposit/withdrawal orders with parsed
+    amounts. Tracks fiat currency transactions in and out of Binance.
+
+    '
+  tags:
+  - mart
+  - binance
+  - fact
+  - fiat_orders
+  meta:
+    materialization: incremental
+    incremental_strategy: delete+insert
+    unique_key: fiat_order_bk
+  columns:
+  - name: fiat_order_bk
+    description: 'TODO: Add description for fiat_order_bk'
+    data_type: varchar(32)
+    data_tests:
+    - not_null
+    - unique
+  - name: create_time_ms
+    description: 'TODO: Add description for create_time_ms'
+    data_type: varchar(64)
+  - name: created_at
+    description: 'TODO: Add description for created_at'
+    data_type: timestamp
+  - name: updated_at
+    description: 'TODO: Add description for updated_at'
+    data_type: timestamp
+  - name: amount
+    description: 'TODO: Add description for amount'
+    data_type: varchar(64)
+  - name: indicated_amt
+    description: 'TODO: Add description for indicated_amt'
+    data_type: double
+  - name: total_fee
+    description: 'TODO: Add description for total_fee'
+    data_type: double
+  - name: fiat_currency
+    description: 'TODO: Add description for fiat_currency'
+    data_type: varchar(64)
+  - name: method
+    description: 'TODO: Add description for method'
+    data_type: varchar(64)
+  - name: transaction_type
+    description: 'TODO: Add description for transaction_type'
+    data_type: varchar(64)
+  - name: processed_at
+    description: 'TODO: Add description for processed_at'
+    data_type: timestamp
+    data_tests:
+    - not_null

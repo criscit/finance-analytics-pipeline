@@ -13,7 +13,7 @@ models:
 
     columns:
       - name: spot_order_bk
-        description: Business key for the order execution, generated from MD5 hash of order_id and exec_id.
+        description: Business key for the order execution, generated from MD5 hash of order_id.
         data_type: varchar(32)
         data_tests:
           - not_null
@@ -34,11 +34,7 @@ models:
         data_type: double
 
       - name: exec_fee
-        description: Execution fee charged for the trade.
-        data_type: double
-
-      - name: exec_fee_v2
-        description: Alternative execution fee calculation.
+        description: Execution fee charged for the trade (from exec_fee_v2).
         data_type: double
 
       - name: exec_price
@@ -93,9 +89,9 @@ models:
         description: Underlying asset price (for derivatives).
         data_type: double
 
-      - name: exec_time
-        description: Timestamp when the execution occurred (converted from milliseconds).
-        data_type: timestamp
+      - name: exec_time_ms
+        description: Execution timestamp in milliseconds since epoch.
+        data_type: bigint
 
       - name: exec_type
         description: Type of execution (e.g., Trade, Funding, Liquidation).
@@ -107,7 +103,7 @@ models:
 
       - name: is_maker
         description: Whether this execution was a maker order (true/false).
-        data_type: varchar(8)
+        data_type: boolean
 
       - name: market_unit
         description: Market unit or contract multiplier.
@@ -123,7 +119,7 @@ models:
 
       - name: seq
         description: Sequence number for the execution.
-        data_type: varchar(64)
+        data_type: bigint
 
       - name: side
         description: Order side (Buy or Sell).
@@ -134,7 +130,7 @@ models:
         data_type: varchar(32)
 
       - name: symbol
-        description: Trading pair symbol (e.g., BTCUSDT).
+        description: Trading pair symbol in lowercase (e.g., btcusdt).
         data_type: varchar(32)
 
       - name: processed_at

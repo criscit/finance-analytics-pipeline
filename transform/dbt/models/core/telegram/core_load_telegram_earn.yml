@@ -13,7 +13,7 @@ models:
 
     columns:
       - name: earn_bk
-        description: Business key for the earn position, generated from MD5 hash of asset and processed_dttm.
+        description: Business key for the earn position, generated from MD5 hash of asset and parsed_at.
         data_type: varchar(32)
         data_tests:
           - not_null

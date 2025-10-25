@@ -67,48 +67,63 @@ class IngestionSourceConfig:
     leaf_options_factory: Callable[[Path], LeafIngestionOptions] | None = None
 
 
+@dataclass
+class ProcessingContext:
+    """Bundles common processing dependencies to reduce function parameter count."""
+
+    con: duckdb.DuckDBPyConnection
+    context: IngestionContext
+    log: Any
+
+
+@dataclass
+class MergePendingState:
+    """Holds state for files being merged before ingestion."""
+
+    files: list[PendingFileInfo] = field(default_factory=list)
+    dataframes: list[pd.DataFrame] = field(default_factory=list)
+
+
 def _default_leaf_options(_: Path) -> LeafIngestionOptions:
     return LeafIngestionOptions()
 
 
 def _prepare_file_ingestion(
-    con: duckdb.DuckDBPyConnection,
+    pctx: ProcessingContext,
     file_path: Path,
-    context: IngestionContext,
-    log: Any,
 ) -> FileCheckResult:
     """Common validation before ingesting a file."""
     if not file_path.is_file():
         return FileCheckResult(status="skipped", reason="not a file")
 
     file_ext = file_path.suffix.lower()
-    if file_ext not in context.supported_extensions:
+    if file_ext not in pctx.context.supported_extensions:
         reason = "pdf_file" if file_ext == ".pdf" else f"unsupported_extension: {file_ext}"
         if file_ext == ".pdf":
-            log.warning("Skipping PDF file (not supported for ingestion): %s", file_path)
+            pctx.log.warning("Skipping PDF file (not supported for ingestion): %s", file_path)
         else:
-            log.warning(
+            pctx.log.warning(
                 "Skipping unsupported file type '%s': %s",
                 file_ext or "(no extension)",
                 file_path,
             )
         return FileCheckResult(status="unsupported", reason=reason)
 
-    if not is_file_stable(file_path, context.stability_seconds):
-        log.info("Skipping unstable file: %s", file_path)
+    if not is_file_stable(file_path, pctx.context.stability_seconds):
+        pctx.log.info("Skipping unstable file: %s", file_path)
         return FileCheckResult(status="skipped", reason="unstable")
 
     file_md5 = md5_hash(file_path)
-    already_ingested = con.execute(
+    already_ingested = pctx.con.execute(
         "select 1 from prod_meta.ingest_ledger where md5 = ?",
         [file_md5],
     ).fetchone()
     if already_ingested:
-        log.info("Already ingested MD5=%s; skipping %s", file_md5, file_path)
+        pctx.log.info("Already ingested MD5=%s; skipping %s", file_md5, file_path)
         return FileCheckResult(status="skipped", reason="already ingested")
 
     try:
-        rel = file_path.relative_to(context.finance_data_root).as_posix()
+        rel = file_path.relative_to(pctx.context.finance_data_root).as_posix()
     except ValueError:
         rel = file_path.as_posix()
 
@@ -136,22 +151,20 @@ def _validate_dataframe_columns(
     return df[expected].copy()
 
 
-def _merge_and_ingest_pending_files(  # noqa: PLR0913
-    con: duckdb.DuckDBPyConnection,
+def _merge_and_ingest_pending_files(
+    pctx: ProcessingContext,
     contract: DataContract,
-    pending_files: list[PendingFileInfo],
-    dataframes: list[pd.DataFrame],
+    merge_state: MergePendingState,
     source_name: str,
-    log: Any,
 ) -> tuple[bool, int]:
     """Merge validated DataFrames, ingest once, and update ledger for each file."""
-    if not pending_files:
+    if not merge_state.files:
         return True, 0
 
-    merged_df = pd.concat(dataframes, ignore_index=True)
+    merged_df = pd.concat(merge_state.dataframes, ignore_index=True)
 
     md5_hasher = hashlib.md5()
-    for info in pending_files:
+    for info in merge_state.files:
         md5_hasher.update(info.md5.encode())
     combined_md5 = md5_hasher.hexdigest()
 
@@ -162,25 +175,25 @@ def _merge_and_ingest_pending_files(  # noqa: PLR0913
     reuse_existing = parquet_file.exists()
 
     try:
-        con.execute("begin;")
+        pctx.con.execute("begin;")
         if reuse_existing:
-            log.info(
+            pctx.log.info(
                 "Merged parquet cache hit for MD5=%s at %s; reusing existing file",
                 combined_md5,
                 parquet_path,
             )
         else:
             parquet_path = writer.write(merged_df, md5_hash=combined_md5, coerce_schema=False)
-            log.info(
+            pctx.log.info(
                 "Created merged parquet %s from %d file(s) (%d rows)",
                 parquet_path,
-                len(pending_files),
+                len(merge_state.files),
                 len(merged_df),
             )
-        rows_inserted = ingest_parquet_to_duckdb(con, "prod_raw", table_nm, parquet_path)
+        rows_inserted = ingest_parquet_to_duckdb(pctx.con, "prod_raw", table_nm, parquet_path)
 
-        for info in pending_files:
-            con.execute(
+        for info in merge_state.files:
+            pctx.con.execute(
                 """
                 insert into prod_meta.ingest_ledger(
                     source_system_nm,
@@ -195,21 +208,21 @@ def _merge_and_ingest_pending_files(  # noqa: PLR0913
                 [source_name, table_nm, info.rel_path, info.size, info.md5, utc_now_str()],
             )
 
-        con.execute("commit;")
-        log.info(
+        pctx.con.execute("commit;")
+        pctx.log.info(
             "Ingested %d merged file(s) -> prod_raw.%s (rows=%d)",
-            len(pending_files),
+            len(merge_state.files),
             table_nm,
             rows_inserted,
         )
         return True, rows_inserted
 
     except Exception as exc:  # pragma: no cover - defensive
-        con.execute("rollback;")
-        log.exception(
+        pctx.con.execute("rollback;")
+        pctx.log.exception(
             "Failed to ingest merged files for %s using %d source files: %s",
             table_nm,
-            len(pending_files),
+            len(merge_state.files),
             exc,
         )
         return False, 0
@@ -244,16 +257,14 @@ def _parquet_from_source_if_needed(
     return out_path
 
 
-def _process_file_once(  # noqa: PLR0913
-    con: duckdb.DuckDBPyConnection,
+def _process_file_once(
+    pctx: ProcessingContext,
     contract: DataContract,
     file_path: Path,
     source_name: str,
-    context: IngestionContext,
-    log: Any,
 ) -> dict[str, Any]:
     """Single-file workflow with idempotency by MD5 of file contents."""
-    check = _prepare_file_ingestion(con, file_path, context, log)
+    check = _prepare_file_ingestion(pctx, file_path)
     if check.status != "pending" or check.info is None:
         return {"status": check.status, "reason": check.reason}
 
@@ -261,12 +272,12 @@ def _process_file_once(  # noqa: PLR0913
     table_nm = contract.target_table.name
 
     try:
-        con.execute("begin;")
+        pctx.con.execute("begin;")
 
-        parquet_path = _parquet_from_source_if_needed(contract, info.path, info.md5, log)
-        rows_inserted = ingest_parquet_to_duckdb(con, "prod_raw", table_nm, parquet_path)
+        parquet_path = _parquet_from_source_if_needed(contract, info.path, info.md5, pctx.log)
+        rows_inserted = ingest_parquet_to_duckdb(pctx.con, "prod_raw", table_nm, parquet_path)
 
-        con.execute(
+        pctx.con.execute(
             """
             insert into prod_meta.ingest_ledger(
                 source_system_nm,
@@ -281,8 +292,8 @@ def _process_file_once(  # noqa: PLR0913
             [source_name, table_nm, info.rel_path, info.size, info.md5, utc_now_str()],
         )
 
-        con.execute("commit;")
-        log.info("Ingested %s -> prod_raw.%s (rows=%d)", info.path, table_nm, rows_inserted)
+        pctx.con.execute("commit;")
+        pctx.log.info("Ingested %s -> prod_raw.%s (rows=%d)", info.path, table_nm, rows_inserted)
         return {
             "status": "success",
             "rows": rows_inserted,
@@ -291,8 +302,8 @@ def _process_file_once(  # noqa: PLR0913
         }
 
     except Exception as exc:  # pragma: no cover - defensive
-        con.execute("rollback;")
-        log.exception("Failed to process %s: %s", info.path, exc)
+        pctx.con.execute("rollback;")
+        pctx.log.exception("Failed to process %s: %s", info.path, exc)
         return {"status": "error", "reason": str(exc)}
 
 
@@ -332,13 +343,11 @@ def _validate_contract_for_table(
     return None
 
 
-def _should_drop_table_for_fresh_load(  # noqa: PLR0913
-    con: duckdb.DuckDBPyConnection,
+def _should_drop_table_for_fresh_load(
+    pctx: ProcessingContext,
     contract: DataContract,
     data_type_dir: Path,
     seen_tables: set[str],
-    context: IngestionContext,
-    log: Any,
 ) -> bool:
     """
     Determine if table should be dropped for fresh ingestion.
@@ -357,23 +366,25 @@ def _should_drop_table_for_fresh_load(  # noqa: PLR0913
             continue
 
         file_ext = file_path.suffix.lower()
-        if file_ext not in context.supported_extensions:
+        if file_ext not in pctx.context.supported_extensions:
             continue
 
-        if not is_file_stable(file_path, context.stability_seconds):
+        if not is_file_stable(file_path, pctx.context.stability_seconds):
             continue
 
         file_md5 = md5_hash(file_path)
-        already_ingested = con.execute(
+        already_ingested = pctx.con.execute(
             "select 1 from prod_meta.ingest_ledger where md5 = ?",
             [file_md5],
         ).fetchone()
 
         if not already_ingested:
-            log.info("Found new files to ingest for %s - will drop table for fresh load", table_nm)
+            pctx.log.info(
+                "Found new files to ingest for %s - will drop table for fresh load", table_nm
+            )
             return True
 
-    log.info("No new files to ingest for %s - keeping existing table intact", table_nm)
+    pctx.log.info("No new files to ingest for %s - keeping existing table intact", table_nm)
     return False
 
 
@@ -412,119 +423,143 @@ def _clear_raw_parquet_cache(table_nm: str, log: Any) -> None:
         log.info("Cleared %d cached parquet artifact(s) for %s", removed, table_nm)
 
 
-def _process_table_files(  # noqa: PLR0913, PLR0912, PLR0915
-    con: duckdb.DuckDBPyConnection,
+def _select_latest_supported_file(
+    matching_files: list[Path],
+    context: IngestionContext,
+    data_type_dir: Path,
+    log: Any,
+) -> Path | None:
+    """Select the latest supported file for latest_only mode."""
+    supported_candidates = [
+        f
+        for f in matching_files
+        if f.is_file() and f.suffix.lower() in context.supported_extensions
+    ]
+    if not supported_candidates:
+        log.info(
+            "No supported files found in %s for latest-only ingestion; "
+            "all files will be evaluated normally",
+            data_type_dir,
+        )
+        return None
+
+    supported_candidates.sort(key=lambda path: path.name, reverse=True)
+    latest_supported = supported_candidates[0]
+    log.info(
+        "Selected latest supported file '%s' for ingestion in %s",
+        latest_supported.name,
+        data_type_dir,
+    )
+    return latest_supported
+
+
+def _should_skip_older_file(
+    file_path: Path,
+    latest_supported: Path | None,
+    context: IngestionContext,
+) -> bool:
+    """Check if file should be skipped because a newer file exists."""
+    return (
+        latest_supported is not None
+        and file_path.is_file()
+        and file_path.suffix.lower() in context.supported_extensions
+        and file_path != latest_supported
+    )
+
+
+def _update_counts(
+    result_status: str, ingested: int, skipped: int, unsupported: int, errors: int
+) -> tuple[int, int, int, int]:
+    """Update metric counts based on processing result status."""
+    if result_status == "success":
+        return ingested + 1, skipped, unsupported, errors
+    if result_status == "skipped":
+        return ingested, skipped + 1, unsupported, errors
+    if result_status == "unsupported":
+        return ingested, skipped, unsupported + 1, errors
+    return ingested, skipped, unsupported, errors + 1
+
+
+def _handle_merge_pending_file(
+    pctx: ProcessingContext,
+    contract: DataContract,
+    file_path: Path,
+    reader: Any,
+    merge_state: MergePendingState,
+) -> tuple[str, int]:
+    """Handle a file in merge-pending mode. Returns (status, count) for metrics."""
+    check = _prepare_file_ingestion(pctx, file_path)
+    if check.status != "pending" or check.info is None:
+        return check.status, 1
+
+    try:
+        df = reader.read(str(file_path))
+        df = _validate_dataframe_columns(contract, df, file_path)
+    except Exception as exc:  # pragma: no cover - defensive
+        pctx.log.exception("Failed to read %s: %s", file_path, exc)
+        return "error", 1
+
+    merge_state.files.append(check.info)
+    merge_state.dataframes.append(df)
+    return "pending", 0
+
+
+def _process_table_files(
+    pctx: ProcessingContext,
     contract: DataContract,
     data_type_dir: Path,
     source_name: str,
-    context: IngestionContext,
     leaf_options: LeafIngestionOptions,
-    log: Any,
 ) -> tuple[int, int, int, int]:
     """Process all files for a given table."""
     file_pattern = contract.metadata.get("file_pattern", "*.csv")
-    log.info("Looking for files matching '%s' in %s", file_pattern, data_type_dir)
+    pctx.log.info("Looking for files matching '%s' in %s", file_pattern, data_type_dir)
 
     matching_files = sorted(data_type_dir.rglob(file_pattern))
-    log.info("Found %d files matching pattern in %s", len(matching_files), data_type_dir)
+    pctx.log.info("Found %d files matching pattern in %s", len(matching_files), data_type_dir)
 
     latest_supported: Path | None = None
     if leaf_options.latest_only:
-        supported_candidates = [
-            f
-            for f in matching_files
-            if f.is_file() and f.suffix.lower() in context.supported_extensions
-        ]
-        if supported_candidates:
-            supported_candidates.sort(key=lambda path: path.name, reverse=True)
-            latest_supported = supported_candidates[0]
-            log.info(
-                "Selected latest supported file '%s' for ingestion in %s",
-                latest_supported.name,
-                data_type_dir,
-            )
-        else:
-            log.info(
-                "No supported files found in %s for latest-only ingestion; "
-                "all files will be evaluated normally",
-                data_type_dir,
-            )
+        latest_supported = _select_latest_supported_file(
+            matching_files, pctx.context, data_type_dir, pctx.log
+        )
 
     ingested = skipped = errors = unsupported = 0
-    pending_files: list[PendingFileInfo] = []
-    pending_frames: list[pd.DataFrame] = []
+    merge_state = MergePendingState()
     reader = make_reader(contract) if leaf_options.merge_pending else None
 
     for file_path in matching_files:
-        if (
-            leaf_options.latest_only
-            and latest_supported is not None
-            and file_path.is_file()
-            and file_path.suffix.lower() in context.supported_extensions
-            and file_path != latest_supported
+        if leaf_options.latest_only and _should_skip_older_file(
+            file_path, latest_supported, pctx.context
         ):
-            log.info(
+            pctx.log.info(
                 "Skipping older supported file '%s' because newer file '%s' will be ingested",
                 file_path.name,
-                latest_supported.name,
+                latest_supported.name if latest_supported else "unknown",
             )
             skipped += 1
             continue
 
         if leaf_options.merge_pending and reader is not None:
-            check = _prepare_file_ingestion(con, file_path, context, log)
-            if check.status == "pending" and check.info is not None:
-                try:
-                    df = reader.read(str(file_path))
-                    df = _validate_dataframe_columns(contract, df, file_path)
-                except Exception as exc:  # pragma: no cover - defensive
-                    log.exception("Failed to read %s: %s", file_path, exc)
-                    errors += 1
-                    continue
-
-                pending_files.append(check.info)
-                pending_frames.append(df)
-                continue
-
-            if check.status == "skipped":
-                skipped += 1
-            elif check.status == "unsupported":
-                unsupported += 1
-            else:
-                errors += 1
+            status, count = _handle_merge_pending_file(
+                pctx, contract, file_path, reader, merge_state
+            )
+            ingested, skipped, unsupported, errors = _update_counts(
+                status, ingested, skipped, unsupported, errors
+            )
             continue
 
-        result = _process_file_once(
-            con,
-            contract,
-            file_path,
-            source_name,
-            context,
-            log,
+        result = _process_file_once(pctx, contract, file_path, source_name)
+        ingested, skipped, unsupported, errors = _update_counts(
+            result.get("status", "error"), ingested, skipped, unsupported, errors
         )
-        status = result.get("status")
-        if status == "success":
-            ingested += 1
-        elif status == "skipped":
-            skipped += 1
-        elif status == "unsupported":
-            unsupported += 1
-        else:
-            errors += 1
 
-    if leaf_options.merge_pending and pending_files:
-        success, _ = _merge_and_ingest_pending_files(
-            con,
-            contract,
-            pending_files,
-            pending_frames,
-            source_name,
-            log,
-        )
+    if leaf_options.merge_pending and merge_state.files:
+        success, _ = _merge_and_ingest_pending_files(pctx, contract, merge_state, source_name)
         if success:
-            ingested += len(pending_files)
+            ingested += len(merge_state.files)
         else:
-            errors += len(pending_files)
+            errors += len(merge_state.files)
 
     return ingested, skipped, unsupported, errors
 
@@ -545,6 +580,7 @@ def run_ingestion(
 
     con = duckdb.connect(context.duckdb_path)
     ensure_meta_schema(con)
+    pctx = ProcessingContext(con=con, context=context, log=log)
 
     ingested = skipped = errors = unsupported = 0
     seen_tables: set[str] = set()
@@ -601,14 +637,7 @@ def run_ingestion(
                 log.exception("Failed to load contract %s: %s", contract_path, exc)
                 continue
 
-            should_drop = _should_drop_table_for_fresh_load(
-                con,
-                contract,
-                leaf_dir,
-                seen_tables,
-                context,
-                log,
-            )
+            should_drop = _should_drop_table_for_fresh_load(pctx, contract, leaf_dir, seen_tables)
             if should_drop:
                 _ensure_fresh_table(con, contract.target_table.name, seen_tables, log)
             else:
@@ -616,13 +645,7 @@ def run_ingestion(
 
             leaf_options = options_factory(leaf_dir)
             i, s, u, err_count = _process_table_files(
-                con,
-                contract,
-                leaf_dir,
-                source_nm,
-                context,
-                leaf_options,
-                log,
+                pctx, contract, leaf_dir, source_nm, leaf_options
             )
             ingested += i
             skipped += s

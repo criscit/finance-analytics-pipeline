@@ -39,10 +39,10 @@ columns:
     description: 'Raw yield value from Telegram earn export'
     source_column_index: 4
 
-  - name: 'processed_dttm'
+  - name: 'parsed_at'
     type: varchar
     nullable: true
-    description: 'Raw processed_dttm value from Telegram earn export'
+    description: 'Raw parsed_at value from Telegram earn export'
     source_column_index: 5
 
 metadata:

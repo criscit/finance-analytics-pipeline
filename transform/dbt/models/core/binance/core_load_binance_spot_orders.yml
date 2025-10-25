@@ -13,15 +13,15 @@ models:
 
     columns:
       - name: spot_order_bk
-        description: Business key for the order, generated from MD5 hash of order_no and execution_time_utc.
+        description: Business key for the order, generated from MD5 hash of order_no.
         data_type: varchar(32)
         data_tests:
           - not_null
           - unique
 
       - name: pair
-        description: Trading pair symbol (e.g., BTCUSDT, ETHUSDT).
-        data_type: varchar(32)
+        description: Trading pair symbol in lowercase (e.g., btcusdt, ethusdt).
+        data_type: varchar(16)
 
       - name: order_price
         description: Limit price set for the order.
@@ -42,6 +42,18 @@ models:
       - name: trading_total
         description: Total value of the trade (executed_amount * average_price).
         data_type: double
+
+      - name: order_amt_currency
+        description: Currency code extracted from order amount (e.g., BTC, ETH).
+        data_type: varchar(16)
+
+      - name: executed_amt_currency
+        description: Currency code extracted from executed amount (e.g., BTC, ETH).
+        data_type: varchar(16)
+
+      - name: trading_total_currency
+        description: Currency code extracted from trading total (e.g., RUB, USDT).
+        data_type: varchar(16)
 
       - name: order_type
         description: Type of order (e.g., Limit, Market, Stop-Limit).

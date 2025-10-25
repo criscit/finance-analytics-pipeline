@@ -1,0 +1,62 @@
+version: 2
+models:
+- name: mart_load_telegram_p2p_trades
+  description: 'Mart table for Telegram wallet P2P trades with parsed crypto and fiat
+    amounts. Tracks peer-to-peer cryptocurrency trades facilitated through Telegram
+    wallet.
+
+    '
+  tags:
+  - mart
+  - telegram
+  - fact
+  - p2p
+  meta:
+    materialization: incremental
+    incremental_strategy: delete+insert
+    unique_key: p2p_trade_bk
+  columns:
+  - name: p2p_trade_bk
+    description: 'TODO: Add description for p2p_trade_bk'
+    data_type: varchar(32)
+    data_tests:
+    - not_null
+    - unique
+  - name: ad_type
+    description: 'TODO: Add description for ad_type'
+    data_type: varchar(64)
+  - name: role
+    description: 'TODO: Add description for role'
+    data_type: varchar(64)
+  - name: net_crypto_amt
+    description: 'TODO: Add description for net_crypto_amt'
+    data_type: double
+  - name: paid_fee_crypto_amt
+    description: 'TODO: Add description for paid_fee_crypto_amt'
+    data_type: double
+  - name: fiat_amt
+    description: 'TODO: Add description for fiat_amt'
+    data_type: double
+  - name: price
+    description: 'TODO: Add description for price'
+    data_type: double
+  - name: crypto_currency
+    description: 'TODO: Add description for crypto_currency'
+    data_type: varchar(64)
+  - name: fiat_currency
+    description: 'TODO: Add description for fiat_currency'
+    data_type: varchar(64)
+  - name: payment_method
+    description: 'TODO: Add description for payment_method'
+    data_type: varchar(64)
+  - name: created_at
+    description: 'TODO: Add description for created_at'
+    data_type: timestamp
+  - name: completed_at
+    description: 'TODO: Add description for completed_at'
+    data_type: timestamp
+  - name: processed_at
+    description: 'TODO: Add description for processed_at'
+    data_type: timestamp
+    data_tests:
+    - not_null

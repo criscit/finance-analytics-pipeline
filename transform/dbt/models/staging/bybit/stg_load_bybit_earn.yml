@@ -1,0 +1,38 @@
+version: 2
+
+models:
+  - name: stg_load_bybit_earn
+    description: >
+      Staging over prod_raw.bybit_earn using seed-based column mapping.
+    tags: [staging, bybit]
+    meta:
+      source_table: prod_raw.bybit_earn
+      seed_name: bybit_earn
+
+    columns:
+      - name: __load_key
+        description: Load key for the Bybit earn portfolio row.
+        data_type: varchar(32)
+        data_tests: [not_null, unique]
+
+      - name: asset
+        description: Asset symbol enrolled in the earn program.
+        data_type: varchar(32)
+
+      - name: apy
+        description: Reported APY percentage.
+        data_type: double
+
+      - name: value_usd
+        description: USD-denominated position value.
+        data_type: double
+
+      - name: yield
+        description: USD yield accrued.
+        data_type: double
+
+      - name: processed_at
+        description: Timestamp of the ingestion.
+        data_type: timestamp
+        data_tests:
+          - not_null

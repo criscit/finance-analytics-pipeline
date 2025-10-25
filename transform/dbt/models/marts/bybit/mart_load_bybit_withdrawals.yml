@@ -1,0 +1,49 @@
+version: 2
+models:
+- name: mart_load_bybit_withdrawals
+  description: 'Mart table for Bybit withdrawal transactions with parsed amounts and
+    timestamps. Tracks outgoing cryptocurrency withdrawals from Bybit wallets.
+
+    '
+  tags:
+  - mart
+  - bybit
+  - fact
+  - withdrawals
+  meta:
+    materialization: incremental
+    incremental_strategy: delete+insert
+    unique_key: withdrawal_bk
+  columns:
+  - name: withdrawal_bk
+    description: 'TODO: Add description for withdrawal_bk'
+    data_type: varchar(32)
+    data_tests:
+    - not_null
+    - unique
+  - name: amount
+    description: 'TODO: Add description for amount'
+    data_type: varchar(64)
+  - name: withdraw_fee
+    description: 'TODO: Add description for withdraw_fee'
+    data_type: double
+  - name: chain
+    description: 'TODO: Add description for chain'
+    data_type: varchar(64)
+  - name: coin
+    description: 'TODO: Add description for coin'
+    data_type: varchar(64)
+  - name: created_at
+    description: 'TODO: Add description for created_at'
+    data_type: timestamp
+  - name: updated_at
+    description: 'TODO: Add description for updated_at'
+    data_type: timestamp
+  - name: withdraw_type
+    description: 'TODO: Add description for withdraw_type'
+    data_type: varchar(64)
+  - name: processed_at
+    description: 'TODO: Add description for processed_at'
+    data_type: timestamp
+    data_tests:
+    - not_null

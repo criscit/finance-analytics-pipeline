@@ -27,7 +27,7 @@ def _md5(path: Path) -> str:
 @asset(deps=["build_imart_models"])
 def export_csv_snapshot() -> Output[dict[str, Any]]:
     # Create timestamp for folder and file naming
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.now(datetime.UTC)
     date_folder = now.strftime("%Y%m%d")
     timestamp = now.strftime("%Y%m%d_%H%M%S")
 

@@ -1,0 +1,38 @@
+version: 2
+
+models:
+  - name: core_load_bybit_earn
+    description: >
+      Core snapshot table for Bybit wallet earn positions with parsed APY and yield values.
+      Tracks staking and yield-earning positions in Bybit wallet.
+    tags: [core, bybit, snapshot, earn]
+    meta:
+      materialization: incremental
+      incremental_strategy: delete+insert
+      unique_key: earn_bk
+
+    columns:
+      - name: earn_bk
+        description: Business key for the earn position, generated from MD5 hash of asset and parsed_at.
+        data_type: varchar(32)
+        data_tests:
+          - not_null
+          - unique
+
+      - name: asset
+        description: Cryptocurrency symbol earning yield (e.g., TON, USDT).
+        data_type: varchar(32)
+        data_tests:
+          - not_null
+
+      - name: apy_pct
+        description: Annual Percentage Yield (APY) for the earn position.
+        data_type: double
+
+      - name: value_usd
+        description: Total USD value of the staked/earning position.
+        data_type: double
+
+      - name: yield_usd
+        description: Total USD yield earned.
+        data_type: double

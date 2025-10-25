@@ -1,0 +1,61 @@
+version: 2
+models:
+- name: mart_load_binance_convert_trades
+  description: 'Mart table for Binance convert trades with parsed timestamps and numeric
+    values. Tracks instant cryptocurrency conversion transactions.
+
+    '
+  tags:
+  - mart
+  - binance
+  - fact
+  - convert
+  meta:
+    materialization: incremental
+    incremental_strategy: delete+insert
+    unique_key: convert_trade_bk
+  columns:
+  - name: convert_trade_bk
+    description: 'TODO: Add description for convert_trade_bk'
+    data_type: varchar(32)
+    data_tests:
+    - not_null
+    - unique
+  - name: create_time_ms
+    description: 'TODO: Add description for create_time_ms'
+    data_type: varchar(64)
+  - name: created_at
+    description: 'TODO: Add description for created_at'
+    data_type: timestamp
+  - name: from_amt
+    description: 'TODO: Add description for from_amt'
+    data_type: double
+  - name: from_asset
+    description: 'TODO: Add description for from_asset'
+    data_type: varchar(64)
+  - name: to_amt
+    description: 'TODO: Add description for to_amt'
+    data_type: double
+  - name: to_asset
+    description: 'TODO: Add description for to_asset'
+    data_type: varchar(64)
+  - name: ratio
+    description: 'TODO: Add description for ratio'
+    data_type: varchar(64)
+  - name: inverse_ratio
+    description: 'TODO: Add description for inverse_ratio'
+    data_type: varchar(64)
+  - name: order_type
+    description: 'TODO: Add description for order_type'
+    data_type: varchar(64)
+  - name: side
+    description: 'TODO: Add description for side'
+    data_type: varchar(64)
+  - name: wallet_type
+    description: 'TODO: Add description for wallet_type'
+    data_type: varchar(64)
+  - name: processed_at
+    description: 'TODO: Add description for processed_at'
+    data_type: timestamp
+    data_tests:
+    - not_null

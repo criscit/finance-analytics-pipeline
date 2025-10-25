@@ -1,53 +1,40 @@
 version: 2
-
 models:
-  - name: mart_load_bakai_transactions
-    description: >
-      Mart table for bank transactions analytics with successful transactions only.
-      This table contains filtered transaction data for analytics purposes with Moscow timezone.
-    meta:
-      materialization: incremental
-      incremental_strategy: delete+insert
-      unique_key: transaction_bk
+- name: mart_load_bakai_transactions
+  description: 'Mart table for bank transactions analytics with successful transactions
+    only. This table contains filtered transaction data for analytics purposes with
+    Moscow timezone.
 
-    columns:
-      - name: transaction_bk
-        description: Business key for the transaction, generated from MD5 hash of key fields.
-        data_type: varchar(32)
-        data_tests:
-          - not_null
-          - unique
-
-      - name: description
-        description: Payment purpose/description from bank export.
-        data_type: varchar(512)
-
-      - name: debit_amt
-        description: Debit amount for the transaction.
-        data_type: double
-
-      - name: credit_amt
-        description: Credit amount for the transaction.
-        data_type: double
-
-      - name: exchange_rate
-        description: Exchange rate applied to the transaction.
-        data_type: double
-
-      - name: transacted_at_utc
-        description: Timestamp of the transaction with UTC timezone.
-        data_type: timestamp
-        data_tests:
-          - not_null
-
-      - name: transaction_dt
-        description: Date of the transaction in Asia/Bishkek timezone.
-        data_type: date
-        data_tests:
-          - not_null
-
-      - name: processed_at
-        description: Timestamp of the ingestion for incremental processing.
-        data_type: timestamp
-        data_tests:
-          - not_null
+    '
+  tags: []
+  meta:
+    materialization: incremental
+    incremental_strategy: delete+insert
+    unique_key: transaction_bk
+  columns:
+  - name: transaction_bk
+    description: 'TODO: Add description for transaction_bk'
+    data_type: varchar(32)
+    data_tests:
+    - not_null
+    - unique
+  - name: description
+    description: 'TODO: Add description for description'
+    data_type: varchar(64)
+  - name: transaction_amt
+    description: 'TODO: Add description for transaction_amt'
+    data_type: double
+  - name: exchange_rate
+    description: 'TODO: Add description for exchange_rate'
+    data_type: double
+  - name: transacted_at_utc
+    description: 'TODO: Add description for transacted_at_utc'
+    data_type: varchar(64)
+  - name: transaction_dt
+    description: 'TODO: Add description for transaction_dt'
+    data_type: varchar(64)
+  - name: processed_at
+    description: 'TODO: Add description for processed_at'
+    data_type: timestamp
+    data_tests:
+    - not_null

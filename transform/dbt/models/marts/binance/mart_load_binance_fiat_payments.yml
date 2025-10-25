@@ -1,0 +1,58 @@
+version: 2
+models:
+- name: mart_load_binance_fiat_payments
+  description: 'Mart table for Binance fiat payment transactions with parsed amounts.
+    Tracks crypto purchases with fiat currency payments.
+
+    '
+  tags:
+  - mart
+  - binance
+  - fact
+  - fiat_payments
+  meta:
+    materialization: incremental
+    incremental_strategy: delete+insert
+    unique_key: fiat_payment_bk
+  columns:
+  - name: fiat_payment_bk
+    description: 'TODO: Add description for fiat_payment_bk'
+    data_type: varchar(32)
+    data_tests:
+    - not_null
+    - unique
+  - name: created_at
+    description: 'TODO: Add description for created_at'
+    data_type: timestamp
+  - name: updated_at
+    description: 'TODO: Add description for updated_at'
+    data_type: timestamp
+  - name: obtain_amt
+    description: 'TODO: Add description for obtain_amt'
+    data_type: double
+  - name: source_amt
+    description: 'TODO: Add description for source_amt'
+    data_type: double
+  - name: price
+    description: 'TODO: Add description for price'
+    data_type: double
+  - name: total_fee
+    description: 'TODO: Add description for total_fee'
+    data_type: double
+  - name: crypto_currency
+    description: 'TODO: Add description for crypto_currency'
+    data_type: varchar(64)
+  - name: fiat_currency
+    description: 'TODO: Add description for fiat_currency'
+    data_type: varchar(64)
+  - name: payment_method
+    description: 'TODO: Add description for payment_method'
+    data_type: varchar(64)
+  - name: transaction_type
+    description: 'TODO: Add description for transaction_type'
+    data_type: varchar(64)
+  - name: processed_at
+    description: 'TODO: Add description for processed_at'
+    data_type: timestamp
+    data_tests:
+    - not_null

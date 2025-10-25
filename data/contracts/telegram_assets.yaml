@@ -51,10 +51,10 @@ columns:
     description: 'Raw value_usd value from Telegram assets export'
     source_column_index: 6
 
-  - name: 'processed_dttm'
+  - name: 'parsed_at'
     type: varchar
     nullable: true
-    description: 'Raw processed_dttm value from Telegram assets export'
+    description: 'Raw parsed_at value from Telegram assets export'
     source_column_index: 7
 
 metadata:

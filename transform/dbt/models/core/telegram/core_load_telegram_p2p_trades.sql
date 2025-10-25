@@ -1,17 +1,17 @@
 {{ config(
     materialized='incremental',
     incremental_strategy='delete+insert',
-    unique_key='trade_bk'
+    unique_key='p2p_trade_bk'
 ) }}
 
 select
   md5(
     concat_ws(
       '|',
-      'telegram_p2p',
+      'telegram_p2p_trades',
       order_number
     )
-  ) as trade_bk,
+  ) as p2p_trade_bk,
   ad_number,
   ad_type,
   role,

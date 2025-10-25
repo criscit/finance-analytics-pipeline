@@ -1,0 +1,46 @@
+version: 2
+models:
+- name: mart_load_bybit_convert_trades
+  description: 'Mart table for Bybit convert trades with parsed timestamps and numeric
+    values. Tracks cryptocurrency conversion transactions with exchange rates.
+
+    '
+  tags:
+  - mart
+  - bybit
+  - fact
+  - convert
+  meta:
+    materialization: incremental
+    incremental_strategy: delete+insert
+    unique_key: convert_trade_bk
+  columns:
+  - name: convert_trade_bk
+    description: 'TODO: Add description for convert_trade_bk'
+    data_type: varchar(32)
+    data_tests:
+    - not_null
+    - unique
+  - name: created_at
+    description: 'TODO: Add description for created_at'
+    data_type: timestamp
+  - name: exchange_rate
+    description: 'TODO: Add description for exchange_rate'
+    data_type: double
+  - name: from_amt
+    description: 'TODO: Add description for from_amt'
+    data_type: double
+  - name: from_coin
+    description: 'TODO: Add description for from_coin'
+    data_type: varchar(64)
+  - name: to_amt
+    description: 'TODO: Add description for to_amt'
+    data_type: double
+  - name: to_coin
+    description: 'TODO: Add description for to_coin'
+    data_type: varchar(64)
+  - name: processed_at
+    description: 'TODO: Add description for processed_at'
+    data_type: timestamp
+    data_tests:
+    - not_null

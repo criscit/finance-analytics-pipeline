@@ -1,0 +1,41 @@
+version: 2
+models:
+- name: mart_load_telegram_assets
+  description: 'Mart table for Telegram wallet asset balances with parsed numeric
+    values. Contains current cryptocurrency holdings with USD valuations and 24h price
+    changes.
+
+    '
+  tags:
+  - mart
+  - telegram
+  - snapshot
+  - assets
+  meta:
+    materialization: incremental
+    incremental_strategy: delete+insert
+    unique_key: asset_bk
+  columns:
+  - name: asset_bk
+    description: 'TODO: Add description for asset_bk'
+    data_type: varchar(32)
+    data_tests:
+    - not_null
+    - unique
+  - name: asset_short_name
+    description: 'TODO: Add description for asset_short_name'
+    data_type: varchar(64)
+  - name: price_usd
+    description: 'TODO: Add description for price_usd'
+    data_type: double
+  - name: balance
+    description: 'TODO: Add description for balance'
+    data_type: varchar(64)
+  - name: value_usd
+    description: 'TODO: Add description for value_usd'
+    data_type: double
+  - name: processed_at
+    description: 'TODO: Add description for processed_at'
+    data_type: timestamp
+    data_tests:
+    - not_null

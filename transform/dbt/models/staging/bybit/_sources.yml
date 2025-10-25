@@ -13,6 +13,9 @@ sources:
       - name: deposits
         identifier: bybit_deposits
         description: Raw Bybit deposits export.
+      - name: earn
+        identifier: bybit_earn
+        description: Raw Bybit earn export.
       - name: internal_transfers
         identifier: bybit_internal_transfers
         description: Raw Bybit internal transfer records export.

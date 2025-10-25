@@ -1,0 +1,86 @@
+version: 2
+models:
+- name: mart_load_telegram_general_transactions
+  description: 'Mart table for Telegram wallet general transactions with parsed amounts
+    and exchange rates. Tracks various transaction types including swaps, deposits,
+    withdrawals, and transfers.
+
+    '
+  tags:
+  - mart
+  - telegram
+  - fact
+  - general_transactions
+  meta:
+    materialization: incremental
+    incremental_strategy: delete+insert
+    unique_key: transaction_bk
+  columns:
+  - name: transaction_bk
+    description: 'TODO: Add description for transaction_bk'
+    data_type: varchar(32)
+    data_tests:
+    - not_null
+    - unique
+  - name: transaction_type
+    description: 'TODO: Add description for transaction_type'
+    data_type: varchar(64)
+  - name: status
+    description: 'TODO: Add description for status'
+    data_type: varchar(64)
+  - name: amount_in
+    description: 'TODO: Add description for amount_in'
+    data_type: varchar(64)
+  - name: currency_in
+    description: 'TODO: Add description for currency_in'
+    data_type: varchar(64)
+  - name: amount_out
+    description: 'TODO: Add description for amount_out'
+    data_type: varchar(64)
+  - name: currency_out
+    description: 'TODO: Add description for currency_out'
+    data_type: varchar(64)
+  - name: ex_rate_value
+    description: 'TODO: Add description for ex_rate_value'
+    data_type: double
+  - name: ex_rate_base
+    description: 'TODO: Add description for ex_rate_base'
+    data_type: double
+  - name: ex_rate_quote
+    description: 'TODO: Add description for ex_rate_quote'
+    data_type: double
+  - name: fee_amt
+    description: 'TODO: Add description for fee_amt'
+    data_type: double
+  - name: fee_currency
+    description: 'TODO: Add description for fee_currency'
+    data_type: double
+  - name: counterparty
+    description: 'TODO: Add description for counterparty'
+    data_type: varchar(64)
+  - name: source
+    description: 'TODO: Add description for source'
+    data_type: varchar(64)
+  - name: raw_payload
+    description: 'TODO: Add description for raw_payload'
+    data_type: varchar(64)
+  - name: transaction_time
+    description: 'TODO: Add description for transaction_time'
+    data_type: timestamp
+  - name: time
+    description: 'TODO: Add description for time'
+    data_type: varchar(64)
+  - name: transaction_date
+    description: 'TODO: Add description for transaction_date'
+    data_type: varchar(64)
+  - name: transaction_time
+    description: 'TODO: Add description for transaction_time'
+    data_type: timestamp
+  - name: parsed_at
+    description: 'TODO: Add description for parsed_at'
+    data_type: timestamp
+  - name: processed_at
+    description: 'TODO: Add description for processed_at'
+    data_type: timestamp
+    data_tests:
+    - not_null

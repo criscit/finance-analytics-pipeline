@@ -1,5 +1,7 @@
 trash/
 
+.claude/
+
 # Environment & secrets
 .env
 .env.*

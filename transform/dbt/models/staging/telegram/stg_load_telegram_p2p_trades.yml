@@ -31,11 +31,11 @@ models:
         description: Trading role of the user in the deal.
         data_type: varchar(16)
 
-      - name: net_crypto_amount
+      - name: net_crypto_amt
         description: Net crypto quantity transacted.
         data_type: double
 
-      - name: paid_fee_crypto_amount
+      - name: paid_fee_crypto_amt
         description: Crypto fee amount paid.
         data_type: double
 
@@ -43,7 +43,7 @@ models:
         description: Crypto asset involved in the trade.
         data_type: varchar(16)
 
-      - name: fiat_amount
+      - name: fiat_amt
         description: Fiat amount exchanged.
         data_type: double
 

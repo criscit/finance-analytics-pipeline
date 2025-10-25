@@ -1,0 +1,43 @@
+version: 2
+models:
+- name: mart_load_bybit_internal_transfers
+  description: 'Mart table for Bybit internal account transfers with parsed amounts.
+    Tracks movements between different account types within Bybit (e.g., spot to derivatives).
+
+    '
+  tags:
+  - mart
+  - bybit
+  - fact
+  - transfers
+  meta:
+    materialization: incremental
+    incremental_strategy: delete+insert
+    unique_key: transfer_bk
+  columns:
+  - name: transfer_bk
+    description: 'TODO: Add description for transfer_bk'
+    data_type: varchar(32)
+    data_tests:
+    - not_null
+    - unique
+  - name: amount
+    description: 'TODO: Add description for amount'
+    data_type: varchar(64)
+  - name: coin
+    description: 'TODO: Add description for coin'
+    data_type: varchar(64)
+  - name: from_account_type
+    description: 'TODO: Add description for from_account_type'
+    data_type: varchar(64)
+  - name: to_account_type
+    description: 'TODO: Add description for to_account_type'
+    data_type: varchar(64)
+  - name: success_at
+    description: 'TODO: Add description for success_at'
+    data_type: timestamp
+  - name: processed_at
+    description: 'TODO: Add description for processed_at'
+    data_type: timestamp
+    data_tests:
+    - not_null

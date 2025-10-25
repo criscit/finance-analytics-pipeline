@@ -15,48 +15,32 @@ models:
         data_type: varchar(32)
         data_tests: [not_null, unique]
 
-      - name: quantity
-        description: Crypto quantity filled in the P2P trade.
-        data_type: double
-
-      - name: quantity_asset
-        description: Asset symbol associated with the quantity.
-        data_type: varchar(32)
+      - name: qty
+        description: Crypto quantity filled in the P2P trade (raw varchar value).
+        data_type: varchar(64)
 
       - name: amount
-        description: Fiat amount exchanged in the trade.
-        data_type: double
-
-      - name: amount_currency
-        description: Fiat currency code for the amount.
-        data_type: varchar(16)
+        description: Fiat amount exchanged in the trade (raw varchar value).
+        data_type: varchar(64)
 
       - name: price
-        description: Executed price for the trade.
-        data_type: double
+        description: Executed price for the trade (raw varchar value).
+        data_type: varchar(64)
 
-      - name: price_pair
-        description: Reported price pair string.
-        data_type: varchar(32)
+      - name: fee
+        description: Fee charged on the trade (raw varchar value).
+        data_type: varchar(64)
 
-      - name: trade_type
+      - name: type
         description: Trade direction (BUY or SELL).
         data_type: varchar(16)
 
-      - name: trade_status
-        description: Current status of the P2P order.
-        data_type: varchar(16)
-
-      - name: fee
-        description: Fee charged on the trade.
-        data_type: double
-
-      - name: fee_currency
-        description: Currency in which the fee was charged.
+      - name: status
+        description: Current status of the P2P order (e.g., Completed, Cancelled).
         data_type: varchar(16)
 
       - name: executed_at
-        description: Execution timestamp of the trade (UTC).
+        description: Execution timestamp of the trade.
         data_type: timestamp
 
       - name: order_no

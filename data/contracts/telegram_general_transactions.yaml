@@ -117,10 +117,10 @@ columns:
     description: 'Raw raw value from Telegram general transactions export'
     source_column_index: 17
 
-  - name: 'processed_dttm'
+  - name: 'parsed_at'
     type: varchar
     nullable: true
-    description: 'Raw processed_dttm value from Telegram general transactions export'
+    description: 'Raw parsed_at value from Telegram general transactions export'
     source_column_index: 18
 
 metadata:

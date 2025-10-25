@@ -20,8 +20,8 @@ models:
         data_type: varchar(64)
 
       - name: closed_size
-        description: Closed quantity on the order.
-        data_type: double
+        description: Closed quantity on the order (raw varchar value).
+        data_type: varchar(64)
 
       - name: exec_fee
         description: Execution fee charged for the fill.
@@ -43,9 +43,9 @@ models:
         description: Executed quantity for the fill.
         data_type: double
 
-      - name: exec_time
-        description: Timestamp of the execution event (UTC).
-        data_type: timestamp
+      - name: exec_time_ms
+        description: Execution timestamp in milliseconds since epoch.
+        data_type: bigint
 
       - name: exec_type
         description: Execution type classification.
@@ -68,24 +68,24 @@ models:
         data_type: double
 
       - name: index_price
-        description: Index price reported at execution time.
-        data_type: double
+        description: Index price reported at execution time (raw varchar value).
+        data_type: varchar(64)
 
       - name: is_maker
         description: Maker flag reported by Bybit.
         data_type: varchar(8)
 
       - name: leaves_qty
-        description: Remaining quantity after the execution.
-        data_type: double
+        description: Remaining quantity after the execution (raw varchar value).
+        data_type: varchar(64)
 
       - name: mark_iv
-        description: Implied volatility at execution time.
-        data_type: double
+        description: Implied volatility at execution time (raw varchar value).
+        data_type: varchar(64)
 
       - name: mark_price
-        description: Mark price reported at execution time.
-        data_type: double
+        description: Mark price reported at execution time (raw varchar value).
+        data_type: varchar(64)
 
       - name: market_unit
         description: Market unit descriptor.
@@ -111,9 +111,9 @@ models:
         description: Order type classification.
         data_type: varchar(32)
 
-      - name: sequence_no
-        description: Sequence number for the event stream.
-        data_type: bigint
+      - name: seq
+        description: Sequence number for the event stream (raw varchar value).
+        data_type: varchar(64)
 
       - name: side
         description: Order side (BUY or SELL).
@@ -128,12 +128,12 @@ models:
         data_type: varchar(32)
 
       - name: trade_iv
-        description: Trade implied volatility metric.
-        data_type: double
+        description: Trade implied volatility metric (raw varchar value).
+        data_type: varchar(64)
 
       - name: underlying_price
-        description: Underlying price associated with the execution.
-        data_type: double
+        description: Underlying price associated with the execution (raw varchar value).
+        data_type: varchar(64)
 
       - name: processed_at
         description: Timestamp of the ingestion.

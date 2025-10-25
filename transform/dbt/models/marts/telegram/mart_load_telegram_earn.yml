@@ -1,0 +1,40 @@
+version: 2
+models:
+- name: mart_load_telegram_earn
+  description: 'Mart table for Telegram wallet earn positions with parsed APY and
+    yield values. Tracks staking and yield-earning positions in Telegram wallet.
+
+    '
+  tags:
+  - mart
+  - telegram
+  - snapshot
+  - earn
+  meta:
+    materialization: incremental
+    incremental_strategy: delete+insert
+    unique_key: earn_bk
+  columns:
+  - name: earn_bk
+    description: 'TODO: Add description for earn_bk'
+    data_type: varchar(32)
+    data_tests:
+    - not_null
+    - unique
+  - name: asset
+    description: 'TODO: Add description for asset'
+    data_type: varchar(64)
+  - name: apy_pct
+    description: 'TODO: Add description for apy_pct'
+    data_type: double
+  - name: value_usd
+    description: 'TODO: Add description for value_usd'
+    data_type: double
+  - name: yield_usd
+    description: 'TODO: Add description for yield_usd'
+    data_type: varchar(64)
+  - name: processed_at
+    description: 'TODO: Add description for processed_at'
+    data_type: timestamp
+    data_tests:
+    - not_null

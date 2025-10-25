@@ -20,11 +20,11 @@ models:
         data_type: varchar(64)
 
       - name: pair
-        description: Trading pair symbol.
-        data_type: varchar(32)
+        description: Trading pair symbol (e.g., BTCUSDT).
+        data_type: varchar(16)
 
       - name: order_type
-        description: Spot order type.
+        description: Spot order type (e.g., Limit, Market).
         data_type: varchar(16)
 
       - name: order_side
@@ -35,31 +35,31 @@ models:
         description: Submitted order price.
         data_type: double
 
-      - name: order_amount
-        description: Submitted base asset quantity.
-        data_type: double
+      - name: order_amt
+        description: Submitted base asset quantity with currency (e.g., "0.00139BTC").
+        data_type: varchar(64)
 
-      - name: executed_amount
-        description: Executed base asset quantity.
-        data_type: double
+      - name: executed_amt
+        description: Executed base asset quantity with currency (e.g., "0.00139BTC").
+        data_type: varchar(64)
 
       - name: average_price
         description: Average execution price.
         data_type: double
 
       - name: trading_total
-        description: Total traded quote quantity.
-        data_type: double
+        description: Total traded quote quantity with currency (e.g., "5907.5RUB").
+        data_type: varchar(64)
 
       - name: order_status
-        description: Current status of the spot order.
+        description: Current status of the spot order (e.g., FILLED, PARTIALLY_FILLED, CANCELLED).
         data_type: varchar(16)
 
       - name: order_placed_at_utc
         description: Order submission timestamp (UTC).
         data_type: timestamp
 
-      - name: execution_time_utc
+      - name: executed_at_utc
         description: Final execution timestamp (UTC).
         data_type: timestamp
 

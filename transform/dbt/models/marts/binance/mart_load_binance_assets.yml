@@ -1,0 +1,46 @@
+version: 2
+models:
+- name: mart_load_binance_assets
+  description: 'Mart table for Binance asset balances (non-zero balances only). Contains
+    current holdings in spot wallet with USDT equivalent valuations.
+
+    '
+  tags:
+  - mart
+  - binance
+  - snapshot
+  - assets
+  meta:
+    materialization: incremental
+    incremental_strategy: delete+insert
+    unique_key: asset_bk
+  columns:
+  - name: asset_bk
+    description: 'TODO: Add description for asset_bk'
+    data_type: varchar(32)
+    data_tests:
+    - not_null
+    - unique
+  - name: asset
+    description: 'TODO: Add description for asset'
+    data_type: varchar(64)
+  - name: free
+    description: 'TODO: Add description for free'
+    data_type: varchar(64)
+  - name: locked
+    description: 'TODO: Add description for locked'
+    data_type: varchar(64)
+  - name: total
+    description: 'TODO: Add description for total'
+    data_type: varchar(64)
+  - name: usdt_equivalent
+    description: 'TODO: Add description for usdt_equivalent'
+    data_type: varchar(64)
+  - name: usdt_price
+    description: 'TODO: Add description for usdt_price'
+    data_type: double
+  - name: processed_at
+    description: 'TODO: Add description for processed_at'
+    data_type: timestamp
+    data_tests:
+    - not_null
