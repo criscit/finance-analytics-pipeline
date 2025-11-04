@@ -8,10 +8,10 @@ select
   earn_bk,
   asset,
   apy_pct,
+  wallet_balance,
+  price_usd,
   value_usd,
   yield_usd,
-  wallet_balance_coin,
-  price_per_coin_usdt,
   current_timestamp at time zone 'UTC' as processed_at
 from
   {{ ref('core_load_telegram_earn') }}

@@ -18,6 +18,7 @@ select
   block_hash,
   chain,
   coin,
+  price_usd,
   confirmations,
   deposit_type,
   from_address,
@@ -29,7 +30,7 @@ select
   to_address,
   tx_id,
   tx_index,
-  
+
   current_timestamp at time zone 'UTC' as processed_at
 from
   {{ ref('stg_load_bybit_deposits') }}

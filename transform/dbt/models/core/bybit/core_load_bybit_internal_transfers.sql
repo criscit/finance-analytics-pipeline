@@ -14,11 +14,12 @@ select
   ) as transfer_bk,
   amount,
   coin,
+  price_usd,
   from_account_type,
   to_account_type,
   status,
   timestamp_ms,
-  
+
   current_timestamp at time zone 'UTC' as processed_at
 from
   {{ ref('stg_load_bybit_internal_transfers') }}

@@ -8,6 +8,7 @@ select
   transfer_bk,
   amount,
   coin,
+  price_usd,
   from_account_type,
   to_account_type,
   (to_timestamp(timestamp_ms / 1000.0) at time zone 'Europe/Moscow') as success_at,

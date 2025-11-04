@@ -33,11 +33,11 @@ models:
   - name: total
     description: 'TODO: Add description for total'
     data_type: varchar(64)
-  - name: usdt_equivalent
-    description: 'TODO: Add description for usdt_equivalent'
+  - name: amount_usd
+    description: 'TODO: Add description for amount_usd'
     data_type: varchar(64)
-  - name: usdt_price
-    description: 'TODO: Add description for usdt_price'
+  - name: price_usd
+    description: 'TODO: Add description for price_usd'
     data_type: double
   - name: processed_at
     description: 'TODO: Add description for processed_at'

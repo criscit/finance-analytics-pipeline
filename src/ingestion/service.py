@@ -477,6 +477,9 @@ def _update_counts(
         return ingested, skipped + 1, unsupported, errors
     if result_status == "unsupported":
         return ingested, skipped, unsupported + 1, errors
+    if result_status == "pending":
+        # Files marked pending are being queued for merge; do not treat as error.
+        return ingested, skipped, unsupported, errors
     return ingested, skipped, unsupported, errors + 1
 
 

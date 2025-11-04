@@ -99,7 +99,6 @@ clean: ## Clean up generated files
 	rm -rf data/quality/gx/uncommitted/
 	rm -rf data/quality/gx/validations/
 	rm -rf transform/dbt/target/
-	rm -rf transform/dbt/dbt_packages/
 	rm -rf transform/dbt/logs/
 	rm -rf transform/dbt/*.log
 	rm -rf transform/dbt/manifest.json

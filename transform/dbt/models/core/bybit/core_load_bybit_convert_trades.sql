@@ -16,8 +16,10 @@ select
   exchange_rate,
   from_amt,
   from_coin,
+  from_price_usd,
   to_amt,
   to_coin,
+  to_price_usd,
   current_timestamp at time zone 'UTC' as processed_at
 from
   {{ ref('stg_load_bybit_convert_trades') }}

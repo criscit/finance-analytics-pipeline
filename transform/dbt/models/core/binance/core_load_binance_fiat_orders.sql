@@ -18,6 +18,7 @@ select
   indicated_amt,
   total_fee,
   fiat_currency,
+  price_usd,
   method,
   status,
   transaction_type,

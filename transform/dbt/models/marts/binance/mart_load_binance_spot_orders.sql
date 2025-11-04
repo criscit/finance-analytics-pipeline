@@ -14,9 +14,13 @@ select
   trading_total,
   order_amt_currency,
   executed_amt_currency,
+  average_price_currency,
   trading_total_currency,
   order_type,
   order_side,
+  executed_price_usd,
+  trading_currency,
+  trading_price_usd,
   order_placed_at_utc at time zone 'Europe/Moscow' as order_placed_at,
   executed_at_utc at time zone 'Europe/Moscow' as executed_at,
   current_timestamp at time zone 'UTC' as processed_at

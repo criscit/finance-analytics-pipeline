@@ -55,6 +55,9 @@ ignore = [
   "UP032"  # .format(...) to f-strings globally
 ]
 
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["PLR2004"]  # Allow magic values in tests for clarity
+
 [tool.mypy]
 python_version = "3.11"
 strict = true

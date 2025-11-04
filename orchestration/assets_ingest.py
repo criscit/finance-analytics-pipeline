@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from dagster import Output, asset, get_dagster_logger
+from dagster import Failure, Output, asset, get_dagster_logger
 
 from src.ingestion import (
     IngestionContext,
@@ -62,6 +62,14 @@ CRYPTO_CONFIG = IngestionSourceConfig(
 def _run_asset_ingestion(config: IngestionSourceConfig) -> Output[dict[str, int]]:
     log = get_dagster_logger()
     metrics = run_ingestion(config, INGESTION_CONTEXT, log)
+    if metrics.get("errors"):
+        raise Failure(
+            description=(
+                f"{config.name} ingestion encountered {metrics['errors']} error(s); "
+                "see logs for details"
+            ),
+            metadata=metrics,
+        )
     return Output(metrics, metadata=metrics)
 
 

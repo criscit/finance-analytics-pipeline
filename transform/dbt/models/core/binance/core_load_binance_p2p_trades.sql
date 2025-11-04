@@ -23,6 +23,7 @@ select
   total_price,
   unit_price,
   asset,
+  asset_price_usd,
   counterparty_nickname,
   fiat,
   fiat_symbol,

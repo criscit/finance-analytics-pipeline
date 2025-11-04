@@ -19,6 +19,7 @@ select
   price,
   total_fee,
   crypto_currency,
+  crypto_price_usd,
   fiat_currency,
   payment_method,
   status,

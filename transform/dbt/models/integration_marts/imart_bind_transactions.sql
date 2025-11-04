@@ -185,11 +185,15 @@ select
   -1.0 * from_amt as "Amount, Currency",
   from_asset as "Currency",
   null::decimal(18,2) as "Amount, RUB",
-  case when from_asset in ('USDT', 'USDC') then -1.0 * from_amt else null end as "Amount, USD",
+  case
+    when from_asset in ('USDT', 'USDC') then -1.0 * from_amt
+    when from_price_usd is not null then -1.0 * from_amt * from_price_usd
+    else null
+  end as "Amount, USD",
   null::decimal(18,6) as "Executed Rate, RUB",
   ratio as "Exchange Rate, USD",
   null::decimal(18,6) as "Close Rate, RUB",
-  null::decimal(18,6) as "Close Rate, USD"
+  from_price_usd as "Close Rate, USD"
 from
   {{ ref('mart_load_binance_convert_trades') }}
 
@@ -205,11 +209,15 @@ select
   to_amt as "Amount, Currency",
   to_asset as "Currency",
   null::decimal(18,2) as "Amount, RUB",
-  case when to_asset in ('USDT', 'USDC') then to_amt else null end as "Amount, USD",
+  case
+    when to_asset in ('USDT', 'USDC') then to_amt
+    when to_price_usd is not null then to_amt * to_price_usd
+    else null
+  end as "Amount, USD",
   null::decimal(18,6) as "Executed Rate, RUB",
   ratio as "Exchange Rate, USD",
   null::decimal(18,6) as "Close Rate, RUB",
-  null::decimal(18,6) as "Close Rate, USD"
+  to_price_usd as "Close Rate, USD"
 from
   {{ ref('mart_load_binance_convert_trades') }}
 
@@ -366,15 +374,20 @@ union all
 -- Bybit Deposits
 select
   date(success_at) as "Date",
+  success_at as "Transaction Timestamp",
   'Bybit' as "Platform Name",
   'Deposit' as "Category",
   'Deposit ' || cast(amount as varchar) || ' ' || coin || ' via ' || chain as "Description",
   amount as "Amount, Currency",
   coin as "Currency",
   null::decimal(18,2) as "Amount, RUB",
-  case when coin in ('USDT', 'USDC', 'USD') then amount else null end as "Amount, USD",
+  case
+    when coin in ('USDT', 'USDC', 'USD') then amount
+    when price_usd is not null then amount * price_usd
+    else null
+  end as "Amount, USD",
   null::decimal(18,6) as "Executed Rate, RUB",
-  null::decimal(18,6) as "Exchange Rate, USD",
+  price_usd as "Exchange Rate, USD",
   null::decimal(18,6) as "Close Rate, RUB",
   null::decimal(18,6) as "Close Rate, USD"
 from
@@ -385,15 +398,20 @@ union all
 -- Bybit Deposits - Fee
 select
   date(success_at) as "Date",
+  success_at as "Transaction Timestamp",
   'Bybit' as "Platform Name",
   'Fee' as "Category",
   'Deposit fee for ' || coin || ' via ' || chain as "Description",
   -1.0 * deposit_fee as "Amount, Currency",
   coin as "Currency",
   null::decimal(18,2) as "Amount, RUB",
-  case when coin in ('USDT', 'USDC', 'USD') then -1.0 * deposit_fee else null end as "Amount, USD",
+  case
+    when coin in ('USDT', 'USDC', 'USD') then -1.0 * deposit_fee
+    when price_usd is not null then -1.0 * deposit_fee * price_usd
+    else null
+  end as "Amount, USD",
   null::decimal(18,6) as "Executed Rate, RUB",
-  null::decimal(18,6) as "Exchange Rate, USD",
+  price_usd as "Exchange Rate, USD",
   null::decimal(18,6) as "Close Rate, RUB",
   null::decimal(18,6) as "Close Rate, USD"
 from
@@ -406,15 +424,20 @@ union all
 -- Bybit Withdrawals
 select
   date(updated_at) as "Date",
+  updated_at as "Transaction Timestamp",
   'Bybit' as "Platform Name",
   'Withdrawal' as "Category",
   'Withdraw ' || cast(amount as varchar) || ' ' || coin || ' via ' || chain as "Description",
   -1.0 * amount as "Amount, Currency",  -- Negative for withdrawal
   coin as "Currency",
   null::decimal(18,2) as "Amount, RUB",
-  case when coin in ('USDT', 'USDC', 'USD') then -1.0 * amount else null end as "Amount, USD",
+  case
+    when coin in ('USDT', 'USDC', 'USD') then -1.0 * amount
+    when price_usd is not null then -1.0 * amount * price_usd
+    else null
+  end as "Amount, USD",
   null::decimal(18,6) as "Executed Rate, RUB",
-  null::decimal(18,6) as "Exchange Rate, USD",
+  price_usd as "Exchange Rate, USD",
   null::decimal(18,6) as "Close Rate, RUB",
   null::decimal(18,6) as "Close Rate, USD"
 from
@@ -425,15 +448,20 @@ union all
 -- Bybit Withdrawals - Fee
 select
   date(updated_at) as "Date",
+  updated_at as "Transaction Timestamp",
   'Bybit' as "Platform Name",
   'Fee' as "Category",
   'Withdrawal fee for ' || coin || ' via ' || chain as "Description",
   -1.0 * withdraw_fee as "Amount, Currency",
   coin as "Currency",
   null::decimal(18,2) as "Amount, RUB",
-  case when coin in ('USDT', 'USDC', 'USD') then -1.0 * withdraw_fee else null end as "Amount, USD",
+  case
+    when coin in ('USDT', 'USDC', 'USD') then -1.0 * withdraw_fee
+    when price_usd is not null then -1.0 * withdraw_fee * price_usd
+    else null
+  end as "Amount, USD",
   null::decimal(18,6) as "Executed Rate, RUB",
-  null::decimal(18,6) as "Exchange Rate, USD",
+  price_usd as "Exchange Rate, USD",
   null::decimal(18,6) as "Close Rate, RUB",
   null::decimal(18,6) as "Close Rate, USD"
 from
@@ -446,6 +474,7 @@ union all
 -- Telegram General Transactions
 select
   date(coalesce(transacted_at, transaction_date)) as "Date",
+  coalesce(transacted_at, transaction_date::timestamp) as "Transaction Timestamp",
   'Telegram Wallet' as "Platform Name",
   transaction_type as "Category",
   coalesce(counterparty, 'Telegram transaction') || ' | In: ' || coalesce(cast(amount_in as varchar) || ' ' || currency_in, 'N/A') || ' | Out: ' || coalesce(cast(amount_out as varchar) || ' ' || currency_out, 'N/A') as "Description",
@@ -455,12 +484,14 @@ select
   case
     when currency_in in ('USDT', 'USD') then amount_in
     when currency_out in ('USDT', 'USD') then -1.0 * amount_out
+    when amount_in is not null and currency_in_price_usd is not null then amount_in * currency_in_price_usd
+    when amount_out is not null and currency_out_price_usd is not null then -1.0 * amount_out * currency_out_price_usd
     else null
   end as "Amount, USD",
   null::decimal(18,6) as "Executed Rate, RUB",
   ex_rate_value as "Exchange Rate, USD",
   null::decimal(18,6) as "Close Rate, RUB",
-  null::decimal(18,6) as "Close Rate, USD"
+  coalesce(currency_in_price_usd, currency_out_price_usd) as "Close Rate, USD"
 from
   {{ ref('mart_load_telegram_general_transactions') }}
 where
@@ -621,17 +652,22 @@ union all
 -- Bybit Convert Trades - From (what you gave up)
 select
   date(created_at) as "Date",
+  created_at as "Transaction Timestamp",
   'Bybit' as "Platform Name",
   'Convert' as "Category",
   'Convert ' || cast(from_amt as varchar) || ' ' || from_coin || ' to ' || cast(to_amt as varchar) || ' ' || to_coin || ' - From' as "Description",
   -1.0 * from_amt as "Amount, Currency",
   from_coin as "Currency",
   null::decimal(18,2) as "Amount, RUB",
-  case when from_coin in ('USDT', 'USDC', 'USD') then -1.0 * from_amt else null end as "Amount, USD",
+  case
+    when from_coin in ('USDT', 'USDC', 'USD') then -1.0 * from_amt
+    when from_price_usd is not null then -1.0 * from_amt * from_price_usd
+    else null
+  end as "Amount, USD",
   null::decimal(18,6) as "Executed Rate, RUB",
   exchange_rate as "Exchange Rate, USD",
   null::decimal(18,6) as "Close Rate, RUB",
-  null::decimal(18,6) as "Close Rate, USD"
+  from_price_usd as "Close Rate, USD"
 from
   {{ ref('mart_load_bybit_convert_trades') }}
 
@@ -640,17 +676,22 @@ union all
 -- Bybit Convert Trades - To (what you received)
 select
   date(created_at) as "Date",
+  created_at as "Transaction Timestamp",
   'Bybit' as "Platform Name",
   'Convert' as "Category",
   'Convert ' || cast(from_amt as varchar) || ' ' || from_coin || ' to ' || cast(to_amt as varchar) || ' ' || to_coin || ' - To' as "Description",
   to_amt as "Amount, Currency",
   to_coin as "Currency",
   null::decimal(18,2) as "Amount, RUB",
-  case when to_coin in ('USDT', 'USDC', 'USD') then to_amt else null end as "Amount, USD",
+  case
+    when to_coin in ('USDT', 'USDC', 'USD') then to_amt
+    when to_price_usd is not null then to_amt * to_price_usd
+    else null
+  end as "Amount, USD",
   null::decimal(18,6) as "Executed Rate, RUB",
   exchange_rate as "Exchange Rate, USD",
   null::decimal(18,6) as "Close Rate, RUB",
-  null::decimal(18,6) as "Close Rate, USD"
+  to_price_usd as "Close Rate, USD"
 from
   {{ ref('mart_load_bybit_convert_trades') }}
 
@@ -735,9 +776,13 @@ select
   amount as "Amount, Currency",
   coin as "Currency",
   null::decimal(18,2) as "Amount, RUB",
-  case when coin in ('USDT', 'USDC', 'USD') then amount else null end as "Amount, USD",
+  case
+    when coin in ('USDT', 'USDC', 'USD') then amount
+    when price_usd is not null then amount * price_usd
+    else null
+  end as "Amount, USD",
   null::decimal(18,6) as "Executed Rate, RUB",
-  null::decimal(18,6) as "Exchange Rate, USD",
+  price_usd as "Exchange Rate, USD",
   null::decimal(18,6) as "Close Rate, RUB",
   null::decimal(18,6) as "Close Rate, USD"
 from

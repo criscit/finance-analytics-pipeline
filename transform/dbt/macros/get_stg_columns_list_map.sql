@@ -1,21 +1,21 @@
-{% macro get_stg_columns_list_map(bank, require=true) %}
+{% macro get_stg_columns_list_map(entity, require=true) %}
 
   {% set rows = [] %}
   {% if execute %}
     {% set q %}
       select target_col, expr
       from {{ ref('transactions_column_map') }}
-      where bank = {{ "'" ~ bank ~ "'" }}
+      where entity = {{ "'" ~ entity ~ "'" }}
       order by 1
     {% endset %}
     {% set res = run_query(q) %}
     {% if res is not none %}{% set rows = res.rows %}{% endif %}
 
     {# общий заголовок лога #}
-    {% do log("get_stg_columns_list_map: bank=" ~ bank ~ ", rows=" ~ (rows|length), true) %}
+    {% do log("get_stg_columns_list_map: entity=" ~ entity ~ ", rows=" ~ (rows|length), true) %}
 
     {% if require and (rows|length == 0) %}
-      {% do exceptions.raise_compiler_error("No column map rows for bank=" ~ bank) %}
+      {% do exceptions.raise_compiler_error("No column map rows for entity=" ~ entity) %}
     {% endif %}
   {% endif %}
 

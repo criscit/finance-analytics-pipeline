@@ -10,8 +10,8 @@ select
   free,
   locked,
   total,
-  usdt_equivalent,
-  usdt_price,
+  amount_usd,
+  price_usd,
   current_timestamp at time zone 'UTC' as processed_at
 from
   {{ ref('core_load_binance_assets') }}

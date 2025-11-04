@@ -14,10 +14,10 @@ select
   ) as earn_bk,
   asset,
   coalesce(apy_pct, 0) as apy_pct,
+  coalesce(wallet_balance, 0) as wallet_balance,
+  coalesce(price_usd, 0) as price_usd,
   coalesce(value_usd, 0) as value_usd,
   coalesce(yield_usd, 0) as yield_usd,
-  coalesce(wallet_balance_coin, 0) as wallet_balance_coin,
-  coalesce(price_per_coin_usdt, 0) as price_per_coin_usdt,
   current_timestamp at time zone 'UTC' as processed_at
 from
   {{ ref('stg_load_telegram_earn') }}

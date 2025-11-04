@@ -13,6 +13,7 @@ select
   indicated_amt,
   total_fee,
   fiat_currency,
+  price_usd,
   method,
   transaction_type,
   current_timestamp at time zone 'UTC' as processed_at

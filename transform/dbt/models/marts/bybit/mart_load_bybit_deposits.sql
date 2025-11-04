@@ -10,6 +10,7 @@ select
   deposit_fee,
   chain,
   coin,
+  price_usd,
   (to_timestamp(success_at_ms / 1000.0) at time zone 'Europe/Moscow') as success_at,
   current_timestamp at time zone 'UTC' as processed_at
 from

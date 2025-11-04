@@ -1,0 +1,18 @@
+# Normalize text to LF in the repo
+*           text=auto eol=lf
+
+# Keep Windows scripts as CRLF
+*.bat       text eol=crlf
+*.cmd       text eol=crlf
+*.ps1       text eol=crlf
+
+# Binary files: never touch line endings
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pdf binary
+*.zip binary
+*.jar binary
+*.exe binary
+*.dll binary

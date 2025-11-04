@@ -20,6 +20,7 @@ select
   effectiveStakingAmount,
   id,
   orderId,
+  price_usd,
   productId,
   status,
   yieldType,

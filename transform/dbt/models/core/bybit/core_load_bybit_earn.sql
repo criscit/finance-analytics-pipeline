@@ -15,10 +15,8 @@ select
   asset,
   coalesce(apy, 0) as apy_pct,
   coalesce(wallet_balance, 0) as wallet_balance,
-  coalesce(asset_usdt_price, 0) as asset_usdt_price,
-  coalesce(wallet_balance_usd, 0) as wallet_balance_usd,
+  coalesce(price_usd, 0) as price_usd,
   coalesce(value_usd, 0) as value_usd,
-  coalesce(yield, 0) as yield_usd,
   current_timestamp at time zone 'UTC' as processed_at
 from
   {{ ref('stg_load_bybit_earn') }}

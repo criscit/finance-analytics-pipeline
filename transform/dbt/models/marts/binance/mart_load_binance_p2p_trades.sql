@@ -15,6 +15,7 @@ select
   total_price,
   unit_price,
   asset,
+  asset_price_usd,
   fiat,
   pay_method_name,
   trade_type,

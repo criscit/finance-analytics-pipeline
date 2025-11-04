@@ -9,10 +9,8 @@ select
   asset,
   apy_pct,
   wallet_balance,
-  asset_usdt_price,
-  wallet_balance_usd,
+  price_usd,
   value_usd,
-  yield_usd,
   current_timestamp at time zone 'UTC' as processed_at
 from
   {{ ref('core_load_bybit_earn') }}

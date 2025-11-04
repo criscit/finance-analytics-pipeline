@@ -37,12 +37,12 @@ models:
         description: Total balance (free + locked).
         data_type: double
 
-      - name: usdt_equivalent
-        description: Total USDT equivalent value of the asset.
+      - name: amount_usd
+        description: Total USD value of the asset.
         data_type: double
 
-      - name: usdt_price
-        description: Current USDT price for 1 unit of the asset.
+      - name: price_usd
+        description: Current USD price for 1 unit of the asset.
         data_type: double
 
       - name: processed_at

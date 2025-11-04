@@ -18,6 +18,7 @@ select
   withdraw_fee,
   chain,
   coin,
+  price_usd,
   create_time_ms,
   update_time_ms,
   status,
@@ -26,7 +27,7 @@ select
   to_address,
   tx_id,
   withdraw_type,
-  
+
   current_timestamp at time zone 'UTC' as processed_at
 from
   {{ ref('stg_load_bybit_withdrawals') }}
