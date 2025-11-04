@@ -45,21 +45,21 @@ sequenceDiagram
     participant GE as Great Expectations
     participant CSVExp as CSV Export
     participant Sheets as Google Sheets
-    
+
     CSV->>Ingest: New CSV files
     Ingest->>DuckDB: Load to staging tables
     Ingest->>DuckDB: Update ingestion ledger
-    
+
     dbt->>DuckDB: Read staging tables
     dbt->>DuckDB: Write core/marts tables
-    
+
     GE->>DuckDB: Validate data quality
     GE->>GE: Generate validation report
-    
+
     CSVExp->>DuckDB: Read marts tables
     CSVExp->>CSVExp: Write CSV snapshots
     CSVExp->>CSVExp: Generate manifests
-    
+
     Sheets->>DuckDB: Read new data
     Sheets->>Sheets: Append to Google Sheets
     Sheets->>DuckDB: Update export bookmark
@@ -172,6 +172,3 @@ CREATE TABLE meta.export_bookmark(
 - Docker container health status
 - DuckDB connectivity
 - Export file verification
-
-
-

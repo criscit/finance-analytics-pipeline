@@ -13,51 +13,51 @@ skip_footer_rows: 0 # 6 botton not fully empty rows
 target_table:
   schema: prod_raw
   name: t_bank_transactions
-  
+
 columns:
   - name: "Номер карты"
     type: varchar
     nullable: true
     description: Last digits of the card used for the transaction
     source_column_index: 2
-    
+
   - name: "Статус"
     type: varchar
     nullable: false
     description: Transaction status from bank system (OK/FAILED)
     source_column_index: 3
-    
+
   - name: "Категория"
     type: varchar
     nullable: true
     description: Bank-assigned spending category for transaction classification
     source_column_index: 9
-    
+
   - name: "MCC"
     type: varchar
     nullable: true
     description: Merchant Category Code identifying the type of merchant/business
     source_column_index: 10
-    
+
   - name: "Описание"
     type: varchar
     nullable: true
     description: Free-text transaction description provided by the bank
     source_column_index: 11
-    
+
   - name: "Сумма операции"
     type: varchar
     nullable: false
     description: Transaction amount as string with comma decimal separator (e.g., "1405,00")
     source_column_index: 4
     format: "decimal with comma separator"
-    
+
   - name: "Валюта операции"
     type: varchar
     nullable: false
     description: ISO 4217 currency code of the transaction
     source_column_index: 5
-    
+
   - name: "Дата операции"
     type: varchar
     nullable: false
@@ -65,47 +65,47 @@ columns:
     source_column_index: 0
     format: "%d.%m.%Y %H:%M:%S"
     timezone: "Europe/Moscow"
-    
+
   - name: "Сумма платежа"
     type: varchar
     nullable: true
     description: Amount at operation time in merchant currency as string with comma separator
     source_column_index: 6
     format: "decimal with comma separator"
-    
+
   - name: "Валюта платежа"
     type: varchar
     nullable: true
     description: ISO 4217 currency code used by the merchant
     source_column_index: 7
-    
+
   - name: "Дата платежа"
     type: varchar
     nullable: true
     description: Payment date in format 'DD.MM.YYYY'
     source_column_index: 1
     format: "%d.%m.%Y"
-    
+
   - name: "Кэшбэк"
     type: varchar
     nullable: true
     description: Cashback amount earned from this transaction as string
     source_column_index: 8
-    
+
   - name: "Бонусы (включая кэшбэк)"
     type: varchar
     nullable: true
     description: Total rewards granted including cashback and other bonuses as string with comma separator
     source_column_index: 12
     format: "decimal with comma separator"
-    
+
   - name: "Сумма операции с округлением"
     type: varchar
     nullable: true
     description: Transaction amount after bank's rounding algorithm applied, as string with comma separator
     source_column_index: 14
     format: "decimal with comma separator"
-    
+
   - name: "Округление на инвесткопилку"
     type: varchar
     nullable: true

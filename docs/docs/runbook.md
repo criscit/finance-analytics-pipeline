@@ -29,7 +29,7 @@
    ```bash
    # Check GE validation results
    ls quality/gx/validations/
-   
+
    # Review specific validation
    cat quality/gx/validations/[validation_id]/[asset_name]/[checkpoint_name].json
    ```
@@ -75,7 +75,7 @@
    ```bash
    # Copy files to import path
    cp your_file.csv $IMPORT_CSV_PATH/
-   
+
    # Trigger manual run in Dagster UI
    # Or run specific assets via CLI
    ```
@@ -99,7 +99,7 @@
    ```bash
    # Replace the service account file
    cp new-finance-sheets-writer-prod-sa.json credentials/finance-sheets-writer-prod-sa.json
-   
+
    # Restart services
    docker compose restart
    ```
@@ -114,7 +114,7 @@
    ```bash
    # Edit .env with new values
    nano .env
-   
+
    # Restart services
    docker compose down && docker compose up -d
    ```
@@ -138,7 +138,7 @@
    ```bash
    # Check latest CSV
    ls -la data/exports/csv/marts_bank_finance_analytics/latest.csv
-   
+
    # Check manifest
    cat data/exports/metadata/marts_bank_finance_analytics/dt=*/manifest.json
    ```
@@ -184,7 +184,7 @@
    ```sql
    -- Analyze tables for better query planning
    ANALYZE;
-   
+
    -- Check table sizes
    SELECT table_name, row_count FROM duckdb_tables();
    ```
@@ -213,6 +213,3 @@
    - Rotate service account keys
    - Review and update dependencies
    - Performance analysis and optimization
-
-
-

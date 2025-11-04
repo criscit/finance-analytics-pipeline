@@ -170,7 +170,7 @@ class TestDataValidation:
 
             con.execute(
                 """
-                INSERT INTO test_table VALUES 
+                INSERT INTO test_table VALUES
                 (1, 'test1', 100.50, 'active'),
                 (2, NULL, 200.75, 'inactive'),
                 (3, 'test3', NULL, 'active'),
@@ -181,7 +181,7 @@ class TestDataValidation:
             # Test completeness checks
             completeness_results = con.execute(
                 """
-                SELECT 
+                SELECT
                     COUNT(*) as total_rows,
                     COUNT(name) as name_complete,
                     COUNT(amount) as amount_complete,
@@ -215,7 +215,7 @@ class TestDataValidation:
             # Test valid data types
             con.execute(
                 """
-                INSERT INTO test_table VALUES 
+                INSERT INTO test_table VALUES
                 (1, 'test1', 100.50, '2024-01-01 12:00:00'),
                 (2, 'test2', 200.75, '2024-01-01 13:00:00')
             """
@@ -247,7 +247,7 @@ class TestDataValidation:
 
             con.execute(
                 """
-                INSERT INTO test_table VALUES 
+                INSERT INTO test_table VALUES
                 (1, 100.50, 0.15),
                 (2, -50.25, 0.95),
                 (3, 0.00, 1.00),
@@ -258,7 +258,7 @@ class TestDataValidation:
             # Test range validations
             range_results = con.execute(
                 """
-                SELECT 
+                SELECT
                     MIN(amount) as min_amount,
                     MAX(amount) as max_amount,
                     MIN(percentage) as min_percentage,

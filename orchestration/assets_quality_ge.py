@@ -19,9 +19,10 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import great_expectations as gx
-from dagster import Failure, MetadataValue, Output, asset, get_dagster_logger
+from dagster import Failure, MetadataValue, Output, asset
 
 from orchestration.quality_gx.bootstrap import run_checkpoint_with_dataframes
+from src.logging_config import logger
 
 if TYPE_CHECKING:
     pass
@@ -57,8 +58,6 @@ def _get_data_context() -> Any:
     Raises:
         FileNotFoundError: If GE_DIR doesn't exist
     """
-    log = get_dagster_logger()
-
     if not GE_DIR:
         raise FileNotFoundError("GE_DIR environment variable is not set")
 
@@ -69,14 +68,14 @@ def _get_data_context() -> Any:
             f"Set GE_DIR or ensure the folder is mounted into the container."
         )
 
-    log.info("Loading GE context from: %s", root)
-    log.info("DUCKDB_URL: %s", os.getenv("DUCKDB_URL"))
+    logger.info("Loading GE context from: %s", root)
+    logger.info("DUCKDB_URL: %s", os.getenv("DUCKDB_URL"))
 
     context = gx.get_context(context_root_dir=str(root))  # type: ignore[attr-defined]
 
     # Log GX version and configuration
     with contextlib.suppress(Exception):
-        log.info("great_expectations version: %s", gx.__version__)
+        logger.info("great_expectations version: %s", gx.__version__)
 
     return context
 
@@ -103,8 +102,7 @@ def _run_checkpoint(checkpoint_name: str, filter_tables: set[str] | None = None)
     Raises:
         RuntimeError: If checkpoint validation fails
     """
-    log = get_dagster_logger()
-    log.info("Running checkpoint: %s", checkpoint_name)
+    logger.info("Running checkpoint: %s", checkpoint_name)
 
     # Run checkpoint using DataFrame-based approach
     result = run_checkpoint_with_dataframes(checkpoint_name, filter_tables=filter_tables)
@@ -147,17 +145,16 @@ def run_ge_raw_checkpoints() -> Output[dict[str, str]]:
     from src.duckdb_utils import get_recently_ingested_tables
 
     checkpoint_name = "check_raw"
-    log = get_dagster_logger()
 
     # Get list of ingested tables from ledger
     ingestion_info = get_recently_ingested_tables(DUCKDB_PATH_NORMALIZED, hours=24)
     tables_to_process = ingestion_info.get("tables_to_process", [])
     ingested_table_names = {t["table_nm"] for t in tables_to_process}
 
-    log.info("Tables ingested in last 24h: %s", ingested_table_names)
+    logger.info("Tables ingested in last 24h: %s", ingested_table_names)
 
     if not ingested_table_names:
-        log.info("No tables ingested recently - skipping raw quality checks")
+        logger.info("No tables ingested recently - skipping raw quality checks")
         return Output(
             {"status": "skipped", "checkpoint": checkpoint_name, "reason": "no_recent_ingestions"},
             metadata={
@@ -170,13 +167,13 @@ def run_ge_raw_checkpoints() -> Output[dict[str, str]]:
     try:
         result = _run_checkpoint(checkpoint_name, filter_tables=ingested_table_names)
     except RuntimeError as error:  # pragma: no cover - runtime error path
-        log.error("GE raw checkpoint failed: %s", error)
+        logger.error("GE raw checkpoint failed: %s", error)
         _handle_checkpoint_failure(checkpoint_name, error)
     except Exception as error:  # pragma: no cover - runtime error path
-        log.error("Unexpected error in GE raw checkpoint: %s", error)
+        logger.error("Unexpected error in GE raw checkpoint: %s", error)
         _handle_unexpected_exception(checkpoint_name, error)
 
-    log.info("Raw table GE checkpoint completed successfully")
+    logger.info("Raw table GE checkpoint completed successfully")
     return Output(
         {"status": "success", "checkpoint": checkpoint_name},
         metadata={
@@ -199,18 +196,17 @@ def run_ge_mart_checkpoints() -> Output[dict[str, str]]:
     - No unexpected null values in critical business fields
     """
     checkpoint_name = "check_mart"
-    log = get_dagster_logger()
 
     try:
         result = _run_checkpoint(checkpoint_name)
     except RuntimeError as error:  # pragma: no cover - runtime error path
-        log.error("GE mart checkpoint failed: %s", error)
+        logger.error("GE mart checkpoint failed: %s", error)
         _handle_checkpoint_failure(checkpoint_name, error)
     except Exception as error:  # pragma: no cover - runtime error path
-        log.error("Unexpected error in GE mart checkpoint: %s", error)
+        logger.error("Unexpected error in GE mart checkpoint: %s", error)
         _handle_unexpected_exception(checkpoint_name, error)
 
-    log.info("Mart table GE checkpoint completed successfully")
+    logger.info("Mart table GE checkpoint completed successfully")
     return Output(
         {"status": "success", "checkpoint": checkpoint_name},
         metadata={

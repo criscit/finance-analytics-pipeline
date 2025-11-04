@@ -6,7 +6,7 @@
 
 select
   {{ get_stg_columns_list_map('t_bank_transactions') }}
-from 
+from
   {{ source('t_bank', 'transactions') }} as raw_transactions
 
 {% if is_incremental() %}

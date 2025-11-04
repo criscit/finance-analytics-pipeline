@@ -12,14 +12,14 @@ skip_footer_rows: 6  # 6 botton not fully empty rows
 target_table:
   schema: prod_raw
   name: bakai_transactions
-  
+
 columns:
   - name: "№ док."
     type: varchar
     nullable: true
     description: Bank document number referencing the transaction in the source system
     source_column_index: 0
-    
+
   - name: "Дата"
     type: varchar
     nullable: false
@@ -28,33 +28,33 @@ columns:
     constraints:
       - type: not_null
     format: "%d.%m.%Y %H:%M:%S"
-    
+
   - name: "Счет-корреспондент"
     type: varchar
     nullable: true
     description: Correspondent account identifier for the counterparty in the transaction
     source_column_index: 2
-    
+
   - name: "Дебет"
     type: varchar
     nullable: true
     description: Debit amount for outgoing transactions (money leaving the account) as string with comma separator
     source_column_index: 3
     format: "decimal with comma separator, empty string for null"
-    
+
   - name: "Кредит"
     type: varchar
     nullable: true
     description: Credit amount for incoming transactions (money entering the account) as string with comma separator
     source_column_index: 4
     format: "decimal with comma separator, empty string for null"
-    
+
   - name: "Назначение платежа"
     type: varchar
     nullable: true
     description: Payment purpose or transaction description from bank export
     source_column_index: 5
-    
+
   - name: "Курс"
     type: varchar
     nullable: true

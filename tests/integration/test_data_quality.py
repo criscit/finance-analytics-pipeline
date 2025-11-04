@@ -44,7 +44,7 @@ class TestDataQualityChecks:
 
                 con.execute(
                     """
-                    INSERT INTO test_table VALUES 
+                    INSERT INTO test_table VALUES
                     (1, 'test1', 100.50, 'active'),
                     (2, NULL, 200.75, 'inactive'),
                     (3, 'test3', NULL, 'active'),
@@ -55,7 +55,7 @@ class TestDataQualityChecks:
                 # Test completeness checks
                 completeness_results = con.execute(
                     """
-                    SELECT 
+                    SELECT
                         COUNT(*) as total_rows,
                         COUNT(name) as name_complete,
                         COUNT(amount) as amount_complete,
@@ -91,7 +91,7 @@ class TestDataQualityChecks:
                 # Test valid data types
                 con.execute(
                     """
-                    INSERT INTO test_table VALUES 
+                    INSERT INTO test_table VALUES
                     (1, 'test1', 100.50, '2024-01-01 12:00:00'),
                     (2, 'test2', 200.75, '2024-01-01 13:00:00')
                 """
@@ -126,7 +126,7 @@ class TestDataQualityChecks:
 
                 con.execute(
                     """
-                    INSERT INTO test_table VALUES 
+                    INSERT INTO test_table VALUES
                     (1, 100.50, 0.15),
                     (2, -50.25, 0.95),
                     (3, 0.00, 1.00),
@@ -137,7 +137,7 @@ class TestDataQualityChecks:
                 # Test range validations
                 range_results = con.execute(
                     """
-                    SELECT 
+                    SELECT
                         MIN(amount) as min_amount,
                         MAX(amount) as max_amount,
                         MIN(percentage) as min_percentage,
@@ -173,7 +173,7 @@ class TestDataQualityChecks:
 
                 con.execute(
                     """
-                    INSERT INTO test_table VALUES 
+                    INSERT INTO test_table VALUES
                     (1, 'user1@test.com', 'User 1'),
                     (2, 'user2@test.com', 'User 2'),
                     (3, 'user1@test.com', 'User 3'),  -- Duplicate email
@@ -184,7 +184,7 @@ class TestDataQualityChecks:
                 # Test uniqueness checks
                 uniqueness_results = con.execute(
                     """
-                    SELECT 
+                    SELECT
                         COUNT(DISTINCT email) as unique_emails,
                         COUNT(DISTINCT name) as unique_names,
                         COUNT(*) as total_rows
@@ -215,7 +215,7 @@ class TestDataQualityChecks:
 
                 con.execute(
                     """
-                    INSERT INTO categories VALUES 
+                    INSERT INTO categories VALUES
                     (1, 'Food'),
                     (2, 'Transport'),
                     (3, 'Entertainment')
@@ -235,7 +235,7 @@ class TestDataQualityChecks:
 
                 con.execute(
                     """
-                    INSERT INTO transactions VALUES 
+                    INSERT INTO transactions VALUES
                     (1, 1, 25.50),
                     (2, 2, 15.75),
                     (3, 99, 100.00)  -- Invalid category_id
@@ -245,7 +245,7 @@ class TestDataQualityChecks:
                 # Test referential integrity
                 integrity_results = con.execute(
                     """
-                    SELECT 
+                    SELECT
                         COUNT(*) as total_transactions,
                         COUNT(CASE WHEN c.id IS NOT NULL THEN 1 END) as valid_references,
                         COUNT(CASE WHEN c.id IS NULL THEN 1 END) as invalid_references
@@ -310,7 +310,7 @@ class TestGreatExpectationsIntegration:
 
                 con.execute(
                     """
-                    INSERT INTO test_table VALUES 
+                    INSERT INTO test_table VALUES
                     (1, 'test1', 100.50, 'active'),
                     (2, NULL, 200.75, 'inactive'),
                     (3, 'test3', NULL, 'active'),
@@ -322,7 +322,7 @@ class TestGreatExpectationsIntegration:
                 # Calculate quality metrics
                 quality_metrics = con.execute(
                     """
-                    SELECT 
+                    SELECT
                         COUNT(*) as total_rows,
                         COUNT(name) / COUNT(*)::DECIMAL as name_completeness,
                         COUNT(amount) / COUNT(*)::DECIMAL as amount_completeness,

@@ -7,6 +7,3 @@ local_duckdb:
       schema: ci
       path: "{{ env_var('DUCKDB_PATH', '/tmp/test.duckdb') }}"
       threads: 2
-
-
-

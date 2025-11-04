@@ -9,7 +9,9 @@ from pathlib import Path
 from typing import Any
 
 import duckdb
-from dagster import MetadataValue, Output, asset, get_dagster_logger
+from dagster import MetadataValue, Output, asset
+
+from src.logging_config import logger
 
 RAW_ROOT = Path(os.getenv("FINANCE_DATA_DIR_CONTAINER", "/app/data/finance"))
 DUCKDB_PATH = os.getenv("DUCKDB_PATH", "/app/data/warehouse/warehouse.duckdb")
@@ -22,8 +24,6 @@ def _ensure_parent(path: Path) -> None:
 
 def _cleanup_export_directory() -> dict[str, int]:
     """Clean up export directory keeping only the 10 most recent date folders."""
-    logger = get_dagster_logger()
-
     if not EXPORT_DIR.exists():
         logger.info("Export directory %s does not exist, skipping cleanup", EXPORT_DIR)
         return {"deleted_count": 0, "kept_count": 0}
@@ -69,8 +69,6 @@ def _cleanup_export_directory() -> dict[str, int]:
 @asset(deps=["export_csv_snapshot", "export_to_google_sheets"])
 def pipeline_maintenance() -> Output[dict[str, Any]]:
     """Move successfully processed files from To Parse to Archive folder tree and cleanup export directory."""
-
-    logger = get_dagster_logger()
     summary: list[dict[str, str]] = []
     with duckdb.connect(DUCKDB_PATH) as con:
         rows = con.execute(

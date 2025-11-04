@@ -33,7 +33,7 @@ graph TD
     C --> D[Great Expectations]
     D --> E[CSV Export]
     D --> F[Google Sheets]
-    
+
     B --> G[Ingestion Ledger]
     F --> H[Export Bookmark]
 ```
@@ -98,6 +98,3 @@ make clean
 - [Data Model](data-model.md) - Tables, columns, and relationships
 - [Runbook](runbook.md) - Operational procedures
 - [Diagrams](diagrams.md) - Visual system diagrams
-
-
-

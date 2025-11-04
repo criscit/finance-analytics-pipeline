@@ -259,6 +259,3 @@ id,user_id,event_type,updated_at,metric_1,metric_2
 - dbt models use table materialization
 - DuckDB automatic query optimization
 - Parallel processing where applicable
-
-
-

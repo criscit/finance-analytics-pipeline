@@ -3,10 +3,11 @@ import os
 from pathlib import Path
 from typing import Any
 
-from dagster import Output, asset, get_dagster_logger
+from dagster import Output, asset
 
 from src.duckdb_utils import read_assets_table_data_with_ordered_columns
 from src.google_sheets import GoogleSheetsTableManager
+from src.logging_config import logger
 
 
 def load_runtime_config() -> dict[str, Any]:
@@ -31,7 +32,6 @@ def export_assets_to_google_sheets() -> Output[dict[str, int]]:
     Note: Assets are a snapshot, so this replaces the entire table each time
     (unlike transactions which are incremental).
     """
-    log = get_dagster_logger()
     cfg = load_runtime_config()
 
     # Validate required environment variables
@@ -42,10 +42,10 @@ def export_assets_to_google_sheets() -> Output[dict[str, int]]:
     if not Path(cfg["google_sa_json_path"]).exists():
         raise ValueError(f"Google service account file not found at: {cfg['google_sa_json_path']}")
 
-    log.info("Exporting assets to Google Spreadsheet ID: %s", cfg["google_spreadsheet_id"])
-    log.info("Using table name: %s", cfg["google_table_name"])
-    log.info("Using sheet name: %s", cfg["google_sheet_name"])
-    log.info("Using service account file: %s", cfg["google_sa_json_path"])
+    logger.info("Exporting assets to Google Spreadsheet ID: %s", cfg["google_spreadsheet_id"])
+    logger.info("Using table name: %s", cfg["google_table_name"])
+    logger.info("Using sheet name: %s", cfg["google_sheet_name"])
+    logger.info("Using service account file: %s", cfg["google_sa_json_path"])
 
     # Initialize Google Sheets manager
     sheets_manager = GoogleSheetsTableManager(cfg["google_sa_json_path"])
@@ -57,10 +57,10 @@ def export_assets_to_google_sheets() -> Output[dict[str, int]]:
     all_values = read_assets_table_data_with_ordered_columns(cfg["duckdb_path"], schema, table)
 
     if not all_values:
-        log.info("No assets data found in table %s", cfg["export_assets_table"])
+        logger.info("No assets data found in table %s", cfg["export_assets_table"])
         return Output({"exported": 0}, metadata={"exported": 0})
 
-    log.info("Found %d assets rows to export", len(all_values))
+    logger.info("Found %d assets rows to export", len(all_values))
 
     # For assets, we replace the entire table (it's a snapshot, not incremental)
     # First, clear the existing data by deleting the sheet and recreating it
@@ -76,7 +76,7 @@ def export_assets_to_google_sheets() -> Output[dict[str, int]]:
         sample_data=all_values,
     )
 
-    log.info(
+    logger.info(
         "Successfully exported %d assets rows to Google Sheets table: %s",
         len(all_values),
         table_id,

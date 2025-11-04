@@ -13,7 +13,7 @@ skip_footer_rows: 0
 target_table:
   schema: prod_raw
   name: telegram_earn
-  
+
 columns:
   - name: 'asset'
     type: varchar

@@ -15,9 +15,9 @@ from typing import TYPE_CHECKING, Any
 import duckdb
 import great_expectations as gx
 import pandas as pd
-from dagster import get_dagster_logger
 
 from orchestration.quality_gx.checkpoints import get_checkpoint_configs
+from src.logging_config import logger
 
 if TYPE_CHECKING:
     from typing import Protocol
@@ -68,8 +68,6 @@ def _ensure_raw_table_exists(schema: str, table: str) -> bool:
     Returns:
         True if table exists or was successfully restored, False otherwise
     """
-    log = get_dagster_logger()
-
     try:
         from src.duckdb_utils import restore_raw_table_from_parquets, table_exists
 
@@ -79,10 +77,10 @@ def _ensure_raw_table_exists(schema: str, table: str) -> bool:
         conn_readonly.close()
 
         if exists:
-            log.info("✓ Table %s.%s exists", schema, table)
+            logger.info("✓ Table %s.%s exists", schema, table)
             return True
 
-        log.warning(
+        logger.warning(
             "Table %s.%s does not exist - attempting to restore from parquets...", schema, table
         )
 
@@ -99,7 +97,7 @@ def _ensure_raw_table_exists(schema: str, table: str) -> bool:
         parquet_dir = Path(raw_data_dir) / table
 
         if not parquet_dir.exists():
-            log.error(
+            logger.error(
                 "Cannot restore %s.%s - parquet directory not found: %s", schema, table, parquet_dir
             )
             return False
@@ -113,16 +111,16 @@ def _ensure_raw_table_exists(schema: str, table: str) -> bool:
         )
         conn_writable.close()
 
-        log.info(
+        logger.info(
             "✓ Successfully restored %s.%s from parquets (%s rows)", schema, table, rows_restored
         )
         return True
 
     except FileNotFoundError as e:
-        log.error("Cannot restore %s.%s: %s", schema, table, e)
+        logger.error("Cannot restore %s.%s: %s", schema, table, e)
         return False
     except Exception as e:
-        log.error("Error checking/restoring table %s.%s: %s", schema, table, e)
+        logger.error("Error checking/restoring table %s.%s: %s", schema, table, e)
         return False
 
 
@@ -141,8 +139,7 @@ def _read_table_to_dataframe(table_name: str) -> pd.DataFrame:
     Raises:
         RuntimeError: If table doesn't exist and cannot be restored
     """
-    log = get_dagster_logger()
-    log.info("Reading table '%s' from DuckDB...", table_name)
+    logger.info("Reading table '%s' from DuckDB...", table_name)
 
     # Parse schema and table name
     parts = table_name.split(".")
@@ -163,7 +160,7 @@ def _read_table_to_dataframe(table_name: str) -> pd.DataFrame:
         df = conn.execute(f"SELECT * FROM {table_name}").df()
         conn.close()
 
-        log.info("✓ Read %s rows from '%s'", len(df), table_name)
+        logger.info("✓ Read %s rows from '%s'", len(df), table_name)
         return df
     except Exception as e:
         raise RuntimeError(f"Failed to read table '{table_name}' from DuckDB: {e}") from e
@@ -220,10 +217,8 @@ def _log_validation_result(validation_name: str, result: Any) -> bool:
     Returns:
         True if validation passed, False otherwise
     """
-    log = get_dagster_logger()
-
     if not result.success:
-        log.warning(
+        logger.warning(
             "✗ Validation '%s' failed: %s/%s expectations failed",
             validation_name,
             result.statistics["unsuccessful_expectations"],
@@ -231,7 +226,7 @@ def _log_validation_result(validation_name: str, result: Any) -> bool:
         )
         return False
 
-    log.info(
+    logger.info(
         "✓ Validation '%s' passed: %s/%s expectations succeeded",
         validation_name,
         result.statistics["successful_expectations"],
@@ -264,8 +259,6 @@ def run_checkpoint_with_dataframes(
         RuntimeError: If checkpoint validation fails
         ValueError: If checkpoint config not found
     """
-    log = get_dagster_logger()
-
     # Get checkpoint configuration
     all_configs = get_checkpoint_configs()
     if checkpoint_name not in all_configs:
@@ -274,8 +267,8 @@ def run_checkpoint_with_dataframes(
         )
 
     checkpoint_config = all_configs[checkpoint_name]
-    log.info("Running checkpoint: %s", checkpoint_name)
-    log.info("Description: %s", checkpoint_config.description)
+    logger.info("Running checkpoint: %s", checkpoint_name)
+    logger.info("Description: %s", checkpoint_config.description)
 
     # Get GX context
     gx_dir = os.getenv("GE_DIR")
@@ -295,15 +288,15 @@ def run_checkpoint_with_dataframes(
         table_name = validation_config.duckdb_table.split(".")[-1]
 
         if filter_tables is not None and table_name not in filter_tables:
-            log.info(
+            logger.info(
                 "Skipping validation '%s' - table '%s' not in filter set",
                 validation_config.name,
                 table_name,
             )
             continue
-        log.info("Validating: %s", validation_config.name)
-        log.info("  Table: %s", validation_config.duckdb_table)
-        log.info("  Suite: %s", validation_config.suite_name)
+        logger.info("Validating: %s", validation_config.name)
+        logger.info("  Table: %s", validation_config.duckdb_table)
+        logger.info("  Suite: %s", validation_config.suite_name)
 
         try:
             # Read data from DuckDB
@@ -332,7 +325,7 @@ def run_checkpoint_with_dataframes(
                 all_success = False
 
         except Exception as e:
-            log.error("Error running validation '%s': %s", validation_config.name, e)
+            logger.error("Error running validation '%s': %s", validation_config.name, e)
             raise RuntimeError(
                 f"Validation '{validation_config.name}' encountered an error: {e}"
             ) from e
@@ -342,7 +335,7 @@ def run_checkpoint_with_dataframes(
             f"Checkpoint '{checkpoint_name}' failed validation. " "Check logs for detailed results."
         )
 
-    log.info("✓ Checkpoint '%s' passed all validations", checkpoint_name)
+    logger.info("✓ Checkpoint '%s' passed all validations", checkpoint_name)
 
     return {
         "success": all_success,

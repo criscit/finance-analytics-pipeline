@@ -68,7 +68,7 @@ def test_database(temp_db: Path) -> Generator[duckdb.DuckDBPyConnection, None, N
     # Insert sample data
     con.execute(
         """
-        INSERT INTO prod_raw.t_bank_transactions VALUES 
+        INSERT INTO prod_raw.t_bank_transactions VALUES
         ('key1', 1, 'test1', 100.50, '2024-01-01 12:00:00'),
         ('key2', 2, 'test2', -200.75, '2024-01-01 13:00:00'),
         ('key3', 3, 'test3', 300.25, '2024-01-01 14:00:00')

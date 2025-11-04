@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from dagster import Failure, Output, asset, get_dagster_logger
+from dagster import Failure, Output, asset
 
 from src.ingestion import (
     IngestionContext,
@@ -13,6 +13,7 @@ from src.ingestion import (
     LeafIngestionOptions,
     run_ingestion,
 )
+from src.logging_config import logger
 
 FINANCE_DATA_DIR_CONTAINER = Path(os.getenv("FINANCE_DATA_DIR_CONTAINER", "/app/data/finance"))
 DUCKDB_PATH = os.getenv("DUCKDB_PATH", "/app/data/warehouse/analytics.duckdb")
@@ -60,8 +61,7 @@ CRYPTO_CONFIG = IngestionSourceConfig(
 
 
 def _run_asset_ingestion(config: IngestionSourceConfig) -> Output[dict[str, int]]:
-    log = get_dagster_logger()
-    metrics = run_ingestion(config, INGESTION_CONTEXT, log)
+    metrics = run_ingestion(config, INGESTION_CONTEXT, logger)
     if metrics.get("errors"):
         raise Failure(
             description=(

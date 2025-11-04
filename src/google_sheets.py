@@ -6,6 +6,8 @@ from typing import Any, ClassVar
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 
+from src.logging_config import logger
+
 
 class GoogleSheetsTableManager:
     """Manages Google Sheets table operations with a single service instance."""
@@ -45,7 +47,7 @@ class GoogleSheetsTableManager:
             return int(r["replies"][0]["addSheet"]["properties"]["sheetId"])
 
         except Exception as e:
-            print(f"Error getting or creating sheet: {e}")
+            logger.error("Error getting or creating sheet: %s", e)
             raise
 
     def find_table_by_name(self, spreadsheet_id: str, sheet_id: int, table_name: str) -> str | None:
@@ -80,7 +82,7 @@ class GoogleSheetsTableManager:
             return None
 
         except Exception as e:
-            print(f"Error finding table: {e}")
+            logger.error("Error finding table: %s", e)
             return None
 
     def create_table(self, spreadsheet_id: str, sheet_id: int, table_name: str) -> str:
@@ -169,7 +171,7 @@ class GoogleSheetsTableManager:
             return str(reply["replies"][1]["addTable"]["table"]["tableId"])
 
         except Exception as e:
-            print(f"Error creating table structure: {e}")
+            logger.error("Error creating table structure: %s", e)
             raise
 
     def _format_date_column(self, spreadsheet_id: str, sheet_id: int, updated_range: str) -> None:
@@ -230,9 +232,9 @@ class GoogleSheetsTableManager:
                     spreadsheetId=spreadsheet_id, body=format_request
                 ).execute()
 
-                print(f"Applied date formatting to rows {start_row} to {end_row}")
+                logger.info("Applied date formatting to rows %d to %d", start_row, end_row)
         except Exception as e:
-            print(f"Warning: Could not apply date formatting: {e}")
+            logger.warning("Could not apply date formatting: %s", e)
             # Don't raise - formatting is nice to have but not critical
 
     def read_existing_data(
@@ -256,7 +258,7 @@ class GoogleSheetsTableManager:
             # Check if table exists
             existing_table_id = self.find_table_by_name(spreadsheet_id, sheet_id, table_name)
             if not existing_table_id:
-                print(f"Table '{table_name}' does not exist, returning empty data")
+                logger.info("Table '%s' does not exist, returning empty data", table_name)
                 return []
 
             # Get the sheet name for reading data
@@ -289,7 +291,7 @@ class GoogleSheetsTableManager:
             return values[1:] if len(values) > 1 else []
 
         except Exception as e:
-            print(f"Error reading existing data: {e}")
+            logger.error("Error reading existing data: %s", e)
             return []
 
     def append_rows(
@@ -314,12 +316,12 @@ class GoogleSheetsTableManager:
             # Check if table already exists
             existing_table_id = self.find_table_by_name(spreadsheet_id, sheet_id, table_name)
             if existing_table_id:
-                print(f"Table '{table_name}' already exists with ID: {existing_table_id}")
+                logger.info("Table '%s' already exists with ID: %s", table_name, existing_table_id)
                 table_id = existing_table_id
             else:
                 # Create the table
                 table_id = self.create_table(spreadsheet_id, sheet_id, table_name)
-                print(f"Created new table '{table_name}' with ID: {table_id}")
+                logger.info("Created new table '%s' with ID: %s", table_name, table_id)
 
             # Get the sheet name for appending data
             spreadsheet = (
@@ -364,9 +366,9 @@ class GoogleSheetsTableManager:
                 # Format the date column (column A) with proper date format
                 self._format_date_column(spreadsheet_id, sheet_id, updated_range)
 
-            print(f"Appended {len(sample_data)} rows of data to table '{table_name}'")
+            logger.info("Appended %d rows of data to table '%s'", len(sample_data), table_name)
             return table_id
 
         except Exception as e:
-            print(f"Error appending data: {e}")
+            logger.error("Error appending data: %s", e)
             raise

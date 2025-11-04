@@ -13,7 +13,7 @@ skip_footer_rows: 0
 target_table:
   schema: prod_raw
   name: bybit_p2p_trades
-  
+
 columns:
   - name: 'Qty'
     type: varchar

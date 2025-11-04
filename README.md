@@ -7,7 +7,7 @@ A local, lake-less data pipeline using Dagster + DuckDB + dbt-duckdb + Great Exp
 - **Ingest**: Local CSV files from host path into DuckDB (no Parquet lake)
 - **Transform**: dbt-duckdb builds staging → core → marts in a single DuckDB file
 - **Quality**: Great Expectations checkpoints against staged/mart tables
-- **Export**: 
+- **Export**:
   - Google Sheets exporter (incremental using high-watermark stored in DuckDB)
   - CSV snapshot exporter (full daily snapshot with latest.csv + manifest.json)
 - **Orchestration**: Dagster assets & schedules
@@ -152,6 +152,3 @@ docker compose logs -f pipeline-worker
 - **Stable**: File stability checks prevent processing incomplete uploads
 - **Quality**: Great Expectations validates data before exports
 - **Local**: No cloud dependencies, runs entirely on your machine
-
-
-

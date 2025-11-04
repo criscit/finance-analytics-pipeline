@@ -257,7 +257,7 @@ def get_recently_ingested_tables(db_path: str, hours: int = 24) -> dict[str, Any
         ledger_exists = con.execute(
             """
             select 1
-            from information_schema.tables 
+            from information_schema.tables
             where table_schema = 'prod_meta'
                 and table_name = 'ingest_ledger'
             """
@@ -273,12 +273,12 @@ def get_recently_ingested_tables(db_path: str, hours: int = 24) -> dict[str, Any
         # Get recent ingestions
         recent_ingestions = con.execute(
             f"""
-            select 
+            select
                 source_system_nm,
                 table_nm,
                 count(*) as file_count,
                 max(processed_at) as latest_ingestion
-            from prod_meta.ingest_ledger 
+            from prod_meta.ingest_ledger
             where processed_at >= current_timestamp - interval '{hours} hours'
             group by source_system_nm, table_nm
             order by latest_ingestion desc
