@@ -19,79 +19,79 @@ columns:
     type: varchar
     nullable: true
     description: 'Raw Ad Number value from Telegram p2p trades export'
-    source_column_index: 1
+    source_column_index: 0
 
   - name: 'Ad Type'
     type: varchar
     nullable: true
     description: 'Raw Ad Type value from Telegram p2p trades export'
-    source_column_index: 2
+    source_column_index: 1
 
   - name: 'Order Number'
     type: varchar
     nullable: true
     description: 'Raw Order Number value from Telegram p2p trades export'
-    source_column_index: 3
+    source_column_index: 2
 
   - name: 'Role'
     type: varchar
     nullable: true
     description: 'Raw Role value from Telegram p2p trades export'
-    source_column_index: 4
+    source_column_index: 3
 
   - name: 'Net Crypto Amount'
     type: varchar
     nullable: true
     description: 'Raw Net Crypto Amount value from Telegram p2p trades export'
-    source_column_index: 5
+    source_column_index: 4
 
   - name: 'Paid Fee Crypto Amount'
     type: varchar
     nullable: true
     description: 'Raw Paid Fee Crypto Amount value from Telegram p2p trades export'
-    source_column_index: 6
+    source_column_index: 5
 
   - name: 'Crypto Currency'
     type: varchar
     nullable: true
     description: 'Raw Crypto Currency value from Telegram p2p trades export'
-    source_column_index: 7
+    source_column_index: 6
 
   - name: 'Fiat Amount'
     type: varchar
     nullable: true
     description: 'Raw Fiat Amount value from Telegram p2p trades export'
-    source_column_index: 8
+    source_column_index: 7
 
   - name: 'Fiat Currency'
     type: varchar
     nullable: true
     description: 'Raw Fiat Currency value from Telegram p2p trades export'
-    source_column_index: 9
+    source_column_index: 8
 
   - name: 'Price'
     type: varchar
     nullable: true
     description: 'Raw Price value from Telegram p2p trades export'
-    source_column_index: 10
+    source_column_index: 9
 
   - name: 'Payment Method'
     type: varchar
     nullable: true
     description: 'Raw Payment Method value from Telegram p2p trades export'
-    source_column_index: 11
+    source_column_index: 10
 
   - name: 'Creation Time'
     type: varchar
     nullable: true
     description: 'Raw Creation Time value from Telegram p2p trades export'
-    source_column_index: 12
+    source_column_index: 11
 
   - name: 'Completion Time'
     type: varchar
     nullable: true
     description: 'Raw Completion Time value from Telegram p2p trades export'
-    source_column_index: 13
+    source_column_index: 12
 
 metadata:
   refresh_frequency: monthly

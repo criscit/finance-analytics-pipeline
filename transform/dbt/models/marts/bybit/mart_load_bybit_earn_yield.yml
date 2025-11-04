@@ -1,0 +1,66 @@
+version: 2
+
+models:
+  - name: mart_load_bybit_earn_yield
+    description: >
+      Mart table for Bybit earn yield distribution history.
+      Ready for analytics and reporting on yield distributions.
+    tags: [mart, bybit, earn, yield]
+    meta:
+      materialization: incremental
+      incremental_strategy: delete+insert
+      unique_key: earn_yield_bk
+
+    columns:
+      - name: earn_yield_bk
+        description: Business key for the earn yield record.
+        data_type: varchar(32)
+        data_tests:
+          - not_null
+          - unique
+
+      - name: amount
+        description: Yield amount distributed.
+        data_type: double
+
+      - name: coin
+        description: Cryptocurrency symbol.
+        data_type: varchar(16)
+
+      - name: created_at_utc
+        description: UTC timestamp when the yield was created.
+        data_type: timestamp
+
+      - name: distributionMode
+        description: Distribution mode (e.g., Auto).
+        data_type: varchar(16)
+
+      - name: effectiveStakingAmount
+        description: Effective staking amount.
+        data_type: double
+
+      - name: id
+        description: Unique identifier for the yield record.
+        data_type: varchar(64)
+
+      - name: orderId
+        description: Associated order ID.
+        data_type: varchar(64)
+
+      - name: productId
+        description: Product ID for the earn program.
+        data_type: varchar(16)
+
+      - name: status
+        description: Status of the yield distribution.
+        data_type: varchar(16)
+
+      - name: yieldType
+        description: Type of yield.
+        data_type: varchar(16)
+
+      - name: processed_at
+        description: Processing timestamp.
+        data_type: timestamp
+        data_tests:
+          - not_null

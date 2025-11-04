@@ -214,6 +214,19 @@ selectors:
           - method: config.schema
             value: imart
 
+  - name: run_bybit_earn_yield
+    definition:
+      intersection:
+        - union:
+          - method: source
+            value: bybit.earn_yield
+            children: true
+          - method: resource_type
+            value: seed
+        - exclude:
+          - method: config.schema
+            value: imart
+
   - name: run_bybit_internal_transfers
     definition:
       intersection:

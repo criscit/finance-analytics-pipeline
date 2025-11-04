@@ -1,0 +1,59 @@
+version: 2
+
+models:
+  - name: imart_bind_assets
+    description: >
+      Integration mart for crypto assets and staking accounts across all platforms.
+      This view combines spot wallet holdings and earn/staking accounts from Binance, Bybit, and Telegram.
+      Materialized as 'view_assets' for Google Sheets export.
+    tags: [integration_marts, crypto, assets, bind, analytics]
+    config:
+      materialized: view
+      alias: view_assets
+      contract:
+        enforced: true
+
+    columns:
+      - name: Type
+        description: Asset type - 'Asset' for holdings or 'Crypto APY' for staking accounts
+        data_type: varchar(32)
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Asset', 'Crypto APY']
+
+      - name: Category
+        description: Asset category - 'Crypto' for spot holdings or 'Crypto APY' for staking/earn
+        data_type: varchar(32)
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Crypto', 'Crypto APY']
+
+      - name: Description
+        description: Detailed description including platform and asset name
+        data_type: varchar(256)
+        data_tests:
+          - not_null
+
+      - name: Currency
+        description: Currency code or crypto symbol (BTC, USDT, ETH, etc.)
+        data_type: varchar(16)
+        data_tests:
+          - not_null
+
+      - name: Amount
+        description: Amount held in original currency
+        data_type: double
+
+      - name: Amount, USD
+        description: USD-equivalent value of the asset
+        data_type: double
+
+      - name: APY, %
+        description: Annual Percentage Yield for staking/earn accounts (null for spot holdings)
+        data_type: decimal(10,2)
+
+      - name: Comments
+        description: Additional details like free/locked amounts, yield earned, or current price
+        data_type: varchar(512)

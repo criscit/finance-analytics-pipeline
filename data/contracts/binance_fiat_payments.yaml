@@ -13,18 +13,24 @@ skip_footer_rows: 0
 target_table:
   schema: prod_raw
   name: binance_fiat_payments
-  
+
 columns:
   - name: 'createTime'
     type: varchar
     nullable: true
     description: 'Raw createTime value from Binance fiat payments export'
-    source_column_index: 1
+    source_column_index: 0
 
   - name: 'cryptoCurrency'
     type: varchar
     nullable: true
     description: 'Raw cryptoCurrency value from Binance fiat payments export'
+    source_column_index: 1
+
+  - name: 'crypto_price_usd'
+    type: varchar
+    nullable: true
+    description: 'Raw crypto_price_usd value from Binance fiat payments export'
     source_column_index: 2
 
   - name: 'fiatCurrency'

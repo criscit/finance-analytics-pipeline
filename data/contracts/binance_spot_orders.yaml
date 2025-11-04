@@ -19,73 +19,97 @@ columns:
     type: varchar
     nullable: true
     description: 'Raw Date(UTC) value from Binance spot orders export'
-    source_column_index: 1
+    source_column_index: 0
 
   - name: 'OrderNo'
     type: varchar
     nullable: true
     description: 'Raw OrderNo value from Binance spot orders export'
-    source_column_index: 2
+    source_column_index: 1
 
   - name: 'Pair'
     type: varchar
     nullable: true
     description: 'Raw Pair value from Binance spot orders export'
-    source_column_index: 3
+    source_column_index: 2
 
   - name: 'Type'
     type: varchar
     nullable: true
     description: 'Raw Type value from Binance spot orders export'
-    source_column_index: 4
+    source_column_index: 3
 
   - name: 'Side'
     type: varchar
     nullable: true
     description: 'Raw Side value from Binance spot orders export'
-    source_column_index: 5
+    source_column_index: 4
 
   - name: 'Order Price'
     type: varchar
     nullable: true
     description: 'Raw Order Price value from Binance spot orders export'
-    source_column_index: 6
+    source_column_index: 5
 
   - name: 'Order Amount'
     type: varchar
     nullable: true
     description: 'Raw Order Amount value from Binance spot orders export'
-    source_column_index: 7
+    source_column_index: 6
 
   - name: 'Time'
     type: varchar
     nullable: true
     description: 'Raw Time value from Binance spot orders export'
-    source_column_index: 8
+    source_column_index: 7
 
   - name: 'Executed'
     type: varchar
     nullable: true
     description: 'Raw Executed value from Binance spot orders export'
-    source_column_index: 9
+    source_column_index: 8
 
   - name: 'Average Price'
     type: varchar
     nullable: true
     description: 'Raw Average Price value from Binance spot orders export'
-    source_column_index: 10
+    source_column_index: 9
 
   - name: 'Trading total'
     type: varchar
     nullable: true
     description: 'Raw Trading total value from Binance spot orders export'
-    source_column_index: 11
+    source_column_index: 10
 
   - name: 'Status'
     type: varchar
     nullable: true
     description: 'Raw Status value from Binance spot orders export'
+    source_column_index: 11
+
+  - name: 'executed_price_usd'
+    type: varchar
+    nullable: true
+    description: 'Raw executed price (USD) value from Binance spot orders export'
     source_column_index: 12
+
+  - name: 'trading_currency'
+    type: varchar
+    nullable: true
+    description: 'Raw trading currency value from Binance spot orders export'
+    source_column_index: 13
+
+  - name: 'trading_price_usd'
+    type: varchar
+    nullable: true
+    description: 'Raw trading price (USD) value from Binance spot orders export'
+    source_column_index: 14
+
+  - name: "\uFEFF\"Date(UTC)\""
+    type: varchar
+    nullable: true
+    description: 'Raw Date(UTC) value containing BOM from Binance spot orders export'
+    source_column_index: 15
 
 metadata:
   refresh_frequency: monthly

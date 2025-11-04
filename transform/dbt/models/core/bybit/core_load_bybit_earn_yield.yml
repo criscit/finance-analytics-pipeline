@@ -1,0 +1,68 @@
+version: 2
+
+models:
+  - name: core_load_bybit_earn_yield
+    description: >
+      Core table for Bybit earn yield distribution history with parsed timestamps.
+      Tracks yield distributions from Bybit earn programs.
+    tags: [core, bybit, earn, yield]
+    meta:
+      materialization: incremental
+      incremental_strategy: delete+insert
+      unique_key: earn_yield_bk
+
+    columns:
+      - name: earn_yield_bk
+        description: Business key for the earn yield record, generated from MD5 hash of id and created timestamp.
+        data_type: varchar(32)
+        data_tests:
+          - not_null
+          - unique
+
+      - name: amount
+        description: Yield amount distributed.
+        data_type: double
+
+      - name: coin
+        description: Cryptocurrency symbol for the yield.
+        data_type: varchar(16)
+        data_tests:
+          - not_null
+
+      - name: created_at_utc
+        description: UTC timestamp when the yield was created.
+        data_type: timestamp
+
+      - name: distributionMode
+        description: Distribution mode (e.g., Auto).
+        data_type: varchar(16)
+
+      - name: effectiveStakingAmount
+        description: Effective staking amount used for yield calculation.
+        data_type: double
+
+      - name: id
+        description: Unique identifier for the yield record.
+        data_type: varchar(64)
+
+      - name: orderId
+        description: Associated order ID (if any).
+        data_type: varchar(64)
+
+      - name: productId
+        description: Product ID for the earn program.
+        data_type: varchar(16)
+
+      - name: status
+        description: Status of the yield distribution (e.g., Success).
+        data_type: varchar(16)
+
+      - name: yieldType
+        description: Type of yield (e.g., Normal).
+        data_type: varchar(16)
+
+      - name: processed_at
+        description: Timestamp when this record was processed.
+        data_type: timestamp
+        data_tests:
+          - not_null

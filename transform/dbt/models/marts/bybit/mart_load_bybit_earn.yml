@@ -25,14 +25,23 @@ models:
     description: 'TODO: Add description for asset'
     data_type: varchar(64)
   - name: apy_pct
-    description: 'TODO: Add description for apy_pct'
+    description: 'Annual Percentage Yield (APY) for the earn position'
+    data_type: double
+  - name: wallet_balance
+    description: 'Wallet balance of the asset in native coin units'
+    data_type: double
+  - name: asset_usdt_price
+    description: 'Asset price in USDT'
+    data_type: double
+  - name: wallet_balance_usd
+    description: 'Wallet balance in USD'
     data_type: double
   - name: value_usd
-    description: 'TODO: Add description for value_usd'
+    description: 'Total USD value of the staked/earning position'
     data_type: double
   - name: yield_usd
-    description: 'TODO: Add description for yield_usd'
-    data_type: varchar(64)
+    description: 'Total USD yield earned'
+    data_type: double
   - name: processed_at
     description: 'TODO: Add description for processed_at'
     data_type: timestamp

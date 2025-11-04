@@ -54,18 +54,12 @@ models:
   - name: order_side
     description: 'TODO: Add description for order_side'
     data_type: varchar(64)
-  - name: order_placed_at_utc
-    description: 'TODO: Add description for order_placed_at_utc'
-    data_type: varchar(64)
-  - name: order_placed_at_msk
-    description: 'TODO: Add description for order_placed_at_msk'
-    data_type: varchar(64)
-  - name: executed_at_utc
-    description: 'TODO: Add description for executed_at_utc'
-    data_type: varchar(64)
-  - name: executed_at_msk
-    description: 'TODO: Add description for executed_at_msk'
-    data_type: varchar(64)
+  - name: order_placed_at
+    description: 'Order placement timestamp in Europe/Moscow timezone'
+    data_type: timestamp
+  - name: executed_at
+    description: 'Order execution timestamp in Europe/Moscow timezone'
+    data_type: timestamp
   - name: processed_at
     description: 'TODO: Add description for processed_at'
     data_type: timestamp

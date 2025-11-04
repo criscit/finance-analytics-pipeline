@@ -49,10 +49,10 @@ def mock_environment() -> Any:
     env_vars = {
         "FINANCE_DATA_DIR_CONTAINER": "/tmp/test_finance",
         "DUCKDB_PATH": "/tmp/test.duckdb",
-        "EXPORT_FINANCE_TABLE": "test_table",
+        "FINANCE_HISTORY_EXPORT_TABLE": "test_table",
         "GOOGLE_SPREADSHEET_ID": "test_sheet_id",
-        "GOOGLE_SHEET_NAME": "Test",
-        "GOOGLE_TABLE_NAME": "Test Table",
+        "FINANCE_HISTORY_GOOGLE_SHEET_NAME": "Test",
+        "FINANCE_HISTORY_GOOGLE_TABLE_NAME": "Test Table",
         "GOOGLE_SA_JSON_PATH": "/tmp/test_sa.json",
     }
 

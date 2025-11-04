@@ -36,3 +36,11 @@ models:
       - name: yield_usd
         description: Total USD yield earned.
         data_type: double
+
+      - name: wallet_balance_coin
+        description: Balance of the asset in native coin units.
+        data_type: double
+
+      - name: price_per_coin_usdt
+        description: Price per coin in USDT.
+        data_type: double

@@ -29,6 +29,18 @@ models:
         description: Annual Percentage Yield (APY) for the earn position.
         data_type: double
 
+      - name: wallet_balance
+        description: Wallet balance of the asset in native coin units.
+        data_type: double
+
+      - name: asset_usdt_price
+        description: Asset price in USDT.
+        data_type: double
+
+      - name: wallet_balance_usd
+        description: Wallet balance in USD.
+        data_type: double
+
       - name: value_usd
         description: Total USD value of the staked/earning position.
         data_type: double

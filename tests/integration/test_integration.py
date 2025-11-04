@@ -185,10 +185,10 @@ columns:
             with duckdb.connect(str(db_path)) as con:
                 con.execute("CREATE SCHEMA IF NOT EXISTS prod_imart")
                 con.execute(
-                    "CREATE TABLE prod_imart.view_bank_transactions (id INTEGER, name VARCHAR, amount DECIMAL)"
+                    "CREATE TABLE prod_imart.view_transactions (id INTEGER, name VARCHAR, amount DECIMAL)"
                 )
                 con.execute(
-                    "INSERT INTO prod_imart.view_bank_transactions VALUES (1, 'test1', 100.50), (2, 'test2', 200.75)"
+                    "INSERT INTO prod_imart.view_transactions VALUES (1, 'test1', 100.50), (2, 'test2', 200.75)"
                 )
 
             export_dir = temp_path / "finance" / "Archive" / "Bank" / "Exports"
@@ -199,8 +199,8 @@ columns:
                 patch("orchestration.assets_export_csv.EXPORT_DIR", export_dir),
                 patch("orchestration.assets_export_csv.RESULTS_DIR", results_dir),
                 patch(
-                    "orchestration.assets_export_csv.EXPORT_FINANCE_TABLE",
-                    "prod_imart.view_bank_transactions",
+                    "orchestration.assets_export_csv.FINANCE_HISTORY_EXPORT_TABLE",
+                    "prod_imart.view_transactions",
                 ),
             ):
                 # Test export
@@ -224,7 +224,7 @@ columns:
 
                 manifest = json.load(f)
 
-            assert manifest["table"] == "prod_imart.view_bank_transactions"
+            assert manifest["table"] == "prod_imart.view_transactions"
             assert manifest["row_count"] == TEST_DATA_ROWS_2
             assert "md5" in manifest
             assert "created_at_utc" in manifest

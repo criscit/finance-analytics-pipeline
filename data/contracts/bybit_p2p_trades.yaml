@@ -19,49 +19,49 @@ columns:
     type: varchar
     nullable: true
     description: 'Raw Qty value from Bybit p2p trades export'
-    source_column_index: 1
+    source_column_index: 0
 
   - name: 'Amount'
     type: varchar
     nullable: true
     description: 'Raw Amount value from Bybit p2p trades export'
-    source_column_index: 2
+    source_column_index: 1
 
   - name: 'Price'
     type: varchar
     nullable: true
     description: 'Raw Price value from Bybit p2p trades export'
-    source_column_index: 3
+    source_column_index: 2
 
   - name: 'Type'
     type: varchar
     nullable: true
     description: 'Raw Type value from Bybit p2p trades export'
-    source_column_index: 4
+    source_column_index: 3
 
   - name: 'Status'
     type: varchar
     nullable: true
     description: 'Raw Status value from Bybit p2p trades export'
-    source_column_index: 5
+    source_column_index: 4
 
   - name: 'Fee'
     type: varchar
     nullable: true
     description: 'Raw Fee value from Bybit p2p trades export'
-    source_column_index: 6
+    source_column_index: 5
 
   - name: 'Date & Time'
     type: varchar
     nullable: true
     description: 'Raw Date & Time value from Bybit p2p trades export'
-    source_column_index: 7
+    source_column_index: 6
 
   - name: 'Order No.'
     type: varchar
     nullable: true
     description: 'Raw Order No. value from Bybit p2p trades export'
-    source_column_index: 8
+    source_column_index: 7
 
 metadata:
   refresh_frequency: monthly

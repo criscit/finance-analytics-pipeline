@@ -252,13 +252,13 @@ FINANCE_DIR_HOST=G:/USER/DATA/FINDNA  # Windows path with forward slashes
 FINANCE_DATA_DIR_CONTAINER=/app/data/finance
 
 # Export configuration
-EXPORT_FINANCE_TABLE=prod_imart.view_bank_transactions
+FINANCE_HISTORY_EXPORT_TABLE=prod_imart.view_transactions
 
 # Google Sheets (optional)
 GOOGLE_SA_JSON_PATH=/app/data/credentials/finance-sheets-writer-prod-sa.json
-GOOGLE_SPREADSHEET_ID=your_spreadsheet_id
-GOOGLE_SHEET_NAME=Spendings
-GOOGLE_TABLE_NAME="Spendings Log"
+FINANCE_GOOGLE_SPREADSHEET_ID=your_spreadsheet_id
+FINANCE_HISTORY_GOOGLE_SHEET_NAME=Spendings
+FINANCE_HISTORY_GOOGLE_TABLE_NAME="Spendings Log"
 
 # DuckDB
 DUCKDB_PATH=/app/data/warehouse/analytics.duckdb

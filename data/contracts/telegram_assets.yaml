@@ -19,43 +19,43 @@ columns:
     type: varchar
     nullable: true
     description: 'Raw asset_full_name value from Telegram assets export'
-    source_column_index: 1
+    source_column_index: 0
 
   - name: 'asset_short_name'
     type: varchar
     nullable: true
     description: 'Raw asset_short_name value from Telegram assets export'
-    source_column_index: 2
+    source_column_index: 1
 
   - name: 'price_usd'
     type: varchar
     nullable: true
     description: 'Raw price_usd value from Telegram assets export'
-    source_column_index: 3
+    source_column_index: 2
 
   - name: 'change_24h'
     type: varchar
     nullable: true
     description: 'Raw change_24h value from Telegram assets export'
-    source_column_index: 4
+    source_column_index: 3
 
   - name: 'balance'
     type: varchar
     nullable: true
     description: 'Raw balance value from Telegram assets export'
-    source_column_index: 5
+    source_column_index: 4
 
   - name: 'value_usd'
     type: varchar
     nullable: true
     description: 'Raw value_usd value from Telegram assets export'
-    source_column_index: 6
+    source_column_index: 5
 
   - name: 'parsed_at'
     type: varchar
     nullable: true
     description: 'Raw parsed_at value from Telegram assets export'
-    source_column_index: 7
+    source_column_index: 6
 
 metadata:
   refresh_frequency: monthly

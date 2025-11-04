@@ -35,7 +35,7 @@ class TestPipelineE2E:
                 {
                     "FINANCE_DATA_DIR_CONTAINER": str(temp_path / "finance"),
                     "DUCKDB_PATH": str(db_path),
-                    "EXPORT_FINANCE_TABLE": "prod_imart.view_bank_transactions",
+                    "FINANCE_HISTORY_EXPORT_TABLE": "prod_imart.view_transactions",
                 },
             ):
                 # This would test the complete pipeline

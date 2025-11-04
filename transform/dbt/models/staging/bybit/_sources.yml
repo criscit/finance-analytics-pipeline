@@ -16,6 +16,9 @@ sources:
       - name: earn
         identifier: bybit_earn
         description: Raw Bybit earn export.
+      - name: earn_yield
+        identifier: bybit_earn_yield
+        description: Raw Bybit earn yield history export.
       - name: internal_transfers
         identifier: bybit_internal_transfers
         description: Raw Bybit internal transfer records export.

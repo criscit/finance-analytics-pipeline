@@ -1,0 +1,71 @@
+version: 2
+
+models:
+  - name: imart_bind_transactions
+    description: >
+      Integration mart for all financial transactions across bank and crypto platforms.
+      This view combines transactions from T Bank, BakAi Bank, Binance, Bybit, and Telegram Wallet.
+      Materialized as 'view_transactions' for Google Sheets export.
+    tags: [integration_marts, transactions, bind, analytics]
+    config:
+      materialized: view
+      alias: view_transactions
+      contract:
+        enforced: true
+
+    columns:
+      - name: Date
+        description: Transaction date in Europe/Moscow (MSK) timezone
+        data_type: date
+        data_tests:
+          - not_null
+
+      - name: Platform Name
+        description: Platform identifier (T Bank, BakAi Bank, Binance, Bybit, Telegram Wallet)
+        data_type: varchar(32)
+        data_tests:
+          - not_null
+
+      - name: Category
+        description: Transaction category or type (Spot Trade, P2P Trade, Deposit, Withdrawal, etc.)
+        data_type: varchar(128)
+
+      - name: Description
+        description: Detailed transaction description
+        data_type: varchar(512)
+        data_tests:
+          - not_null
+
+      - name: Amount, Currency
+        description: Transaction amount in original currency
+        data_type: double
+        data_tests:
+          - not_null
+
+      - name: Currency
+        description: Currency code (RUB, KGS, USDT, USD, BTC, etc.)
+        data_type: varchar(16)
+
+      - name: Amount, RUB
+        description: Transaction amount converted to RUB (where available)
+        data_type: decimal(18,2)
+
+      - name: Amount, USD
+        description: Transaction amount converted to USD (where available)
+        data_type: decimal(18,2)
+
+      - name: Executed Rate, RUB
+        description: Exchange rate to RUB at execution time (future use)
+        data_type: decimal(18,6)
+
+      - name: Exchange Rate, USD
+        description: Exchange rate to USD (populated for P2P trades, conversions, etc.)
+        data_type: decimal(18,6)
+
+      - name: Close Rate, RUB
+        description: Closing exchange rate to RUB (future use)
+        data_type: decimal(18,6)
+
+      - name: Close Rate, USD
+        description: Closing exchange rate to USD (future use)
+        data_type: decimal(18,6)

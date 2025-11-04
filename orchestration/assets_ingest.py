@@ -28,6 +28,11 @@ INGESTION_CONTEXT = IngestionContext(
 )
 
 
+def _bank_leaf_options(leaf_dir: Path) -> LeafIngestionOptions:
+    """Configure bank ingestion behaviour - merge all files into consolidated parquet."""
+    return LeafIngestionOptions(latest_only=False, merge_pending=True)
+
+
 def _crypto_leaf_options(leaf_dir: Path) -> LeafIngestionOptions:
     """Configure crypto ingestion behaviour per transaction type directory."""
     name = leaf_dir.name.lower()
@@ -41,6 +46,7 @@ BANK_CONFIG = IngestionSourceConfig(
     source_label="bank",
     leaf_label="data type",
     structure_hint="Bank/{source}/<data_type>/",
+    leaf_options_factory=_bank_leaf_options,
 )
 
 CRYPTO_CONFIG = IngestionSourceConfig(

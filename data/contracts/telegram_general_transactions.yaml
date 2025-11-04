@@ -13,42 +13,48 @@ skip_footer_rows: 0
 target_table:
   schema: prod_raw
   name: telegram_general_transactions
-  
+
 columns:
   - name: 'type'
     type: varchar
     nullable: true
     description: 'Raw type value from Telegram general transactions export'
-    source_column_index: 1
+    source_column_index: 0
 
   - name: 'date'
     type: varchar
     nullable: true
     description: 'Raw date value from Telegram general transactions export'
-    source_column_index: 2
+    source_column_index: 1
 
   - name: 'time'
     type: varchar
     nullable: true
     description: 'Raw time value from Telegram general transactions export'
-    source_column_index: 3
+    source_column_index: 2
 
   - name: 'status'
     type: varchar
     nullable: true
     description: 'Raw status value from Telegram general transactions export'
-    source_column_index: 4
+    source_column_index: 3
 
   - name: 'amount_in'
     type: varchar
     nullable: true
     description: 'Raw amount_in value from Telegram general transactions export'
-    source_column_index: 5
+    source_column_index: 4
 
   - name: 'currency_in'
     type: varchar
     nullable: true
     description: 'Raw currency_in value from Telegram general transactions export'
+    source_column_index: 5
+
+  - name: 'currency_in_price_usd'
+    type: varchar
+    nullable: true
+    description: 'Raw currency_in_price_usd value from Telegram general transactions export'
     source_column_index: 6
 
   - name: 'amount_out'
@@ -63,65 +69,71 @@ columns:
     description: 'Raw currency_out value from Telegram general transactions export'
     source_column_index: 8
 
+  - name: 'currency_out_price_usd'
+    type: varchar
+    nullable: true
+    description: 'Raw currency_out_price_usd value from Telegram general transactions export'
+    source_column_index: 9
+
   - name: 'ex_rate_base'
     type: varchar
     nullable: true
     description: 'Raw ex_rate_base value from Telegram general transactions export'
-    source_column_index: 9
+    source_column_index: 10
 
   - name: 'ex_rate_quote'
     type: varchar
     nullable: true
     description: 'Raw ex_rate_quote value from Telegram general transactions export'
-    source_column_index: 10
+    source_column_index: 11
 
   - name: 'ex_rate_value'
     type: varchar
     nullable: true
     description: 'Raw ex_rate_value value from Telegram general transactions export'
-    source_column_index: 11
+    source_column_index: 12
 
   - name: 'counterparty'
     type: varchar
     nullable: true
     description: 'Raw counterparty value from Telegram general transactions export'
-    source_column_index: 12
+    source_column_index: 13
 
   - name: 'order_id'
     type: varchar
     nullable: true
     description: 'Raw order_id value from Telegram general transactions export'
-    source_column_index: 13
+    source_column_index: 14
 
   - name: 'source'
     type: varchar
     nullable: true
     description: 'Raw source value from Telegram general transactions export'
-    source_column_index: 14
+    source_column_index: 15
 
   - name: 'fee_amount'
     type: varchar
     nullable: true
     description: 'Raw fee_amount value from Telegram general transactions export'
-    source_column_index: 15
+    source_column_index: 16
 
   - name: 'fee_currency'
     type: varchar
     nullable: true
     description: 'Raw fee_currency value from Telegram general transactions export'
-    source_column_index: 16
+    source_column_index: 17
 
   - name: 'raw'
     type: varchar
     nullable: true
     description: 'Raw raw value from Telegram general transactions export'
-    source_column_index: 17
+    source_column_index: 18
 
   - name: 'parsed_at'
     type: varchar
     nullable: true
     description: 'Raw parsed_at value from Telegram general transactions export'
-    source_column_index: 18
+    source_column_index: 19
 
 metadata:
   refresh_frequency: monthly

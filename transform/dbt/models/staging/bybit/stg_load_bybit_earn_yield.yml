@@ -1,0 +1,62 @@
+version: 2
+
+models:
+  - name: stg_load_bybit_earn_yield
+    description: >
+      Staging over prod_raw.bybit_earn_yield using seed-based column mapping.
+    tags: [staging, bybit]
+    meta:
+      source_table: prod_raw.bybit_earn_yield
+      seed_name: bybit_earn_yield
+
+    columns:
+      - name: __load_key
+        description: Load key for the Bybit earn yield row.
+        data_type: varchar(32)
+        data_tests: [not_null, unique]
+
+      - name: amount
+        description: Yield amount distributed.
+        data_type: double
+
+      - name: coin
+        description: Coin symbol for the yield.
+        data_type: varchar(16)
+
+      - name: createdAt_ms
+        description: Creation timestamp in milliseconds.
+        data_type: bigint
+
+      - name: distributionMode
+        description: Distribution mode (e.g., Auto).
+        data_type: varchar(16)
+
+      - name: effectiveStakingAmount
+        description: Effective staking amount for yield calculation.
+        data_type: double
+
+      - name: id
+        description: Unique ID for the yield record.
+        data_type: varchar(64)
+
+      - name: orderId
+        description: Associated order ID (if any).
+        data_type: varchar(64)
+
+      - name: productId
+        description: Product ID for the earn program.
+        data_type: varchar(16)
+
+      - name: status
+        description: Status of the yield distribution (e.g., Success).
+        data_type: varchar(16)
+
+      - name: yieldType
+        description: Type of yield (e.g., Normal).
+        data_type: varchar(16)
+
+      - name: processed_at
+        description: Timestamp of the ingestion.
+        data_type: timestamp
+        data_tests:
+          - not_null

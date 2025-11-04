@@ -46,15 +46,18 @@ class BaseReader:
     def _normalize_columns_by_index(self, df: pd.DataFrame) -> pd.DataFrame:
         # Safer check: explicitly test for None (not truthiness)
         if any(c.source_column_index is not None for c in self.contract.columns):
-            cols = list(df.columns)
+            cols = [
+                col.lstrip("\ufeff") if isinstance(col, str) else col  # strip BOM if present
+                for col in df.columns
+            ]
             for c in self.contract.columns:
                 if c.source_column_index is None:
                     continue
-                src_pos = int(c.source_column_index) - 1  # contract is 1-based
+                src_pos = int(c.source_column_index)  # contract is 0-based
                 if not (0 <= src_pos < len(cols)):
                     raise ValueError(
                         f"source_column_index out of range for column {c.name} "
-                        f"(got {c.source_column_index}, have {len(cols)} columns)"
+                        f"(got index {c.source_column_index}, have {len(cols)} columns)"
                     )
                 # Rename by position (does not rely on possibly duplicated/dirty header text)
                 cols[src_pos] = c.name

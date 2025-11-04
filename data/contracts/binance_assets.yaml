@@ -15,6 +15,12 @@ target_table:
   name: binance_assets
   
 columns:
+  - name: 'amount_usd'
+    type: varchar
+    nullable: true
+    description: 'Raw amount_usd value from Binance assets export'
+    source_column_index: 0
+
   - name: 'asset'
     type: varchar
     nullable: true
@@ -33,23 +39,17 @@ columns:
     description: 'Raw locked value from Binance assets export'
     source_column_index: 3
 
+  - name: 'price_usd'
+    type: varchar
+    nullable: true
+    description: 'Raw price_usd value from Binance assets export'
+    source_column_index: 4
+
   - name: 'total'
     type: varchar
     nullable: true
     description: 'Raw total value from Binance assets export'
-    source_column_index: 4
-
-  - name: 'usdt_equivalent'
-    type: varchar
-    nullable: true
-    description: 'Raw usdt_equivalent value from Binance assets export'
     source_column_index: 5
-
-  - name: 'usdt_price'
-    type: varchar
-    nullable: true
-    description: 'Raw usdt_price value from Binance assets export'
-    source_column_index: 6
 
 metadata:
   refresh_frequency: monthly

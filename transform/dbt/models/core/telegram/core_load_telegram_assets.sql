@@ -14,10 +14,10 @@ select
   ) as asset_bk,
   asset_full_name,
   asset_short_name,
-  cast(regexp_replace(coalesce(price_usd, '0'), '[^0-9.-]', '', 'g') as double) as price_usd,
-  cast(regexp_replace(coalesce(change_24h_pct, '0'), '[^0-9.-]', '', 'g') as double) as change_24h_pct,
+  coalesce(price_usd, 0) as price_usd,
+  coalesce(change_24h_pct, 0) as change_24h_pct,
   balance,
-  cast(regexp_replace(coalesce(value_usd, '0'), '[^0-9.-]', '', 'g') as double) as value_usd,
+  coalesce(value_usd, 0) as value_usd,
   current_timestamp at time zone 'UTC' as processed_at
 from
   {{ ref('stg_load_telegram_assets') }}

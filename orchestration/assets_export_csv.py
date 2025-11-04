@@ -13,7 +13,9 @@ DUCKDB_PATH = os.getenv("DUCKDB_PATH", "/app/data/warehouse/warehouse.duckdb")
 FINANCE_DATA_DIR = Path(os.getenv("FINANCE_DATA_DIR_CONTAINER", "/app/data/finance"))
 EXPORT_DIR = FINANCE_DATA_DIR / "Archive" / "Bank" / "Exports"
 RESULTS_DIR = FINANCE_DATA_DIR / "Results"
-EXPORT_FINANCE_TABLE = os.getenv("EXPORT_FINANCE_TABLE", "prod_imart.view_bank_transactions")
+FINANCE_HISTORY_EXPORT_TABLE = os.getenv(
+    "FINANCE_HISTORY_EXPORT_TABLE", "prod_imart.view_transactions"
+)
 
 
 def _md5(path: Path) -> str:
@@ -32,7 +34,7 @@ def export_csv_snapshot() -> Output[dict[str, Any]]:
     timestamp = now.strftime("%Y%m%d_%H%M%S")
 
     # Replace dots with underscores in table name
-    table_name = EXPORT_FINANCE_TABLE.replace(".", "_")
+    table_name = FINANCE_HISTORY_EXPORT_TABLE.replace(".", "_")
 
     # Create date-based folder structure
     date_dir = EXPORT_DIR / date_folder
@@ -52,13 +54,13 @@ def export_csv_snapshot() -> Output[dict[str, Any]]:
     # Export data from database
     con = duckdb.connect(DUCKDB_PATH, read_only=True)
     con.execute(
-        f"COPY (select * from {EXPORT_FINANCE_TABLE}) TO '{csv_path.as_posix()}' WITH (HEADER, DELIMITER ',')",
+        f"COPY (select * from {FINANCE_HISTORY_EXPORT_TABLE}) TO '{csv_path.as_posix()}' WITH (HEADER, DELIMITER ',')",
     )
     # Also export to Results folder
     con.execute(
-        f"COPY (select * from {EXPORT_FINANCE_TABLE}) TO '{results_path.as_posix()}' WITH (HEADER, DELIMITER ',')",
+        f"COPY (select * from {FINANCE_HISTORY_EXPORT_TABLE}) TO '{results_path.as_posix()}' WITH (HEADER, DELIMITER ',')",
     )
-    result = con.execute(f"select count(*) from {EXPORT_FINANCE_TABLE}").fetchone()
+    result = con.execute(f"select count(*) from {FINANCE_HISTORY_EXPORT_TABLE}").fetchone()
     row_count = result[0] if result else 0
     con.close()
 
@@ -68,7 +70,7 @@ def export_csv_snapshot() -> Output[dict[str, Any]]:
 
     # Create manifest metadata
     meta = {
-        "table": EXPORT_FINANCE_TABLE,
+        "table": FINANCE_HISTORY_EXPORT_TABLE,
         "csv_path": str(csv_path),
         "results_path": str(results_path),
         "row_count": row_count,

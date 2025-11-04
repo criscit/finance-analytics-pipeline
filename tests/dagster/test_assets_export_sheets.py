@@ -18,11 +18,11 @@ class TestGoogleSheetsUtilities:
         with patch.dict(
             "os.environ",
             {
-                "GOOGLE_SPREADSHEET_ID": "test_sheet_id",
-                "GOOGLE_SHEET_NAME": "Test",
-                "GOOGLE_TABLE_NAME": "Test Table",
+                "FINANCE_GOOGLE_SPREADSHEET_ID": "test_sheet_id",
+                "FINANCE_HISTORY_GOOGLE_SHEET_NAME": "Test",
+                "FINANCE_HISTORY_GOOGLE_TABLE_NAME": "Test Table",
                 "GOOGLE_SA_JSON_PATH": "/path/to/sa.json",
-                "EXPORT_FINANCE_TABLE": "test_table",
+                "FINANCE_HISTORY_EXPORT_TABLE": "test_table",
                 "DUCKDB_PATH": "/path/to/db.duckdb",
             },
         ):
@@ -47,7 +47,7 @@ class TestGoogleSheetsUtilities:
                 config["google_sa_json_path"]
                 == "/app/credentials/finance-sheets-writer-prod-sa.json"
             )
-            assert config["export_finance_table"] == "prod_imart.view_bank_transactions"
+            assert config["export_finance_table"] == "prod_imart.view_transactions"
             assert config["duckdb_path"] == "/app/data/warehouse/analytics.duckdb"
 
 
@@ -69,6 +69,6 @@ class TestGoogleSheetsExportAsset:
         }
 
         with pytest.raises(
-            ValueError, match="GOOGLE_SPREADSHEET_ID environment variable is required"
+            ValueError, match="FINANCE_GOOGLE_SPREADSHEET_ID environment variable is required"
         ):
             export_to_google_sheets()

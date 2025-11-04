@@ -13,16 +13,16 @@ from src.utils import filter_new_transactions, get_max_transaction_dates_by_bank
 def load_runtime_config() -> dict[str, Any]:
     """Read environment variables at runtime."""
     return {
-        "google_spreadsheet_id": os.getenv("GOOGLE_SPREADSHEET_ID"),
+        "google_spreadsheet_id": os.getenv("FINANCE_GOOGLE_SPREADSHEET_ID"),
         "google_sa_json_path": os.getenv(
             "GOOGLE_SA_JSON_PATH", "/app/credentials/finance-sheets-writer-prod-sa.json"
         ),
         "export_finance_table": os.getenv(
-            "EXPORT_FINANCE_TABLE", "prod_imart.view_bank_transactions"
+            "FINANCE_HISTORY_EXPORT_TABLE", "prod_imart.view_transactions"
         ),
         "duckdb_path": os.getenv("DUCKDB_PATH", "/app/data/warehouse/analytics.duckdb"),
-        "google_table_name": os.getenv("GOOGLE_TABLE_NAME", "Spendings Log"),
-        "google_sheet_name": os.getenv("GOOGLE_SHEET_NAME", "Spendings"),
+        "google_table_name": os.getenv("FINANCE_HISTORY_GOOGLE_TABLE_NAME", "Spendings Log"),
+        "google_sheet_name": os.getenv("FINANCE_HISTORY_GOOGLE_SHEET_NAME", "Spendings"),
     }
 
 
@@ -34,7 +34,9 @@ def export_to_google_sheets() -> Output[dict[str, int]]:
 
     # Validate required environment variables
     if not cfg["google_spreadsheet_id"]:
-        raise ValueError("GOOGLE_SPREADSHEET_ID environment variable is required but not set")
+        raise ValueError(
+            "FINANCE_GOOGLE_SPREADSHEET_ID environment variable is required but not set"
+        )
     if not Path(cfg["google_sa_json_path"]).exists():
         raise ValueError(f"Google service account file not found at: {cfg['google_sa_json_path']}")
 

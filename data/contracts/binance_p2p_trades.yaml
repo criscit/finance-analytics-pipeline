@@ -13,30 +13,36 @@ skip_footer_rows: 0
 target_table:
   schema: prod_raw
   name: binance_p2p_trades
-  
+
 columns:
   - name: 'additionalKycVerify'
     type: varchar
     nullable: true
     description: 'Raw additionalKycVerify value from Binance p2p trades export'
-    source_column_index: 1
+    source_column_index: 0
 
   - name: 'advNo'
     type: varchar
     nullable: true
     description: 'Raw advNo value from Binance p2p trades export'
-    source_column_index: 2
+    source_column_index: 1
 
   - name: 'amount'
     type: varchar
     nullable: true
     description: 'Raw amount value from Binance p2p trades export'
-    source_column_index: 3
+    source_column_index: 2
 
   - name: 'asset'
     type: varchar
     nullable: true
     description: 'Raw asset value from Binance p2p trades export'
+    source_column_index: 3
+
+  - name: 'asset_price_usd'
+    type: varchar
+    nullable: true
+    description: 'Raw asset_price_usd value from Binance p2p trades export'
     source_column_index: 4
 
   - name: 'commission'

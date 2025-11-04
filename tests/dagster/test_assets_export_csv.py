@@ -55,7 +55,7 @@ class TestCSVExportAsset:
                 patch("orchestration.assets_export_csv.DUCKDB_PATH", str(db_file)),
                 patch("orchestration.assets_export_csv.EXPORT_DIR", export_dir),
                 patch("orchestration.assets_export_csv.RESULTS_DIR", results_dir),
-                patch("orchestration.assets_export_csv.EXPORT_FINANCE_TABLE", "test_table"),
+                patch("orchestration.assets_export_csv.FINANCE_HISTORY_EXPORT_TABLE", "test_table"),
             ):
                 result = export_csv_snapshot()
 
@@ -79,7 +79,9 @@ class TestCSVExportAsset:
                 patch("orchestration.assets_export_csv.DUCKDB_PATH", str(db_file)),
                 patch("orchestration.assets_export_csv.EXPORT_DIR", export_dir),
                 patch("orchestration.assets_export_csv.RESULTS_DIR", results_dir),
-                patch("orchestration.assets_export_csv.EXPORT_FINANCE_TABLE", "empty_table"),
+                patch(
+                    "orchestration.assets_export_csv.FINANCE_HISTORY_EXPORT_TABLE", "empty_table"
+                ),
             ):
                 result = export_csv_snapshot()
 
@@ -98,7 +100,10 @@ class TestCSVExportAsset:
                 patch("orchestration.assets_export_csv.DUCKDB_PATH", ":memory:"),
                 patch("orchestration.assets_export_csv.EXPORT_DIR", export_dir),
                 patch("orchestration.assets_export_csv.RESULTS_DIR", results_dir),
-                patch("orchestration.assets_export_csv.EXPORT_FINANCE_TABLE", "nonexistent_table"),
+                patch(
+                    "orchestration.assets_export_csv.FINANCE_HISTORY_EXPORT_TABLE",
+                    "nonexistent_table",
+                ),
                 pytest.raises(duckdb.CatalogException),  # DuckDB will raise an error
             ):
                 export_csv_snapshot()

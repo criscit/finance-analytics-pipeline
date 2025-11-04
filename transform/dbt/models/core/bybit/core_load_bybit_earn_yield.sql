@@ -1,27 +1,31 @@
 {{ config(
     materialized='incremental',
     incremental_strategy='delete+insert',
-    unique_key='earn_bk'
+    unique_key='earn_yield_bk'
 ) }}
 
 select
   md5(
     concat_ws(
       '|',
-      'bybit_earn',
-      asset
+      'bybit_earn_yield',
+      id,
+      cast(createdAt_ms as varchar)
     )
-  ) as earn_bk,
-  asset,
-  coalesce(apy, 0) as apy_pct,
-  coalesce(wallet_balance, 0) as wallet_balance,
-  coalesce(asset_usdt_price, 0) as asset_usdt_price,
-  coalesce(wallet_balance_usd, 0) as wallet_balance_usd,
-  coalesce(value_usd, 0) as value_usd,
-  coalesce(yield, 0) as yield_usd,
+  ) as earn_yield_bk,
+  amount,
+  coin,
+  to_timestamp(createdAt_ms / 1000.0) as created_at_utc,
+  distributionMode,
+  effectiveStakingAmount,
+  id,
+  orderId,
+  productId,
+  status,
+  yieldType,
   current_timestamp at time zone 'UTC' as processed_at
 from
-  {{ ref('stg_load_bybit_earn') }}
+  {{ ref('stg_load_bybit_earn_yield') }}
 
 {% if is_incremental() %}
   where processed_at >= (

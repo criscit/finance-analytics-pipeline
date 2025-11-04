@@ -13,9 +13,11 @@ select
     )
   ) as earn_bk,
   asset,
-  cast(regexp_replace(coalesce(apy_pct, '0'), '[^0-9.-]', '', 'g') as double) as apy_pct,
-  cast(regexp_replace(coalesce(value_usd, '0'), '[^0-9.-]', '', 'g') as double) as value_usd,
-  cast(regexp_replace(coalesce(yield_usd, '0'), '[^0-9.-]', '', 'g') as double) as yield_usd,
+  coalesce(apy_pct, 0) as apy_pct,
+  coalesce(value_usd, 0) as value_usd,
+  coalesce(yield_usd, 0) as yield_usd,
+  coalesce(wallet_balance_coin, 0) as wallet_balance_coin,
+  coalesce(price_per_coin_usdt, 0) as price_per_coin_usdt,
   current_timestamp at time zone 'UTC' as processed_at
 from
   {{ ref('stg_load_telegram_earn') }}

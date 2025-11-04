@@ -121,8 +121,8 @@ poetry run pytest export/tests/
 
 ### Customizing Exports
 
-- **CSV exports**: Modify `EXPORT_FINANCE_TABLE` in `.env` to change the source table
-- **Google Sheets**: Update `GOOGLE_SHEET_NAME` and `GOOGLE_TABLE_NAME` to change the target sheet and table
+- **CSV exports**: Modify `FINANCE_HISTORY_EXPORT_TABLE` in `.env` to change the source table
+- **Google Sheets**: Update `FINANCE_HISTORY_GOOGLE_SHEET_NAME` and `FINANCE_HISTORY_GOOGLE_TABLE_NAME` to change the target sheet and table
 - **Schedules**: Modify the cron schedule in `orchestration/dagster_project/src/repo.py`
 
 ## Troubleshooting
