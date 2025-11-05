@@ -7,7 +7,6 @@
 select
   transaction_bk,
   transaction_type,
-  status,
   amount_in,
   currency_in,
   currency_in_price_usd,
@@ -20,22 +19,15 @@ select
   fee_amt,
   fee_currency,
   counterparty,
-  source,
-  raw_payload,
-  case
-    when transaction_date is not null and nullif(transaction_time, '') is not null
-    then transaction_date + cast(transaction_time as time)
-    else null
-  end as transacted_at,
-  transaction_date,
-  transaction_time,
-  parsed_at,
+  transacted_at,
+  date(transacted_at at time zone 'Europe/Moscow') as transacted_dt,
   current_timestamp at time zone 'UTC' as processed_at
 from
   {{ ref('core_load_telegram_general_transactions') }}
-
+where
+  status = 'Success'
 {% if is_incremental() %}
-  where processed_at >= (
+  and processed_at >= (
     select
       coalesce(max(processed_at), '1900-01-02'::timestamp) - interval '1 day'
     from

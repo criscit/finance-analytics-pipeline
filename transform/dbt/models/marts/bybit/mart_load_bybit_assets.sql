@@ -11,6 +11,7 @@ select
   free,
   locked,
   usd_value,
+  wallet_balance,
   current_timestamp at time zone 'UTC' as processed_at
 from
   {{ ref('core_load_bybit_assets') }}

@@ -11,8 +11,8 @@ select
   chain,
   coin,
   price_usd,
-  (to_timestamp(create_time_ms / 1000.0) at time zone 'Europe/Moscow') as created_at,
-  (to_timestamp(update_time_ms / 1000.0) at time zone 'Europe/Moscow') as updated_at,
+  (to_timestamp(update_time_ms / 1000.0) at time zone 'Europe/Moscow') as executed_at,
+  date(to_timestamp(update_time_ms / 1000.0) at time zone 'Europe/Moscow') as executed_dt,
   withdraw_type,
   current_timestamp at time zone 'UTC' as processed_at
 from

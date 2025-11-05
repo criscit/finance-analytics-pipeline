@@ -6,8 +6,8 @@
 
 select
   fiat_payment_bk,
-  (to_timestamp(create_time_ms / 1000.0) at time zone 'Europe/Moscow') as created_at,
-  (to_timestamp(update_time_ms / 1000.0) at time zone 'Europe/Moscow') as updated_at,
+  (to_timestamp(update_time_ms / 1000.0) at time zone 'Europe/Moscow') as executed_at,
+  date(to_timestamp(update_time_ms / 1000.0) at time zone 'Europe/Moscow') as executed_dt,
   obtain_amt,
   source_amt,
   price,

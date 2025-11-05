@@ -16,28 +16,34 @@ models:
     unique_key: transfer_bk
   columns:
   - name: transfer_bk
-    description: 'TODO: Add description for transfer_bk'
+    description: 'Business key (MD5 hash) for unique identification'
     data_type: varchar(32)
     data_tests:
     - not_null
     - unique
   - name: amount
-    description: 'TODO: Add description for amount'
+    description: 'Transfer amount in cryptocurrency units'
     data_type: varchar(64)
   - name: coin
-    description: 'TODO: Add description for coin'
+    description: 'Cryptocurrency symbol transferred'
     data_type: varchar(64)
   - name: from_account_type
-    description: 'TODO: Add description for from_account_type'
+    description: 'Source account type (spot, derivatives, etc.)'
     data_type: varchar(64)
   - name: to_account_type
-    description: 'TODO: Add description for to_account_type'
+    description: 'Target account type (spot, derivatives, etc.)'
     data_type: varchar(64)
+  - name: price_usd
+    description: 'USD price of the coin at transfer time'
+    data_type: double
   - name: success_at
-    description: 'TODO: Add description for success_at'
+    description: 'Transfer success timestamp (Europe/Moscow timezone)'
     data_type: timestamp
+  - name: success_dt
+    description: 'Transfer success date (Europe/Moscow timezone)'
+    data_type: date
   - name: processed_at
-    description: 'TODO: Add description for processed_at'
+    description: 'Ingestion timestamp for incremental processing (UTC)'
     data_type: timestamp
     data_tests:
     - not_null

@@ -17,70 +17,55 @@ models:
     unique_key: transaction_bk
   columns:
   - name: transaction_bk
-    description: 'TODO: Add description for transaction_bk'
+    description: 'Business key (MD5 hash) for unique identification'
     data_type: varchar(32)
     data_tests:
     - not_null
     - unique
   - name: transaction_type
-    description: 'TODO: Add description for transaction_type'
+    description: 'Type of transaction (swap, deposit, withdrawal, transfer, etc.)'
     data_type: varchar(64)
   - name: status
-    description: 'TODO: Add description for status'
+    description: 'Transaction status (completed, pending, failed, etc.)'
     data_type: varchar(64)
   - name: amount_in
-    description: 'TODO: Add description for amount_in'
+    description: 'Incoming amount in the transaction'
     data_type: varchar(64)
   - name: currency_in
-    description: 'TODO: Add description for currency_in'
+    description: 'Currency symbol for incoming amount'
     data_type: varchar(64)
   - name: amount_out
-    description: 'TODO: Add description for amount_out'
+    description: 'Outgoing amount in the transaction'
     data_type: varchar(64)
   - name: currency_out
-    description: 'TODO: Add description for currency_out'
+    description: 'Currency symbol for outgoing amount'
     data_type: varchar(64)
   - name: ex_rate_value
-    description: 'TODO: Add description for ex_rate_value'
+    description: 'Exchange rate value applied to transaction'
     data_type: double
   - name: ex_rate_base
-    description: 'TODO: Add description for ex_rate_base'
+    description: 'Base currency for exchange rate'
     data_type: double
   - name: ex_rate_quote
-    description: 'TODO: Add description for ex_rate_quote'
+    description: 'Quote currency for exchange rate'
     data_type: double
   - name: fee_amt
-    description: 'TODO: Add description for fee_amt'
+    description: 'Transaction fee amount'
     data_type: double
   - name: fee_currency
-    description: 'TODO: Add description for fee_currency'
+    description: 'Currency in which fee is charged'
     data_type: double
   - name: counterparty
-    description: 'TODO: Add description for counterparty'
+    description: 'Counterparty involved in the transaction'
     data_type: varchar(64)
-  - name: source
-    description: 'TODO: Add description for source'
-    data_type: varchar(64)
-  - name: raw_payload
-    description: 'TODO: Add description for raw_payload'
-    data_type: varchar(64)
-  - name: transaction_time
-    description: 'TODO: Add description for transaction_time'
+  - name: transacted_at
+    description: 'Transaction timestamp (Europe/Moscow timezone)'
     data_type: timestamp
-  - name: time
-    description: 'TODO: Add description for time'
-    data_type: varchar(64)
-  - name: transaction_date
-    description: 'TODO: Add description for transaction_date'
-    data_type: varchar(64)
-  - name: transaction_time
-    description: 'TODO: Add description for transaction_time'
-    data_type: timestamp
-  - name: parsed_at
-    description: 'TODO: Add description for parsed_at'
-    data_type: timestamp
+  - name: transacted_dt
+    description: 'Transaction date (Europe/Moscow timezone)'
+    data_type: date
   - name: processed_at
-    description: 'TODO: Add description for processed_at'
+    description: 'Ingestion timestamp for incremental processing (UTC)'
     data_type: timestamp
     data_tests:
     - not_null

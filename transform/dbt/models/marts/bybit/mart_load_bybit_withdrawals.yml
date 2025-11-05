@@ -16,34 +16,37 @@ models:
     unique_key: withdrawal_bk
   columns:
   - name: withdrawal_bk
-    description: 'TODO: Add description for withdrawal_bk'
+    description: 'Business key (MD5 hash) for unique identification'
     data_type: varchar(32)
     data_tests:
     - not_null
     - unique
   - name: amount
-    description: 'TODO: Add description for amount'
+    description: 'Withdrawal amount in cryptocurrency units'
     data_type: varchar(64)
   - name: withdraw_fee
-    description: 'TODO: Add description for withdraw_fee'
+    description: 'Network fee charged for the withdrawal'
     data_type: double
   - name: chain
-    description: 'TODO: Add description for chain'
+    description: 'Blockchain network used for withdrawal'
     data_type: varchar(64)
   - name: coin
-    description: 'TODO: Add description for coin'
+    description: 'Cryptocurrency symbol withdrawn'
     data_type: varchar(64)
-  - name: created_at
-    description: 'TODO: Add description for created_at'
+  - name: price_usd
+    description: 'USD price of the coin at withdrawal time'
+    data_type: double
+  - name: executed_at
+    description: 'Withdrawal execution timestamp (Europe/Moscow timezone)'
     data_type: timestamp
-  - name: updated_at
-    description: 'TODO: Add description for updated_at'
-    data_type: timestamp
+  - name: executed_dt
+    description: 'Withdrawal execution date (Europe/Moscow timezone)'
+    data_type: date
   - name: withdraw_type
-    description: 'TODO: Add description for withdraw_type'
+    description: 'Type of withdrawal (on-chain, internal, etc.)'
     data_type: varchar(64)
   - name: processed_at
-    description: 'TODO: Add description for processed_at'
+    description: 'Ingestion timestamp for incremental processing (UTC)'
     data_type: timestamp
     data_tests:
     - not_null

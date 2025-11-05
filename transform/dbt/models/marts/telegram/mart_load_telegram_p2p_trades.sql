@@ -16,7 +16,9 @@ select
   fiat_currency,
   payment_method,
   created_at,
+  date(created_at at time zone 'Europe/Moscow') as created_dt,
   completed_at,
+  date(completed_at at time zone 'Europe/Moscow') as completed_dt,
   current_timestamp at time zone 'UTC' as processed_at
 from
   {{ ref('core_load_telegram_p2p_trades') }}

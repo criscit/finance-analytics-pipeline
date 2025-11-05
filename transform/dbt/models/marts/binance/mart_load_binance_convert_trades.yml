@@ -16,46 +16,46 @@ models:
     unique_key: convert_trade_bk
   columns:
   - name: convert_trade_bk
-    description: 'TODO: Add description for convert_trade_bk'
+    description: 'Business key (MD5 hash) for unique identification'
     data_type: varchar(32)
     data_tests:
     - not_null
     - unique
-  - name: create_time_ms
-    description: 'TODO: Add description for create_time_ms'
-    data_type: varchar(64)
   - name: created_at
-    description: 'TODO: Add description for created_at'
+    description: 'Convert trade creation timestamp (Europe/Moscow timezone)'
     data_type: timestamp
+  - name: created_dt
+    description: 'Convert trade creation date (Europe/Moscow timezone)'
+    data_type: date
   - name: from_amt
-    description: 'TODO: Add description for from_amt'
+    description: 'Amount converted from source cryptocurrency'
     data_type: double
   - name: from_asset
-    description: 'TODO: Add description for from_asset'
+    description: 'Source cryptocurrency symbol'
     data_type: varchar(64)
   - name: to_amt
-    description: 'TODO: Add description for to_amt'
+    description: 'Amount received in target cryptocurrency'
     data_type: double
   - name: to_asset
-    description: 'TODO: Add description for to_asset'
+    description: 'Target cryptocurrency symbol'
     data_type: varchar(64)
   - name: ratio
-    description: 'TODO: Add description for ratio'
+    description: 'Conversion ratio from source to target'
     data_type: varchar(64)
   - name: inverse_ratio
-    description: 'TODO: Add description for inverse_ratio'
+    description: 'Inverse conversion ratio from target to source'
     data_type: varchar(64)
   - name: order_type
-    description: 'TODO: Add description for order_type'
+    description: 'Order type for conversion'
     data_type: varchar(64)
   - name: side
-    description: 'TODO: Add description for side'
+    description: 'Conversion side (buy or sell)'
     data_type: varchar(64)
   - name: wallet_type
-    description: 'TODO: Add description for wallet_type'
+    description: 'Wallet type used for conversion'
     data_type: varchar(64)
   - name: processed_at
-    description: 'TODO: Add description for processed_at'
+    description: 'Ingestion timestamp for incremental processing (UTC)'
     data_type: timestamp
     data_tests:
     - not_null

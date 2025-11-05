@@ -16,6 +16,7 @@ select
   order_price,
   order_qty,
   (to_timestamp(exec_time_ms / 1000.0) at time zone 'Europe/Moscow') as executed_at,
+  date(to_timestamp(exec_time_ms / 1000.0) at time zone 'Europe/Moscow') as executed_dt,
   exec_type,
   fee_currency,
   is_maker,

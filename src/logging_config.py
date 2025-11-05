@@ -5,7 +5,9 @@ This module provides a singleton logger instance configured with:
 - Structured logging with context binding
 - File rotation and retention
 - Color-coded console output
-- Compatible with Dagster orchestration
+
+Note: For Dagster assets, use context.log instead of this logger.
+This logger is intended for business logic in src/.
 """
 
 import sys
@@ -82,5 +84,5 @@ def bind_context(**kwargs: Any) -> Any:
     return logger.bind(**kwargs)
 
 
-# Export the default logger instance
+# Export the logger and utility functions
 __all__ = ["logger", "get_logger", "bind_context"]

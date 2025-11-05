@@ -16,31 +16,34 @@ models:
     unique_key: convert_trade_bk
   columns:
   - name: convert_trade_bk
-    description: 'TODO: Add description for convert_trade_bk'
+    description: 'Business key (MD5 hash) for unique identification'
     data_type: varchar(32)
     data_tests:
     - not_null
     - unique
   - name: created_at
-    description: 'TODO: Add description for created_at'
+    description: 'Convert trade creation timestamp (Europe/Moscow timezone)'
     data_type: timestamp
+  - name: created_dt
+    description: 'Convert trade creation date (Europe/Moscow timezone)'
+    data_type: date
   - name: exchange_rate
-    description: 'TODO: Add description for exchange_rate'
+    description: 'Exchange rate used for conversion'
     data_type: double
   - name: from_amt
-    description: 'TODO: Add description for from_amt'
+    description: 'Amount converted from source cryptocurrency'
     data_type: double
   - name: from_coin
-    description: 'TODO: Add description for from_coin'
+    description: 'Source cryptocurrency symbol'
     data_type: varchar(64)
   - name: to_amt
-    description: 'TODO: Add description for to_amt'
+    description: 'Amount received in target cryptocurrency'
     data_type: double
   - name: to_coin
-    description: 'TODO: Add description for to_coin'
+    description: 'Target cryptocurrency symbol'
     data_type: varchar(64)
   - name: processed_at
-    description: 'TODO: Add description for processed_at'
+    description: 'Ingestion timestamp for incremental processing (UTC)'
     data_type: timestamp
     data_tests:
     - not_null

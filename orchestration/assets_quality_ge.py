@@ -11,21 +11,16 @@ Architecture:
 - Bootstrap happens automatically before each checkpoint run
 - GX stores artifacts as JSON (can be gitignored or committed)
 """
-from __future__ import annotations
-
 import contextlib
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import great_expectations as gx
-from dagster import Failure, MetadataValue, Output, asset
+from dagster import AssetExecutionContext, Failure, MetadataValue, Output, asset
 
 from orchestration.quality_gx.bootstrap import run_checkpoint_with_dataframes
 from src.logging_config import logger
-
-if TYPE_CHECKING:
-    pass
 
 # Support both local and container environments
 GE_DIR = os.getenv("GE_DIR", None)
@@ -131,7 +126,7 @@ def _handle_unexpected_exception(checkpoint_name: str, error: Exception) -> None
 
 
 @asset(deps=["ingest_bank"])
-def run_ge_raw_checkpoints() -> Output[dict[str, str]]:
+def run_ge_raw_checkpoints(context: AssetExecutionContext) -> Output[dict[str, str]]:
     """
     Run Great Expectations checkpoints on raw tables.
 
@@ -151,10 +146,10 @@ def run_ge_raw_checkpoints() -> Output[dict[str, str]]:
     tables_to_process = ingestion_info.get("tables_to_process", [])
     ingested_table_names = {t["table_nm"] for t in tables_to_process}
 
-    logger.info("Tables ingested in last 24h: %s", ingested_table_names)
+    context.log.info("Tables ingested in last 24h: %s", ingested_table_names)
 
     if not ingested_table_names:
-        logger.info("No tables ingested recently - skipping raw quality checks")
+        context.log.info("No tables ingested recently - skipping raw quality checks")
         return Output(
             {"status": "skipped", "checkpoint": checkpoint_name, "reason": "no_recent_ingestions"},
             metadata={
@@ -167,13 +162,13 @@ def run_ge_raw_checkpoints() -> Output[dict[str, str]]:
     try:
         result = _run_checkpoint(checkpoint_name, filter_tables=ingested_table_names)
     except RuntimeError as error:  # pragma: no cover - runtime error path
-        logger.error("GE raw checkpoint failed: %s", error)
+        context.log.error("GE raw checkpoint failed: %s", error)
         _handle_checkpoint_failure(checkpoint_name, error)
     except Exception as error:  # pragma: no cover - runtime error path
-        logger.error("Unexpected error in GE raw checkpoint: %s", error)
+        context.log.error("Unexpected error in GE raw checkpoint: %s", error)
         _handle_unexpected_exception(checkpoint_name, error)
 
-    logger.info("Raw table GE checkpoint completed successfully")
+    context.log.info("Raw table GE checkpoint completed successfully")
     return Output(
         {"status": "success", "checkpoint": checkpoint_name},
         metadata={
@@ -185,7 +180,7 @@ def run_ge_raw_checkpoints() -> Output[dict[str, str]]:
 
 
 @asset(deps=["build_dbt_models"])
-def run_ge_mart_checkpoints() -> Output[dict[str, str]]:
+def run_ge_mart_checkpoints(context: AssetExecutionContext) -> Output[dict[str, str]]:
     """
     Run Great Expectations checkpoints on mart tables.
 
@@ -200,13 +195,13 @@ def run_ge_mart_checkpoints() -> Output[dict[str, str]]:
     try:
         result = _run_checkpoint(checkpoint_name)
     except RuntimeError as error:  # pragma: no cover - runtime error path
-        logger.error("GE mart checkpoint failed: %s", error)
+        context.log.error("GE mart checkpoint failed: %s", error)
         _handle_checkpoint_failure(checkpoint_name, error)
     except Exception as error:  # pragma: no cover - runtime error path
-        logger.error("Unexpected error in GE mart checkpoint: %s", error)
+        context.log.error("Unexpected error in GE mart checkpoint: %s", error)
         _handle_unexpected_exception(checkpoint_name, error)
 
-    logger.info("Mart table GE checkpoint completed successfully")
+    context.log.info("Mart table GE checkpoint completed successfully")
     return Output(
         {"status": "success", "checkpoint": checkpoint_name},
         metadata={

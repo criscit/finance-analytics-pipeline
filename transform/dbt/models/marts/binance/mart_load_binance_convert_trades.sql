@@ -6,8 +6,8 @@
 
 select
   convert_trade_bk,
-  create_time_ms,
   (to_timestamp(create_time_ms / 1000.0) at time zone 'Europe/Moscow') as created_at,
+  date(to_timestamp(create_time_ms / 1000.0) at time zone 'Europe/Moscow') as created_dt,
   from_amt,
   from_asset,
   from_price_usd,

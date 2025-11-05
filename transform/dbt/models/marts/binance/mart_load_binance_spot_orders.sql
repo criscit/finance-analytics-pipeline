@@ -22,7 +22,9 @@ select
   trading_currency,
   trading_price_usd,
   order_placed_at_utc at time zone 'Europe/Moscow' as order_placed_at,
+  date(order_placed_at_utc at time zone 'Europe/Moscow') as order_placed_dt,
   executed_at_utc at time zone 'Europe/Moscow' as executed_at,
+  date(executed_at_utc at time zone 'Europe/Moscow') as executed_dt,
   current_timestamp at time zone 'UTC' as processed_at
 from
   {{ ref('core_load_binance_spot_orders') }}

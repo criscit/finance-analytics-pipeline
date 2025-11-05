@@ -16,52 +16,67 @@ models:
     unique_key: spot_order_bk
   columns:
   - name: spot_order_bk
-    description: 'TODO: Add description for spot_order_bk'
+    description: 'Business key (MD5 hash) for unique identification'
     data_type: varchar(32)
     data_tests:
     - not_null
     - unique
   - name: pair
-    description: 'TODO: Add description for pair'
+    description: 'Trading pair symbol'
     data_type: varchar(64)
   - name: order_price
-    description: 'TODO: Add description for order_price'
+    description: 'Original order price requested'
     data_type: double
   - name: order_amt
-    description: 'TODO: Add description for order_amt'
+    description: 'Original order amount requested'
     data_type: double
   - name: executed_amt
-    description: 'TODO: Add description for executed_amt'
+    description: 'Amount actually executed'
     data_type: double
   - name: average_price
-    description: 'TODO: Add description for average_price'
+    description: 'Average execution price'
     data_type: double
   - name: trading_total
-    description: 'TODO: Add description for trading_total'
+    description: 'Total trading value'
     data_type: varchar(64)
   - name: order_amt_currency
-    description: 'TODO: Add description for order_amt_currency'
+    description: 'Currency for order amount'
     data_type: double
   - name: executed_amt_currency
-    description: 'TODO: Add description for executed_amt_currency'
+    description: 'Currency for executed amount'
     data_type: double
   - name: trading_total_currency
-    description: 'TODO: Add description for trading_total_currency'
+    description: 'Currency for trading total'
     data_type: varchar(64)
   - name: order_type
-    description: 'TODO: Add description for order_type'
+    description: 'Order type (market, limit, etc.)'
     data_type: varchar(64)
   - name: order_side
-    description: 'TODO: Add description for order_side'
+    description: 'Order side (buy or sell)'
     data_type: varchar(64)
+  - name: executed_price_usd
+    description: 'Executed price in USD'
+    data_type: double
+  - name: trading_currency
+    description: 'Trading currency code'
+    data_type: varchar(16)
+  - name: trading_price_usd
+    description: 'Trading price in USD'
+    data_type: double
   - name: order_placed_at
     description: 'Order placement timestamp in Europe/Moscow timezone'
     data_type: timestamp
+  - name: order_placed_dt
+    description: 'Order placement date (Europe/Moscow timezone)'
+    data_type: date
   - name: executed_at
     description: 'Order execution timestamp in Europe/Moscow timezone'
     data_type: timestamp
+  - name: executed_dt
+    description: 'Order execution date (Europe/Moscow timezone)'
+    data_type: date
   - name: processed_at
-    description: 'TODO: Add description for processed_at'
+    description: 'Ingestion timestamp for incremental processing (UTC)'
     data_type: timestamp
     data_tests:
     - not_null

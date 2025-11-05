@@ -7,7 +7,7 @@
 select
   earn_bk,
   asset,
-  apy_pct,
+  apy,
   wallet_balance,
   price_usd,
   value_usd,

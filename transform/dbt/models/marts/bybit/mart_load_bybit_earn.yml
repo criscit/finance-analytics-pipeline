@@ -16,15 +16,15 @@ models:
     unique_key: earn_bk
   columns:
   - name: earn_bk
-    description: 'TODO: Add description for earn_bk'
+    description: 'Business key (MD5 hash) for unique identification'
     data_type: varchar(32)
     data_tests:
     - not_null
     - unique
   - name: asset
-    description: 'TODO: Add description for asset'
+    description: 'Cryptocurrency symbol in earn position'
     data_type: varchar(64)
-  - name: apy_pct
+  - name: apy
     description: 'Annual Percentage Yield (APY) for the earn position'
     data_type: double
   - name: wallet_balance
@@ -43,7 +43,7 @@ models:
     description: 'Total USD yield earned'
     data_type: double
   - name: processed_at
-    description: 'TODO: Add description for processed_at'
+    description: 'Ingestion timestamp for incremental processing (UTC)'
     data_type: timestamp
     data_tests:
     - not_null

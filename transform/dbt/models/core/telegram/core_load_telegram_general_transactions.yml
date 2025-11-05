@@ -78,6 +78,8 @@ models:
       - name: transacted_at
         description: Timestamp when the transaction occurred.
         data_type: timestamp
+        data_tests:
+          - not_null
 
       - name: transaction_date
         description: Date portion of the transaction timestamp.
@@ -86,7 +88,3 @@ models:
       - name: transaction_time
         description: Time portion of the transaction as text.
         data_type: varchar(16)
-
-      - name: parsed_at
-        description: Processing timestamp from the source data.
-        data_type: timestamp

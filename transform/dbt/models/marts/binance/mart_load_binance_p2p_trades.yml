@@ -16,49 +16,55 @@ models:
     unique_key: p2p_trade_bk
   columns:
   - name: p2p_trade_bk
-    description: 'TODO: Add description for p2p_trade_bk'
+    description: 'Deterministic business key for the P2P trade, hashed from Binance order number'
     data_type: varchar(32)
     data_tests:
     - not_null
     - unique
   - name: created_at
-    description: 'TODO: Add description for created_at'
+    description: 'P2P trade creation timestamp (Europe/Moscow timezone)'
     data_type: timestamp
+  - name: created_dt
+    description: 'P2P trade creation date (Europe/Moscow timezone)'
+    data_type: date
   - name: amount
-    description: 'TODO: Add description for amount'
+    description: 'Total amount transacted, as reported by Binance (denominated in the asset units)'
     data_type: varchar(64)
   - name: commission
-    description: 'TODO: Add description for commission'
+    description: 'Total commission charged for the trade in asset units'
     data_type: varchar(64)
   - name: taker_amt
-    description: 'TODO: Add description for taker_amt'
+    description: 'Quantity filled by the taker side of the trade (asset units)'
     data_type: double
   - name: taker_commission
-    description: 'TODO: Add description for taker_commission'
+    description: 'Commission amount charged to the taker (asset units)'
     data_type: varchar(64)
   - name: taker_commission_rate
-    description: 'TODO: Add description for taker_commission_rate'
+    description: 'Commission rate applied to the taker trade (fractional value)'
     data_type: double
   - name: total_price
-    description: 'TODO: Add description for total_price'
+    description: 'Total fiat consideration for the trade'
     data_type: double
   - name: unit_price
-    description: 'TODO: Add description for unit_price'
+    description: 'Fiat price per unit of the traded asset'
     data_type: double
   - name: asset
-    description: 'TODO: Add description for asset'
+    description: 'Asset code for the instrument exchanged (crypto or fiat)'
     data_type: varchar(64)
+  - name: asset_price_usd
+    description: 'Reference USD price for one unit of the traded asset at execution time'
+    data_type: double
   - name: fiat
-    description: 'TODO: Add description for fiat'
+    description: 'Fiat currency code used to settle the trade'
     data_type: varchar(64)
   - name: pay_method_name
-    description: 'TODO: Add description for pay_method_name'
+    description: 'Named payment method provided by Binance for this trade'
     data_type: varchar(64)
   - name: trade_type
-    description: 'TODO: Add description for trade_type'
+    description: 'Direction of the trade from the user perspective (BUY or SELL)'
     data_type: varchar(64)
   - name: processed_at
-    description: 'TODO: Add description for processed_at'
+    description: 'UTC timestamp when the mart row was materialized'
     data_type: timestamp
     data_tests:
     - not_null

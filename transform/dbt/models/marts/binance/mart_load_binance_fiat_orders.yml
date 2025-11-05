@@ -16,40 +16,37 @@ models:
     unique_key: fiat_order_bk
   columns:
   - name: fiat_order_bk
-    description: 'TODO: Add description for fiat_order_bk'
+    description: 'Business key (MD5 hash) for unique identification'
     data_type: varchar(32)
     data_tests:
     - not_null
     - unique
-  - name: create_time_ms
-    description: 'TODO: Add description for create_time_ms'
-    data_type: varchar(64)
-  - name: created_at
-    description: 'TODO: Add description for created_at'
+  - name: executed_at
+    description: 'Fiat order execution timestamp (Europe/Moscow timezone)'
     data_type: timestamp
-  - name: updated_at
-    description: 'TODO: Add description for updated_at'
-    data_type: timestamp
+  - name: executed_dt
+    description: 'Fiat order execution date (Europe/Moscow timezone)'
+    data_type: date
   - name: amount
-    description: 'TODO: Add description for amount'
+    description: 'Order amount in fiat currency'
     data_type: varchar(64)
   - name: indicated_amt
-    description: 'TODO: Add description for indicated_amt'
+    description: 'Indicated or requested amount'
     data_type: double
   - name: total_fee
-    description: 'TODO: Add description for total_fee'
+    description: 'Total fees charged for the order'
     data_type: double
   - name: fiat_currency
-    description: 'TODO: Add description for fiat_currency'
+    description: 'Fiat currency code'
     data_type: varchar(64)
   - name: method
-    description: 'TODO: Add description for method'
+    description: 'Payment method used'
     data_type: varchar(64)
   - name: transaction_type
-    description: 'TODO: Add description for transaction_type'
+    description: 'Transaction type (deposit or withdrawal)'
     data_type: varchar(64)
   - name: processed_at
-    description: 'TODO: Add description for processed_at'
+    description: 'Ingestion timestamp for incremental processing (UTC)'
     data_type: timestamp
     data_tests:
     - not_null

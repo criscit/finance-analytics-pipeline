@@ -31,17 +31,11 @@ select
   fee_amt,
   fee_currency,
   counterparty,
-  source,
-  raw_payload,
-  -- Combine date and time into timestamp
   case
     when transaction_date is not null and nullif(transaction_time, '') is not null
     then transaction_date + cast(transaction_time as time)
     else null
   end as transacted_at,
-  transaction_date,
-  transaction_time,
-  parsed_at,
   current_timestamp at time zone 'UTC' as processed_at
 from
   {{ ref('stg_load_telegram_general_transactions') }}

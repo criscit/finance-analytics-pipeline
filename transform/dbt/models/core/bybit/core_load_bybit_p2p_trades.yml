@@ -21,20 +21,48 @@ models:
           - unique
 
       - name: qty
-        description: Quantity of cryptocurrency traded (raw varchar value).
+        description: Quantity of cryptocurrency traded (raw varchar value, e.g., "138.8078 USDT").
         data_type: varchar(64)
+
+      - name: crypto_amt
+        description: Parsed numeric amount of cryptocurrency traded.
+        data_type: double
+
+      - name: crypto_currency
+        description: Currency code of cryptocurrency traded (e.g., USDT, BTC).
+        data_type: varchar(16)
 
       - name: amount
-        description: Fiat amount paid/received (raw varchar value).
+        description: Fiat amount paid/received (raw varchar value, e.g., "12177.60 KGS").
         data_type: varchar(64)
+
+      - name: fiat_amt
+        description: Parsed numeric fiat amount paid/received.
+        data_type: double
+
+      - name: fiat_currency
+        description: Fiat currency code (e.g., KGS, RUB, USD).
+        data_type: varchar(16)
 
       - name: price
-        description: Exchange rate between crypto and fiat (raw varchar value).
+        description: Exchange rate between crypto and fiat (raw varchar value, e.g., "87.73 KGS/USDT").
         data_type: varchar(64)
 
+      - name: price_usd
+        description: Parsed numeric exchange rate value.
+        data_type: double
+
       - name: fee
-        description: Trading fee amount (raw varchar value).
+        description: Trading fee amount (raw varchar value, e.g., "0 USDT").
         data_type: varchar(64)
+
+      - name: fee_amount
+        description: Parsed numeric fee amount.
+        data_type: double
+
+      - name: fee_currency
+        description: Currency code for the fee (e.g., USDT).
+        data_type: varchar(16)
 
       - name: type
         description: Type of trade (BUY or SELL from user perspective).

@@ -12,6 +12,7 @@ select
   coin,
   price_usd,
   (to_timestamp(success_at_ms / 1000.0) at time zone 'Europe/Moscow') as success_at,
+  date(to_timestamp(success_at_ms / 1000.0) at time zone 'Europe/Moscow') as success_dt,
   current_timestamp at time zone 'UTC' as processed_at
 from
   {{ ref('core_load_bybit_deposits') }}

@@ -14,10 +14,10 @@ select
   ) as asset_bk,
   asset_full_name,
   asset_short_name,
-  coalesce(price_usd, 0) as price_usd,
-  coalesce(change_24h_pct, 0) as change_24h_pct,
+  price_usd,
+  change_24h_pct,
   balance,
-  coalesce(value_usd, 0) as value_usd,
+  value_usd,
   current_timestamp at time zone 'UTC' as processed_at
 from
   {{ ref('stg_load_telegram_assets') }}

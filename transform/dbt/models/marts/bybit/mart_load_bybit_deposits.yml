@@ -16,28 +16,31 @@ models:
     unique_key: deposit_bk
   columns:
   - name: deposit_bk
-    description: 'TODO: Add description for deposit_bk'
+    description: 'Business key (MD5 hash) for unique identification'
     data_type: varchar(32)
     data_tests:
     - not_null
     - unique
   - name: amount
-    description: 'TODO: Add description for amount'
+    description: 'Deposit amount in cryptocurrency units'
     data_type: varchar(64)
   - name: deposit_fee
-    description: 'TODO: Add description for deposit_fee'
+    description: 'Network fee charged for the deposit'
     data_type: double
   - name: chain
-    description: 'TODO: Add description for chain'
+    description: 'Blockchain network used for deposit'
     data_type: varchar(64)
   - name: coin
-    description: 'TODO: Add description for coin'
+    description: 'Cryptocurrency symbol deposited'
     data_type: varchar(64)
   - name: success_at
-    description: 'TODO: Add description for success_at'
+    description: 'Deposit success timestamp (Europe/Moscow timezone)'
     data_type: timestamp
+  - name: success_dt
+    description: 'Deposit success date (Europe/Moscow timezone)'
+    data_type: date
   - name: processed_at
-    description: 'TODO: Add description for processed_at'
+    description: 'Ingestion timestamp for incremental processing (UTC)'
     data_type: timestamp
     data_tests:
     - not_null

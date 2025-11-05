@@ -16,31 +16,34 @@ models:
     unique_key: p2p_trade_bk
   columns:
   - name: p2p_trade_bk
-    description: 'TODO: Add description for p2p_trade_bk'
+    description: 'Business key (MD5 hash) for unique identification'
     data_type: varchar(32)
     data_tests:
     - not_null
     - unique
   - name: qty
-    description: 'TODO: Add description for qty'
+    description: 'Cryptocurrency quantity traded'
     data_type: double
   - name: amount
-    description: 'TODO: Add description for amount'
+    description: 'Fiat currency amount for the trade'
     data_type: varchar(64)
   - name: price
-    description: 'TODO: Add description for price'
+    description: 'Unit price of cryptocurrency in fiat currency'
     data_type: double
   - name: fee
-    description: 'TODO: Add description for fee'
+    description: 'Transaction fee for P2P trade'
     data_type: double
   - name: type
-    description: 'TODO: Add description for type'
+    description: 'Trade type (buy or sell)'
     data_type: varchar(64)
   - name: executed_at
     description: 'Trade execution timestamp in Europe/Moscow timezone'
     data_type: timestamp
+  - name: executed_dt
+    description: 'Trade execution date (Europe/Moscow timezone)'
+    data_type: date
   - name: processed_at
-    description: 'TODO: Add description for processed_at'
+    description: 'Ingestion timestamp for incremental processing (UTC)'
     data_type: timestamp
     data_tests:
     - not_null

@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 import duckdb
-from dagster import MetadataValue, Output, asset
+from dagster import AssetExecutionContext, MetadataValue, Output, asset
 
 DUCKDB_PATH = os.getenv("DUCKDB_PATH", "/app/data/warehouse/warehouse.duckdb")
 FINANCE_DATA_DIR = Path(os.getenv("FINANCE_DATA_DIR_CONTAINER", "/app/data/finance"))
@@ -27,7 +27,7 @@ def _md5(path: Path) -> str:
 
 
 @asset(deps=["build_imart_models"])
-def export_csv_snapshot() -> Output[dict[str, Any]]:
+def export_csv_snapshot(context: AssetExecutionContext) -> Output[dict[str, Any]]:
     # Create timestamp for folder and file naming
     now = datetime.datetime.now(datetime.UTC)
     date_folder = now.strftime("%Y%m%d")

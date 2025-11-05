@@ -51,6 +51,10 @@ models:
         description: Currency code extracted from executed amount (e.g., BTC, ETH).
         data_type: varchar(16)
 
+      - name: average_price_currency
+        description: Currency code extracted from average price (e.g., USDT, RUB).
+        data_type: varchar(16)
+
       - name: trading_total_currency
         description: Currency code extracted from trading total (e.g., RUB, USDT).
         data_type: varchar(16)

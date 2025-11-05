@@ -1,11 +1,9 @@
 """Dagster assets for ingesting finance data into DuckDB."""
 
-from __future__ import annotations
-
 import os
 from pathlib import Path
 
-from dagster import Failure, Output, asset
+from dagster import AssetExecutionContext, Failure, Output, asset
 
 from src.ingestion import (
     IngestionContext,
@@ -74,12 +72,12 @@ def _run_asset_ingestion(config: IngestionSourceConfig) -> Output[dict[str, int]
 
 
 @asset(name="ingest_bank", deps=["ingest_crypto"])
-def ingest_bank() -> Output[dict[str, int]]:
+def ingest_bank(context: AssetExecutionContext) -> Output[dict[str, int]]:
     """Ingest bank statements and exports into the raw DuckDB schema."""
     return _run_asset_ingestion(BANK_CONFIG)
 
 
 @asset(name="ingest_crypto")
-def ingest_crypto() -> Output[dict[str, int]]:
+def ingest_crypto(context: AssetExecutionContext) -> Output[dict[str, int]]:
     """Ingest crypto exchange exports into the raw DuckDB schema."""
     return _run_asset_ingestion(CRYPTO_CONFIG)

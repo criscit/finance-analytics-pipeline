@@ -1,7 +1,5 @@
 """Assets responsible for post-run file lifecycle management."""
 
-from __future__ import annotations
-
 import os
 import shutil
 from datetime import datetime
@@ -9,9 +7,7 @@ from pathlib import Path
 from typing import Any
 
 import duckdb
-from dagster import MetadataValue, Output, asset
-
-from src.logging_config import logger
+from dagster import AssetExecutionContext, MetadataValue, Output, asset
 
 RAW_ROOT = Path(os.getenv("FINANCE_DATA_DIR_CONTAINER", "/app/data/finance"))
 DUCKDB_PATH = os.getenv("DUCKDB_PATH", "/app/data/warehouse/warehouse.duckdb")
@@ -22,10 +18,10 @@ def _ensure_parent(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
 
 
-def _cleanup_export_directory() -> dict[str, int]:
+def _cleanup_export_directory(context: AssetExecutionContext) -> dict[str, int]:
     """Clean up export directory keeping only the 10 most recent date folders."""
     if not EXPORT_DIR.exists():
-        logger.info("Export directory %s does not exist, skipping cleanup", EXPORT_DIR)
+        context.log.info("Export directory %s does not exist, skipping cleanup", EXPORT_DIR)
         return {"deleted_count": 0, "kept_count": 0}
 
     # Get all date folders (assuming they are named with date format like YYYYMMDD)
@@ -38,7 +34,7 @@ def _cleanup_export_directory() -> dict[str, int]:
                 date_folders.append((item, item.stat().st_mtime))
             except ValueError:
                 # Skip folders that don't match date format
-                logger.warning("Skipping non-date folder: %s", item.name)
+                context.log.warning("Skipping non-date folder: %s", item.name)
                 continue
 
     # Sort by modification time (newest first)
@@ -53,11 +49,11 @@ def _cleanup_export_directory() -> dict[str, int]:
         try:
             shutil.rmtree(folder_path)
             deleted_count += 1
-            logger.info("Deleted old export folder: %s", folder_path.name)
+            context.log.info("Deleted old export folder: %s", folder_path.name)
         except Exception as e:
-            logger.error("Failed to delete folder %s: %s", folder_path, e)
+            context.log.error("Failed to delete folder %s: %s", folder_path, e)
 
-    logger.info(
+    context.log.info(
         "Export cleanup completed: kept %d folders, deleted %d folders",
         len(folders_to_keep),
         deleted_count,
@@ -67,7 +63,7 @@ def _cleanup_export_directory() -> dict[str, int]:
 
 
 @asset(deps=["export_csv_snapshot", "export_to_google_sheets"])
-def pipeline_maintenance() -> Output[dict[str, Any]]:
+def pipeline_maintenance(context: AssetExecutionContext) -> Output[dict[str, Any]]:
     """Move successfully processed files from To Parse to Archive folder tree and cleanup export directory."""
     summary: list[dict[str, str]] = []
     with duckdb.connect(DUCKDB_PATH) as con:
@@ -89,7 +85,7 @@ def pipeline_maintenance() -> Output[dict[str, Any]]:
         for source_system_nm, table_nm, file_path in rows:
             src = RAW_ROOT / file_path
             if not src.exists():
-                logger.warning("File %s missing at archive time", src)
+                context.log.warning("File %s missing at archive time", src)
                 continue
 
             # Replace "To Parse" with "Archive" in the path
@@ -118,10 +114,10 @@ def pipeline_maintenance() -> Output[dict[str, Any]]:
                     "table": table_nm,
                 },
             )
-            logger.info("Archived %s to %s", file_path, target)
+            context.log.info("Archived %s to %s", file_path, target)
 
     # Clean up export directory
-    cleanup_result = _cleanup_export_directory()
+    cleanup_result = _cleanup_export_directory(context)
 
     return Output(
         {

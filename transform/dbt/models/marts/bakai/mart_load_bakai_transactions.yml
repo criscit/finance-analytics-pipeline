@@ -13,28 +13,28 @@ models:
     unique_key: transaction_bk
   columns:
   - name: transaction_bk
-    description: 'TODO: Add description for transaction_bk'
+    description: 'Business key (MD5 hash) for unique identification'
     data_type: varchar(32)
     data_tests:
     - not_null
     - unique
   - name: description
-    description: 'TODO: Add description for description'
+    description: 'Transaction description or memo'
     data_type: varchar(64)
   - name: transaction_amt
-    description: 'TODO: Add description for transaction_amt'
+    description: 'Transaction amount in transaction currency'
     data_type: double
   - name: exchange_rate
-    description: 'TODO: Add description for exchange_rate'
+    description: 'Currency exchange rate applied to transaction'
     data_type: double
   - name: transacted_at_utc
-    description: 'TODO: Add description for transacted_at_utc'
+    description: 'Transaction timestamp in UTC'
     data_type: varchar(64)
   - name: transaction_dt
-    description: 'TODO: Add description for transaction_dt'
+    description: 'Transaction date'
     data_type: varchar(64)
   - name: processed_at
-    description: 'TODO: Add description for processed_at'
+    description: 'Ingestion timestamp for incremental processing (UTC)'
     data_type: timestamp
     data_tests:
     - not_null

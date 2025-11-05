@@ -16,28 +16,28 @@ models:
     unique_key: asset_bk
   columns:
   - name: asset_bk
-    description: 'TODO: Add description for asset_bk'
+    description: 'Business key (MD5 hash) for unique identification'
     data_type: varchar(32)
     data_tests:
     - not_null
     - unique
   - name: coin
-    description: 'TODO: Add description for coin'
+    description: 'Cryptocurrency symbol'
     data_type: varchar(64)
   - name: equity
-    description: 'TODO: Add description for equity'
+    description: 'Total equity balance for the asset'
     data_type: varchar(64)
   - name: free
-    description: 'TODO: Add description for free'
+    description: 'Available balance for trading or withdrawal'
     data_type: varchar(64)
   - name: locked
-    description: 'TODO: Add description for locked'
+    description: 'Balance locked in orders or positions'
     data_type: varchar(64)
   - name: usd_value
-    description: 'TODO: Add description for usd_value'
+    description: 'Total asset value in USD'
     data_type: double
   - name: processed_at
-    description: 'TODO: Add description for processed_at'
+    description: 'Ingestion timestamp for incremental processing (UTC)'
     data_type: timestamp
     data_tests:
     - not_null
