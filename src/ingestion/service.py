@@ -20,6 +20,14 @@ from src.duckdb_utils import ensure_meta_schema, ingest_parquet_to_duckdb
 from src.utils import extract_table_name_from_dir, is_file_stable, md5_hash, qident, utc_now_str
 
 
+def _safe_rollback(con: duckdb.DuckDBPyConnection, log: Any) -> None:
+    """Attempt rollback, handling case where transaction was already aborted."""
+    try:
+        con.execute("rollback;")
+    except duckdb.TransactionException:
+        log.debug("Rollback skipped - no active transaction (likely auto-aborted by failed commit)")
+
+
 @dataclass(frozen=True)
 class IngestionContext:
     """Runtime configuration that is shared across ingestion sources."""
@@ -218,7 +226,7 @@ def _merge_and_ingest_pending_files(
         return True, rows_inserted
 
     except Exception as exc:  # pragma: no cover - defensive
-        pctx.con.execute("rollback;")
+        _safe_rollback(pctx.con, pctx.log)
         pctx.log.exception(
             "Failed to ingest merged files for %s using %d source files: %s",
             table_nm,
@@ -302,7 +310,7 @@ def _process_file_once(
         }
 
     except Exception as exc:  # pragma: no cover - defensive
-        pctx.con.execute("rollback;")
+        _safe_rollback(pctx.con, pctx.log)
         pctx.log.exception("Failed to process %s: %s", info.path, exc)
         return {"status": "error", "reason": str(exc)}
 
@@ -348,10 +356,14 @@ def _should_drop_table_for_fresh_load(
     contract: DataContract,
     data_type_dir: Path,
     seen_tables: set[str],
+    options: LeafIngestionOptions,
 ) -> bool:
     """
     Determine if table should be dropped for fresh ingestion.
     Only drops if table hasn't been seen this run and there are files to process.
+
+    When latest_only=True, only checks the latest file (same logic as _process_table_files)
+    to avoid false positives from older files that were intentionally never ingested.
     """
     table_nm = contract.target_table.name
 
@@ -360,6 +372,15 @@ def _should_drop_table_for_fresh_load(
 
     file_pattern = contract.metadata.get("file_pattern", "*.csv")
     matching_files = list(data_type_dir.rglob(file_pattern))
+
+    # When latest_only mode, only check the latest file for newness
+    # This prevents older files (never ingested) from triggering a table drop
+    if options.latest_only:
+        latest_file = _select_latest_supported_file(
+            matching_files, pctx.context, data_type_dir, pctx.log
+        )
+        if latest_file:
+            matching_files = [latest_file]
 
     for file_path in matching_files:
         if not file_path.is_file():
@@ -640,13 +661,15 @@ def run_ingestion(
                 log.exception("Failed to load contract %s: %s", contract_path, exc)
                 continue
 
-            should_drop = _should_drop_table_for_fresh_load(pctx, contract, leaf_dir, seen_tables)
+            leaf_options = options_factory(leaf_dir)
+
+            should_drop = _should_drop_table_for_fresh_load(
+                pctx, contract, leaf_dir, seen_tables, leaf_options
+            )
             if should_drop:
                 _ensure_fresh_table(con, contract.target_table.name, seen_tables, log)
             else:
                 seen_tables.add(contract.target_table.name)
-
-            leaf_options = options_factory(leaf_dir)
             i, s, u, err_count = _process_table_files(
                 pctx, contract, leaf_dir, source_nm, leaf_options
             )

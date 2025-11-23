@@ -5,8 +5,13 @@ profile: local_duckdb
 model-paths: ["models"]
 seed-paths: ["seeds"]
 macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
 target-path: "target"
 clean-targets: ["target"]
+
+snapshots:
+  finance_analytics_pipeline:
+    +target_schema: core
 
 models:
   finance_analytics_pipeline:

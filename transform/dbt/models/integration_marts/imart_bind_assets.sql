@@ -68,12 +68,12 @@ select
   'Asset' as "Type",
   'Crypto APY' as "Category",
   null as "Description",
-  wallet_balance_coin as "Amount, Currency",
+  wallet_balance as "Amount, Currency",
   asset as "Currency",
   null::decimal(18,2) as "Amount, RUB",
   value_usd as "Amount, USD",
   null::decimal(18,6) as "Executed Rate, RUB",
-  price_per_coin_usdt as "Executed Rate, USD",
+  price_usd as "Executed Rate, USD",
   null::decimal(18,6) as "Close Rate, RUB",
   null::decimal(18,6) as "Close Rate, USD",
   apy_pct as "APY, %",
@@ -93,10 +93,10 @@ select
   null::decimal(18,2) as "Amount, RUB",
   value_usd as "Amount, USD",
   null::decimal(18,6) as "Executed Rate, RUB",
-  asset_usdt_price as "Executed Rate, USD",
+  price_usd as "Executed Rate, USD",
   null::decimal(18,6) as "Close Rate, RUB",
   null::decimal(18,6) as "Close Rate, USD",
-  apy_pct as "APY, %",
-  'Yield earned: $' || cast(yield_usd as varchar) as "Comments"
+  apy as "APY, %",
+  null as "Comments"
 from
   {{ ref('mart_load_bybit_earn') }}

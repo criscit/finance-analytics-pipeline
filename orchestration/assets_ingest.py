@@ -11,7 +11,6 @@ from src.ingestion import (
     LeafIngestionOptions,
     run_ingestion,
 )
-from src.logging_config import logger
 
 FINANCE_DATA_DIR_CONTAINER = Path(os.getenv("FINANCE_DATA_DIR_CONTAINER", "/app/data/finance"))
 DUCKDB_PATH = os.getenv("DUCKDB_PATH", "/app/data/warehouse/analytics.duckdb")
@@ -58,8 +57,10 @@ CRYPTO_CONFIG = IngestionSourceConfig(
 )
 
 
-def _run_asset_ingestion(config: IngestionSourceConfig) -> Output[dict[str, int]]:
-    metrics = run_ingestion(config, INGESTION_CONTEXT, logger)
+def _run_asset_ingestion(
+    config: IngestionSourceConfig, context: AssetExecutionContext
+) -> Output[dict[str, int]]:
+    metrics = run_ingestion(config, INGESTION_CONTEXT, context.log)
     if metrics.get("errors"):
         raise Failure(
             description=(
@@ -74,10 +75,10 @@ def _run_asset_ingestion(config: IngestionSourceConfig) -> Output[dict[str, int]
 @asset(name="ingest_bank", deps=["ingest_crypto"])
 def ingest_bank(context: AssetExecutionContext) -> Output[dict[str, int]]:
     """Ingest bank statements and exports into the raw DuckDB schema."""
-    return _run_asset_ingestion(BANK_CONFIG)
+    return _run_asset_ingestion(BANK_CONFIG, context)
 
 
 @asset(name="ingest_crypto")
 def ingest_crypto(context: AssetExecutionContext) -> Output[dict[str, int]]:
     """Ingest crypto exchange exports into the raw DuckDB schema."""
-    return _run_asset_ingestion(CRYPTO_CONFIG)
+    return _run_asset_ingestion(CRYPTO_CONFIG, context)

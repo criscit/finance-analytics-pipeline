@@ -1,25 +1,15 @@
 {{ config(
-    materialized='incremental',
-    incremental_strategy='delete+insert',
-    unique_key='earn_bk'
+    materialized='view'
 ) }}
 
+-- Current versions only from SCD2 snapshot
 select
-  earn_bk,
-  asset,
-  apy,
-  wallet_balance,
-  price_usd,
-  value_usd,
-  current_timestamp at time zone 'UTC' as processed_at
-from
-  {{ ref('core_load_bybit_earn') }}
-
-{% if is_incremental() %}
-  where processed_at >= (
-    select
-      coalesce(max(processed_at), '1900-01-02'::timestamp) - interval '1 day'
-    from
-      {{ this }}
-  )
-{% endif %}
+    earn_bk,
+    asset,
+    apy,
+    wallet_balance,
+    price_usd,
+    value_usd,
+    processed_at
+from {{ ref('snap_bybit_earn') }}
+where dbt_valid_to is null

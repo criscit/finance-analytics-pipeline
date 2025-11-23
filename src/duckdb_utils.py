@@ -363,7 +363,6 @@ def ensure_raw_table(
         );
         """
     )
-    con.execute(f"create index if not exists ix_{table}_bk on {qtable(schema, table)}(__load_key);")
 
 
 def table_columns(con: duckdb.DuckDBPyConnection, schema: str, table: str) -> list[str]:
