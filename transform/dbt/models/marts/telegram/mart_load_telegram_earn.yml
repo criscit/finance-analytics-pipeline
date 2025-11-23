@@ -1,7 +1,7 @@
 version: 2
 models:
 - name: mart_load_telegram_earn
-  description: 'Mart table for Telegram wallet earn positions with parsed APY and
+  description: 'Mart view for Telegram wallet earn positions with APY, balance, and
     yield values. Tracks staking and yield-earning positions in Telegram wallet.
 
     '
@@ -11,9 +11,7 @@ models:
   - snapshot
   - earn
   meta:
-    materialization: incremental
-    incremental_strategy: delete+insert
-    unique_key: earn_bk
+    materialization: view
   columns:
   - name: earn_bk
     description: 'Business key (MD5 hash) for unique identification'
@@ -27,17 +25,17 @@ models:
   - name: apy_pct
     description: 'Annual Percentage Yield (APY) for the earn position'
     data_type: double
-  - name: value_usd
-    description: 'Total USD value of the staked/earning position'
-    data_type: double
-  - name: yield_usd
-    description: 'Total USD yield earned'
-    data_type: double
-  - name: wallet_balance_coin
+  - name: wallet_balance
     description: 'Balance of the asset in native coin units'
     data_type: double
-  - name: price_per_coin_usdt
-    description: 'Price per coin in USDT'
+  - name: price_usd
+    description: 'Price per coin in USD'
+    data_type: double
+  - name: amount_usd
+    description: 'Principal USD value (wallet_balance * price_usd for non-stablecoins)'
+    data_type: double
+  - name: total_yield_usd
+    description: 'Total USD yield earned'
     data_type: double
   - name: processed_at
     description: 'Ingestion timestamp for incremental processing (UTC)'

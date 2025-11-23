@@ -39,6 +39,9 @@ selectors:
             children: true
           - method: resource_type
             value: seed
+          - method: path
+            value: snapshots/snap_telegram_assets
+            children: true
         - exclude:
           - method: config.schema
             value: imart
@@ -52,6 +55,9 @@ selectors:
             children: true
           - method: resource_type
             value: seed
+          - method: path
+            value: snapshots/snap_telegram_earn
+            children: true
         - exclude:
           - method: config.schema
             value: imart
@@ -92,6 +98,9 @@ selectors:
             children: true
           - method: resource_type
             value: seed
+          - method: path
+            value: snapshots/snap_binance_assets
+            children: true
         - exclude:
           - method: config.schema
             value: imart
@@ -171,6 +180,9 @@ selectors:
             children: true
           - method: resource_type
             value: seed
+          - method: path
+            value: snapshots/snap_bybit_assets
+            children: true
         - exclude:
           - method: config.schema
             value: imart
@@ -208,8 +220,14 @@ selectors:
           - method: source
             value: bybit.earn
             children: true
+          - method: source
+            value: bybit.earn_yield
+            children: true
           - method: resource_type
             value: seed
+          - method: path
+            value: snapshots/snap_bybit_earn
+            children: true
         - exclude:
           - method: config.schema
             value: imart
@@ -221,8 +239,14 @@ selectors:
           - method: source
             value: bybit.earn_yield
             children: true
+          - method: source
+            value: bybit.earn
+            children: true
           - method: resource_type
             value: seed
+          - method: path
+            value: snapshots/snap_bybit_earn
+            children: true
         - exclude:
           - method: config.schema
             value: imart

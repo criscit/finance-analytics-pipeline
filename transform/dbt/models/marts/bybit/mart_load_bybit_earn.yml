@@ -1,8 +1,8 @@
 version: 2
 models:
 - name: mart_load_bybit_earn
-  description: 'Mart table for Bybit wallet earn positions with parsed APY and yield
-    values. Tracks staking and yield-earning positions in Bybit wallet.
+  description: 'Mart view for Bybit wallet earn positions with APY, balance, and
+    aggregated yield values. Tracks staking and yield-earning positions in Bybit wallet.
 
     '
   tags:
@@ -11,9 +11,7 @@ models:
   - snapshot
   - earn
   meta:
-    materialization: incremental
-    incremental_strategy: delete+insert
-    unique_key: earn_bk
+    materialization: view
   columns:
   - name: earn_bk
     description: 'Business key (MD5 hash) for unique identification'
@@ -30,17 +28,14 @@ models:
   - name: wallet_balance
     description: 'Wallet balance of the asset in native coin units'
     data_type: double
-  - name: asset_usdt_price
-    description: 'Asset price in USDT'
+  - name: price_usd
+    description: 'Asset price in USD'
     data_type: double
-  - name: wallet_balance_usd
-    description: 'Wallet balance in USD'
+  - name: amount_usd
+    description: 'Principal USD value (wallet_balance * price_usd for non-stablecoins)'
     data_type: double
-  - name: value_usd
-    description: 'Total USD value of the staked/earning position'
-    data_type: double
-  - name: yield_usd
-    description: 'Total USD yield earned'
+  - name: total_yield_usd
+    description: 'Total USD yield earned from all yield distributions for this asset'
     data_type: double
   - name: processed_at
     description: 'Ingestion timestamp for incremental processing (UTC)'

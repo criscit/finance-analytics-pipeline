@@ -71,13 +71,13 @@ select
   wallet_balance as amount_currency,
   asset as currency,
   null::decimal(18,2) as amount_rub,
-  value_usd as amount_usd,
+  coalesce(amount_usd, 0) + coalesce(total_yield_usd, 0) as amount_usd,
   null::decimal(18,6) as executed_rate_rub,
   cast(price_usd as decimal(18,6)) as executed_rate_usd,
   null::decimal(18,6) as close_rate_rub,
   null::decimal(18,6) as close_rate_usd,
   cast(apy_pct as decimal(10,2)) as apy_pct,
-  'Yield earned: $' || cast(yield_usd as varchar) as comments
+  'Yield earned: $' || cast(total_yield_usd as varchar) as comments
 from
   {{ ref('mart_load_telegram_earn') }}
 
@@ -91,12 +91,12 @@ select
   wallet_balance as amount_currency,
   asset as currency,
   null::decimal(18,2) as amount_rub,
-  value_usd as amount_usd,
+  coalesce(amount_usd, 0) + coalesce(total_yield_usd, 0) as amount_usd,
   null::decimal(18,6) as executed_rate_rub,
   cast(price_usd as decimal(18,6)) as executed_rate_usd,
   null::decimal(18,6) as close_rate_rub,
   null::decimal(18,6) as close_rate_usd,
   cast(apy as decimal(10,2)) as apy_pct,
-  null as comments
+  'Yield earned: $' || cast(total_yield_usd as varchar) as comments
 from
   {{ ref('mart_load_bybit_earn') }}
