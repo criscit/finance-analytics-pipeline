@@ -6,7 +6,12 @@ from typing import Any
 from dagster import AssetExecutionContext, Output, asset
 
 from src.duckdb_utils import read_assets_table_data_with_ordered_columns
-from src.google_sheets import GoogleSheetsTableManager
+from src.google_sheets import GoogleSheetsTableManager, SourceFilterConfig
+
+# Source column index in the assets data (0-based): 13 = "Source" column
+ASSETS_SOURCE_COLUMN_INDEX = 13
+ASSETS_SOURCE_VALUE = "finance-analytics-pipeline"
+ASSETS_NUM_COLUMNS = 15  # 15 columns including Source
 
 
 def load_runtime_config() -> dict[str, Any]:
@@ -28,8 +33,8 @@ def export_assets_to_google_sheets(context: AssetExecutionContext) -> Output[dic
     """
     Export assets data from DuckDB to Google Sheets.
 
-    Note: Assets are a snapshot, so this replaces the entire table each time
-    (unlike transactions which are incremental).
+    Assets are a snapshot - this deletes all rows with source='finance-analytics-pipeline'
+    and inserts fresh data. Other sources remain untouched.
     """
     cfg = load_runtime_config()
 
@@ -53,7 +58,16 @@ def export_assets_to_google_sheets(context: AssetExecutionContext) -> Output[dic
     schema, table = cfg["export_assets_table"].split(".", 1)
 
     # Read all data from the DuckDB assets table with proper column ordering
-    all_values = read_assets_table_data_with_ordered_columns(cfg["duckdb_path"], schema, table)
+    raw_values = read_assets_table_data_with_ordered_columns(cfg["duckdb_path"], schema, table)
+
+    # Ensure rows have Source column set to the expected value and match sheet width
+    all_values: list[list[str]] = []
+    for row in raw_values:
+        padded_row = list(row)
+        if len(padded_row) < ASSETS_NUM_COLUMNS:
+            padded_row.extend([""] * (ASSETS_NUM_COLUMNS - len(padded_row)))
+        padded_row[ASSETS_SOURCE_COLUMN_INDEX] = ASSETS_SOURCE_VALUE
+        all_values.append(padded_row)
 
     if not all_values:
         context.log.info("No assets data found in table %s", cfg["export_assets_table"])
@@ -61,29 +75,26 @@ def export_assets_to_google_sheets(context: AssetExecutionContext) -> Output[dic
 
     context.log.info("Found %d assets rows to export", len(all_values))
 
-    # For assets, we replace the entire table (it's a snapshot, not incremental)
-    # First, clear the existing data by deleting the sheet and recreating it
-    # The append_rows method will create the sheet and table if they don't exist
-
-    # Append data to Google Sheets (creates sheet and table if needed)
-    # Note: For a true "replace" operation, you might want to add a method to
-    # clear the existing table first, but for now we'll append
-    table_id = sheets_manager.append_rows(
+    # Delete existing rows with our source and insert new data
+    source_filter = SourceFilterConfig(
+        column_index=ASSETS_SOURCE_COLUMN_INDEX,
+        value=ASSETS_SOURCE_VALUE,
+        num_columns=ASSETS_NUM_COLUMNS,
+    )
+    exported_count = sheets_manager.replace_rows_by_source(
         spreadsheet_id=cfg["google_spreadsheet_id"],
         sheet_name=cfg["google_sheet_name"],
-        table_name=cfg["google_table_name"],
-        sample_data=all_values,
+        source_filter=source_filter,
+        new_data=all_values,
     )
 
     context.log.info(
-        "Successfully exported %d assets rows to Google Sheets table: %s",
-        len(all_values),
-        table_id,
+        "Successfully exported %d assets rows to Google Sheets",
+        exported_count,
     )
     return Output(
-        {"exported": len(all_values)},
+        {"exported": exported_count},
         metadata={
-            "exported": len(all_values),
-            "table_id": table_id,
+            "exported": exported_count,
         },
     )

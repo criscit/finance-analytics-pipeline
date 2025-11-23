@@ -32,7 +32,11 @@ def read_table_data(
 
 
 def read_table_data_with_ordered_columns_generic(
-    db_path: str, schema: str, table: str, column_mapping: dict[str, str]
+    db_path: str,
+    schema: str,
+    table: str,
+    column_mapping: dict[str, str],
+    order_by: str | None = None,
 ) -> list[list[str]]:
     """
     Read table data with proper column ordering for Google Sheets using a custom column mapping.
@@ -42,6 +46,7 @@ def read_table_data_with_ordered_columns_generic(
         schema: Schema name
         table: Table name
         column_mapping: Dictionary mapping DuckDB column names to Google Sheets column names
+        order_by: Optional column name to sort results by (e.g., 'transacted_at')
 
     Returns:
         List of rows with properly ordered columns for Google Sheets
@@ -55,6 +60,8 @@ def read_table_data_with_ordered_columns_generic(
         raise ValueError(f"No matching columns found for table {qtable(schema, table)}")
 
     query = f"select {', '.join(select_columns)} from {qtable(schema, table)}"
+    if order_by:
+        query += f" order by {qident(order_by)}"
 
     with connect_readonly(db_path) as con:
         rows = con.execute(query).fetchall()
@@ -69,9 +76,14 @@ def read_table_data_with_ordered_columns_generic(
 
 
 def read_table_data_with_ordered_columns(db_path: str, schema: str, table: str) -> list[list[str]]:
-    """Read transaction table data with proper column ordering for Google Sheets."""
+    """Read transaction table data with proper column ordering for Google Sheets.
+
+    Results are sorted by transacted_at column.
+    """
     column_mapping = get_duckdb_to_sheets_column_mapping()
-    return read_table_data_with_ordered_columns_generic(db_path, schema, table, column_mapping)
+    return read_table_data_with_ordered_columns_generic(
+        db_path, schema, table, column_mapping, order_by="transacted_at"
+    )
 
 
 def read_assets_table_data_with_ordered_columns(
@@ -128,7 +140,7 @@ def get_ordered_columns_for_sheets() -> list[str]:
         "Amount, RUB",
         "Amount, USD",
         "Executed Rate, RUB",
-        "Exchange Rate, USD",
+        "Executed Rate, USD",
         "Close Rate, RUB",
         "Close Rate, USD",
     ]
@@ -138,22 +150,21 @@ def get_duckdb_to_sheets_column_mapping() -> dict[str, str]:
     """
     Get mapping from DuckDB column names to Google Sheets column names for transactions.
 
-    Note: The integration mart now uses quoted column names that match the Google Sheets
-    column names directly, so this mapping is 1:1.
+    Maps the imart column names (snake_case) to display names for Google Sheets.
     """
     return {
-        "Date": "Date",
-        "Platform Name": "Platform Name",
-        "Category": "Category",
-        "Description": "Description",
-        "Amount, Currency": "Amount, Currency",
-        "Currency": "Currency",
-        "Amount, RUB": "Amount, RUB",
-        "Amount, USD": "Amount, USD",
-        "Executed Rate, RUB": "Executed Rate, RUB",
-        "Exchange Rate, USD": "Exchange Rate, USD",
-        "Close Rate, RUB": "Close Rate, RUB",
-        "Close Rate, USD": "Close Rate, USD",
+        "date": "Date",
+        "platform_name": "Platform Name",
+        "category": "Category",
+        "description": "Description",
+        "amount_currency": "Amount, Currency",
+        "currency": "Currency",
+        "amount_rub": "Amount, RUB",
+        "amount_usd": "Amount, USD",
+        "executed_rate_rub": "Executed Rate, RUB",
+        "executed_rate_usd": "Executed Rate, USD",
+        "close_rate_rub": "Close Rate, RUB",
+        "close_rate_usd": "Close Rate, USD",
     }
 
 
@@ -161,12 +172,19 @@ def get_ordered_columns_for_assets_sheets() -> list[str]:
     """Get the ordered column names for Google Sheets assets export."""
     return [
         "Type",
+        "Platform Name",
         "Category",
         "Description",
+        "Amount, Currency",
         "Currency",
-        "Amount",
+        "Amount, RUB",
         "Amount, USD",
+        "Executed Rate, RUB",
+        "Executed Rate, USD",
+        "Close Rate, RUB",
+        "Close Rate, USD",
         "APY, %",
+        "Source",
         "Comments",
     ]
 
@@ -175,18 +193,24 @@ def get_duckdb_to_sheets_assets_column_mapping() -> dict[str, str]:
     """
     Get mapping from DuckDB column names to Google Sheets column names for assets.
 
-    Note: The integration mart uses quoted column names that match the Google Sheets
-    column names directly, so this mapping is 1:1.
+    Maps the imart column names (snake_case) to display names for Google Sheets.
     """
     return {
-        "Type": "Type",
-        "Category": "Category",
-        "Description": "Description",
-        "Currency": "Currency",
-        "Amount": "Amount",
-        "Amount, USD": "Amount, USD",
-        "APY, %": "APY, %",
-        "Comments": "Comments",
+        "type": "Type",
+        "platform_name": "Platform Name",
+        "category": "Category",
+        "description": "Description",
+        "amount_currency": "Amount, Currency",
+        "currency": "Currency",
+        "amount_rub": "Amount, RUB",
+        "amount_usd": "Amount, USD",
+        "executed_rate_rub": "Executed Rate, RUB",
+        "executed_rate_usd": "Executed Rate, USD",
+        "close_rate_rub": "Close Rate, RUB",
+        "close_rate_usd": "Close Rate, USD",
+        "apy_pct": "APY, %",
+        "source": "Source",
+        "comments": "Comments",
     }
 
 

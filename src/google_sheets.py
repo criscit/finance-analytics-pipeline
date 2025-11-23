@@ -1,12 +1,22 @@
 """Google Sheets table management module."""
 
 import uuid
+from dataclasses import dataclass
 from typing import Any, ClassVar
 
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 
 from src.logging_config import logger
+
+
+@dataclass
+class SourceFilterConfig:
+    """Configuration for source-based row filtering operations."""
+
+    column_index: int
+    value: str
+    num_columns: int = 14
 
 
 class GoogleSheetsTableManager:
@@ -112,7 +122,7 @@ class GoogleSheetsTableManager:
                                 "sheetId": sheet_id,
                                 "startRowIndex": 0,
                                 "startColumnIndex": 0,
-                                "endColumnIndex": 6,
+                                "endColumnIndex": 12,
                             },
                             "columnProperties": [
                                 {
@@ -131,9 +141,11 @@ class GoogleSheetsTableManager:
                                         "condition": {
                                             "type": "ONE_OF_LIST",
                                             "values": [
-                                                {"userEnteredValue": "Chas"},
-                                                {"userEnteredValue": "Sberbank"},
-                                                {"userEnteredValue": "Tinkoff"},
+                                                {"userEnteredValue": "T Bank"},
+                                                {"userEnteredValue": "BakAi Bank"},
+                                                {"userEnteredValue": "Binance"},
+                                                {"userEnteredValue": "Bybit"},
+                                                {"userEnteredValue": "Telegram Wallet"},
                                             ],
                                         },
                                     },
@@ -153,6 +165,66 @@ class GoogleSheetsTableManager:
                                     },
                                 },
                                 {"columnIndex": 5, "columnName": "Currency", "columnType": "TEXT"},
+                                {
+                                    "columnIndex": 6,
+                                    "columnName": "Amount, RUB",
+                                    "columnType": "DOUBLE",
+                                    "format": {
+                                        "numberFormat": {"type": "NUMBER", "pattern": "#,##0.00"}
+                                    },
+                                },
+                                {
+                                    "columnIndex": 7,
+                                    "columnName": "Amount, USD",
+                                    "columnType": "DOUBLE",
+                                    "format": {
+                                        "numberFormat": {"type": "NUMBER", "pattern": "#,##0.00"}
+                                    },
+                                },
+                                {
+                                    "columnIndex": 8,
+                                    "columnName": "Executed Rate, RUB",
+                                    "columnType": "DOUBLE",
+                                    "format": {
+                                        "numberFormat": {
+                                            "type": "NUMBER",
+                                            "pattern": "#,##0.000000",
+                                        }
+                                    },
+                                },
+                                {
+                                    "columnIndex": 9,
+                                    "columnName": "Executed Rate, USD",
+                                    "columnType": "DOUBLE",
+                                    "format": {
+                                        "numberFormat": {
+                                            "type": "NUMBER",
+                                            "pattern": "#,##0.000000",
+                                        }
+                                    },
+                                },
+                                {
+                                    "columnIndex": 10,
+                                    "columnName": "Close Rate, RUB",
+                                    "columnType": "DOUBLE",
+                                    "format": {
+                                        "numberFormat": {
+                                            "type": "NUMBER",
+                                            "pattern": "#,##0.000000",
+                                        }
+                                    },
+                                },
+                                {
+                                    "columnIndex": 11,
+                                    "columnName": "Close Rate, USD",
+                                    "columnType": "DOUBLE",
+                                    "format": {
+                                        "numberFormat": {
+                                            "type": "NUMBER",
+                                            "pattern": "#,##0.000000",
+                                        }
+                                    },
+                                },
                             ],
                         }
                     }
@@ -274,8 +346,8 @@ class GoogleSheetsTableManager:
             if not actual_sheet_name:
                 raise Exception(f"Could not find sheet with ID {sheet_id}")
 
-            # Read all data from the sheet
-            range_name = f"{actual_sheet_name}!A:F"
+            # Read all data from the sheet (12 columns: A-L)
+            range_name = f"{actual_sheet_name}!A:L"
             result = (
                 self.sheets_service.spreadsheets()
                 .values()
@@ -341,8 +413,8 @@ class GoogleSheetsTableManager:
             for row_data in sample_data:
                 values.append(row_data)
 
-            # Use append to add data to the end of the table
-            range_name = f"{actual_sheet_name}!A:F"
+            # Use append to add data to the end of the table (12 columns: A-L)
+            range_name = f"{actual_sheet_name}!A:L"
 
             body = {"values": values}
 
@@ -372,3 +444,147 @@ class GoogleSheetsTableManager:
         except Exception as e:
             logger.error("Error appending data: %s", e)
             raise
+
+    def delete_rows_by_source(
+        self,
+        spreadsheet_id: str,
+        sheet_name: str,
+        source_column_index: int,
+        source_value: str,
+    ) -> int:
+        """
+        Delete all rows where the source column matches the given value.
+
+        Args:
+            spreadsheet_id: The ID of the Google Spreadsheet
+            sheet_name: Name of the sheet
+            source_column_index: 0-based index of the source column
+            source_value: Value to match for deletion
+
+        Returns:
+            int: Number of rows deleted
+        """
+        try:
+            sheet_id = self.get_or_create_sheet(spreadsheet_id, sheet_name)
+
+            # Get the actual sheet name
+            spreadsheet = (
+                self.sheets_service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
+            )
+            actual_sheet_name = None
+            for sheet in spreadsheet.get("sheets", []):
+                if sheet["properties"]["sheetId"] == sheet_id:
+                    actual_sheet_name = sheet["properties"]["title"]
+                    break
+
+            if not actual_sheet_name:
+                raise Exception(f"Could not find sheet with ID {sheet_id}")
+
+            # Read all data from the sheet
+            range_name = f"{actual_sheet_name}!A:Z"
+            result = (
+                self.sheets_service.spreadsheets()
+                .values()
+                .get(spreadsheetId=spreadsheet_id, range=range_name)
+                .execute()
+            )
+
+            values = result.get("values", [])
+            if not values or len(values) <= 1:
+                logger.info("No data rows to delete")
+                return 0
+
+            # Find rows to delete (match source value), collect row indices in reverse order
+            rows_to_delete = []
+            for i, row in enumerate(values[1:], start=2):  # Start from 2 (skip header, 1-indexed)
+                if len(row) > source_column_index and row[source_column_index] == source_value:
+                    rows_to_delete.append(i)
+
+            if not rows_to_delete:
+                logger.info("No rows found with source='%s'", source_value)
+                return 0
+
+            # Delete rows in reverse order to maintain correct indices
+            rows_to_delete.sort(reverse=True)
+            delete_requests = []
+            for row_num in rows_to_delete:
+                delete_requests.append(
+                    {
+                        "deleteDimension": {
+                            "range": {
+                                "sheetId": sheet_id,
+                                "dimension": "ROWS",
+                                "startIndex": row_num - 1,  # 0-indexed
+                                "endIndex": row_num,
+                            }
+                        }
+                    }
+                )
+
+            if delete_requests:
+                self.sheets_service.spreadsheets().batchUpdate(
+                    spreadsheetId=spreadsheet_id, body={"requests": delete_requests}
+                ).execute()
+
+            logger.info("Deleted %d rows with source='%s'", len(rows_to_delete), source_value)
+            return len(rows_to_delete)
+
+        except Exception as e:
+            logger.error("Error deleting rows by source: %s", e)
+            raise
+
+    def replace_rows_by_source(
+        self,
+        spreadsheet_id: str,
+        sheet_name: str,
+        source_filter: SourceFilterConfig,
+        new_data: list[list[Any]],
+    ) -> int:
+        """
+        Delete all rows with matching source value and insert new rows.
+
+        Args:
+            spreadsheet_id: The ID of the Google Spreadsheet
+            sheet_name: Name of the sheet
+            source_filter: Configuration for source column filtering
+            new_data: New rows to insert (without header)
+
+        Returns:
+            int: Number of rows inserted
+        """
+        # Delete existing rows with this source
+        deleted = self.delete_rows_by_source(
+            spreadsheet_id, sheet_name, source_filter.column_index, source_filter.value
+        )
+        logger.info("Deleted %d existing rows before inserting new data", deleted)
+
+        if not new_data:
+            logger.info("No new data to insert")
+            return 0
+
+        # Get sheet info
+        sheet_id = self.get_or_create_sheet(spreadsheet_id, sheet_name)
+        spreadsheet = self.sheets_service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
+        actual_sheet_name = None
+        for sheet in spreadsheet.get("sheets", []):
+            if sheet["properties"]["sheetId"] == sheet_id:
+                actual_sheet_name = sheet["properties"]["title"]
+                break
+
+        if not actual_sheet_name:
+            raise Exception(f"Could not find sheet with ID {sheet_id}")
+
+        # Append new data
+        col_letter = chr(ord("A") + source_filter.num_columns - 1)
+        range_name = f"{actual_sheet_name}!A:{col_letter}"
+
+        self.sheets_service.spreadsheets().values().append(
+            spreadsheetId=spreadsheet_id,
+            range=range_name,
+            valueInputOption="USER_ENTERED",
+            insertDataOption="INSERT_ROWS",
+            body={"values": new_data},
+        ).execute()
+
+        logger.info("Inserted %d new rows with source='%s'", len(new_data), source_filter.value)
+        return len(new_data)

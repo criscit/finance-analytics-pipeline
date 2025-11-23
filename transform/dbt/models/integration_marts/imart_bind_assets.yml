@@ -22,6 +22,12 @@ models:
           - accepted_values:
               values: ['Asset', 'Crypto APY']
 
+      - name: platform_name
+        description: Platform identifier (Binance, Bybit, Telegram Wallet)
+        data_type: varchar(32)
+        data_tests:
+          - not_null
+
       - name: category
         description: Asset category - 'Crypto' for spot holdings or 'Crypto APY' for staking/earn
         data_type: varchar(32)
@@ -71,6 +77,12 @@ models:
       - name: apy_pct
         description: Annual Percentage Yield for staking/earn accounts (null for spot holdings)
         data_type: decimal(10,2)
+
+      - name: source
+        description: Data pipeline source marker for Google Sheets sync
+        data_type: varchar(64)
+        data_tests:
+          - not_null
 
       - name: comments
         description: Additional details like free/locked amounts, yield earned, or current price

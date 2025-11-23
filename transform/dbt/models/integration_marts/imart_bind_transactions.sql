@@ -1,6 +1,5 @@
 {{ config(
-    materialized='view',
-    alias='view_transactions'
+    materialized='view'
 ) }}
 
 -- T Bank transactions (RUB)
@@ -500,7 +499,7 @@ union all
 select
   transacted_dt as date,
   transacted_at as transacted_at,
-  'Telegram Wallet' as platform_name,
+  'Telegram' as platform_name,
   transaction_type as category,
   coalesce(counterparty, 'Telegram transaction') || ' | In: ' || coalesce(cast(amount_in as varchar) || ' ' || currency_in, 'N/A') || ' | Out: ' || coalesce(cast(amount_out as varchar) || ' ' || currency_out, 'N/A') as description,
   coalesce(amount_in, -1.0 * amount_out) as amount_currency,
@@ -526,7 +525,7 @@ union all
 select
   transacted_dt as date,
   transacted_at as transacted_at,
-  'Telegram Wallet' as platform_name,
+  'Telegram' as platform_name,
   'Fee' as category,
   'Transaction fee' as description,
   -1.0 * fee_amt as amount_currency,
@@ -548,7 +547,7 @@ union all
 select
   date(completed_at) as date,
   completed_at as transacted_at,
-  'Telegram Wallet' as platform_name,
+  'Telegram' as platform_name,
   'P2P Trade' as category,
   ad_type || ' as ' || role || ' - ' || cast(net_crypto_amt as varchar) || ' ' || crypto_currency || ' for ' || cast(fiat_amt as varchar) || ' ' || fiat_currency || ' - Fiat' as description,
   case
@@ -575,7 +574,7 @@ union all
 select
   date(completed_at) as date,
   completed_at as transacted_at,
-  'Telegram Wallet' as platform_name,
+  'Telegram' as platform_name,
   'P2P Trade' as category,
   ad_type || ' as ' || role || ' - ' || cast(net_crypto_amt as varchar) || ' ' || crypto_currency || ' for ' || cast(fiat_amt as varchar) || ' ' || fiat_currency || ' - Crypto' as description,
   case
@@ -598,7 +597,7 @@ union all
 select
   date(completed_at) as date,
   completed_at as transacted_at,
-  'Telegram Wallet' as platform_name,
+  'Telegram' as platform_name,
   'Fee' as category,
   'P2P trading fee' as description,
   -1.0 * paid_fee_crypto_amt as amount_currency,

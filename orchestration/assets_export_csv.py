@@ -16,6 +16,7 @@ RESULTS_DIR = FINANCE_DATA_DIR / "Results"
 FINANCE_HISTORY_EXPORT_TABLE = os.getenv(
     "FINANCE_HISTORY_EXPORT_TABLE", "prod_imart.view_transactions"
 )
+FINANCE_ASSETS_EXPORT_TABLE = os.getenv("FINANCE_ASSETS_EXPORT_TABLE", "prod_imart.view_assets")
 
 
 def _md5(path: Path) -> str:
@@ -26,51 +27,57 @@ def _md5(path: Path) -> str:
     return h.hexdigest()
 
 
-@asset(deps=["build_imart_models"])
-def export_csv_snapshot(context: AssetExecutionContext) -> Output[dict[str, Any]]:
-    # Create timestamp for folder and file naming
+def _export_table_snapshot(
+    context: AssetExecutionContext,
+    *,
+    export_table: str,
+    results_filename: str,
+    snapshot_label: str,
+    order_by: str | None = None,
+) -> Output[dict[str, Any]]:
+    """Shared helper that exports DuckDB tables to timestamped CSV snapshots."""
     now = datetime.datetime.now(datetime.UTC)
     date_folder = now.strftime("%Y%m%d")
     timestamp = now.strftime("%Y%m%d_%H%M%S")
 
-    # Replace dots with underscores in table name
-    table_name = FINANCE_HISTORY_EXPORT_TABLE.replace(".", "_")
-
-    # Create date-based folder structure
+    table_name = export_table.replace(".", "_")
     date_dir = EXPORT_DIR / date_folder
     date_dir.mkdir(parents=True, exist_ok=True)
 
-    # Create file names with timestamp
     csv_filename = f"{table_name}_{timestamp}.csv"
     manifest_filename = f"{table_name}_manifest_{timestamp}.json"
 
     csv_path = date_dir / csv_filename
     manifest_path = date_dir / manifest_filename
 
-    # Results file path
-    results_path = RESULTS_DIR / "bank_transactions.csv"
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    results_path = RESULTS_DIR / results_filename
 
-    # Export data from database
+    context.log.info(
+        "Exporting %s snapshot from %s (order by %s)",
+        snapshot_label,
+        export_table,
+        order_by or "N/A",
+    )
     con = duckdb.connect(DUCKDB_PATH, read_only=True)
+
+    order_clause = f" order by {order_by}" if order_by else ""
+    export_query = f"select * from {export_table}{order_clause}"
     con.execute(
-        f"COPY (select * from {FINANCE_HISTORY_EXPORT_TABLE}) TO '{csv_path.as_posix()}' WITH (HEADER, DELIMITER ',')",
+        f"COPY ({export_query}) TO '{csv_path.as_posix()}' WITH (HEADER, DELIMITER ',')",
     )
-    # Also export to Results folder
     con.execute(
-        f"COPY (select * from {FINANCE_HISTORY_EXPORT_TABLE}) TO '{results_path.as_posix()}' WITH (HEADER, DELIMITER ',')",
+        f"COPY ({export_query}) TO '{results_path.as_posix()}' WITH (HEADER, DELIMITER ',')",
     )
-    result = con.execute(f"select count(*) from {FINANCE_HISTORY_EXPORT_TABLE}").fetchone()
+    result = con.execute(f"select count(*) from {export_table}").fetchone()
     row_count = result[0] if result else 0
     con.close()
 
-    # Calculate checksums
     checksum = _md5(csv_path)
     results_checksum = _md5(results_path)
 
-    # Create manifest metadata
     meta = {
-        "table": FINANCE_HISTORY_EXPORT_TABLE,
+        "table": export_table,
         "csv_path": str(csv_path),
         "results_path": str(results_path),
         "row_count": row_count,
@@ -79,9 +86,9 @@ def export_csv_snapshot(context: AssetExecutionContext) -> Output[dict[str, Any]
         "created_at_utc": now.isoformat(timespec="seconds") + "Z",
         "date_folder": date_folder,
         "timestamp": timestamp,
+        "snapshot_label": snapshot_label,
     }
 
-    # Write manifest file
     with manifest_path.open("w", encoding="utf-8") as f:
         json.dump(meta, f, indent=2)
 
@@ -91,6 +98,7 @@ def export_csv_snapshot(context: AssetExecutionContext) -> Output[dict[str, Any]
             "md5": checksum,
             "results_md5": results_checksum,
             "timestamp": timestamp,
+            "snapshot_label": snapshot_label,
         },
         metadata={
             "csv": MetadataValue.path(str(csv_path)),
@@ -101,5 +109,29 @@ def export_csv_snapshot(context: AssetExecutionContext) -> Output[dict[str, Any]
             "results_md5": results_checksum,
             "date_folder": date_folder,
             "timestamp": timestamp,
+            "snapshot_label": snapshot_label,
         },
+    )
+
+
+@asset(deps=["build_imart_models"])
+def export_csv_snapshot(context: AssetExecutionContext) -> Output[dict[str, Any]]:
+    """Historical transactions export."""
+    return _export_table_snapshot(
+        context,
+        export_table=FINANCE_HISTORY_EXPORT_TABLE,
+        results_filename="transactions.csv",
+        snapshot_label="transactions",
+        order_by="transacted_at",
+    )
+
+
+@asset(deps=["build_imart_models"])
+def export_assets_csv_snapshot(context: AssetExecutionContext) -> Output[dict[str, Any]]:
+    """Assets snapshot export."""
+    return _export_table_snapshot(
+        context,
+        export_table=FINANCE_ASSETS_EXPORT_TABLE,
+        results_filename="assets.csv",
+        snapshot_label="assets",
     )

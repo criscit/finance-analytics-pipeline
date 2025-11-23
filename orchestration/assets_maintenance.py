@@ -62,7 +62,14 @@ def _cleanup_export_directory(context: AssetExecutionContext) -> dict[str, int]:
     return {"deleted_count": deleted_count, "kept_count": len(folders_to_keep)}
 
 
-@asset(deps=["export_csv_snapshot", "export_to_google_sheets"])
+@asset(
+    deps=[
+        "export_csv_snapshot",
+        "export_assets_csv_snapshot",
+        "export_to_google_sheets",
+        "export_assets_to_google_sheets",
+    ]
+)
 def pipeline_maintenance(context: AssetExecutionContext) -> Output[dict[str, Any]]:
     """Move successfully processed files from To Parse to Archive folder tree and cleanup export directory."""
     summary: list[dict[str, str]] = []

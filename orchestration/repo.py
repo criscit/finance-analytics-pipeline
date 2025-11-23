@@ -1,7 +1,8 @@
 # file: orchestration/dagster_project/src/repo.py
 from dagster import AssetSelection, Definitions, ScheduleDefinition, define_asset_job
 
-from .assets_export_csv import export_csv_snapshot
+from .assets_export_assets_sheets import export_assets_to_google_sheets
+from .assets_export_csv import export_assets_csv_snapshot, export_csv_snapshot
 from .assets_export_sheets import export_to_google_sheets
 from .assets_ingest import ingest_bank, ingest_crypto
 from .assets_maintenance import pipeline_maintenance
@@ -19,7 +20,9 @@ all_assets = [
     run_ge_mart_checkpoints,
     build_imart_models,
     export_csv_snapshot,
+    export_assets_csv_snapshot,
     export_to_google_sheets,
+    export_assets_to_google_sheets,
     pipeline_maintenance,
 ]
 
@@ -49,7 +52,9 @@ export_pipeline = define_asset_job(
     selection=AssetSelection.assets(
         build_imart_models,
         export_csv_snapshot,
+        export_assets_csv_snapshot,
         export_to_google_sheets,
+        export_assets_to_google_sheets,
     ),
 )
 
@@ -80,7 +85,9 @@ monthly_job = define_asset_job(
         run_ge_mart_checkpoints,
         build_imart_models,
         export_csv_snapshot,
+        export_assets_csv_snapshot,
         export_to_google_sheets,
+        export_assets_to_google_sheets,
         pipeline_maintenance,
     ),
 )
