@@ -14,7 +14,7 @@ models:
         enforced: true
 
     columns:
-      - name: Type
+      - name: type
         description: Asset type - 'Asset' for holdings or 'Crypto APY' for staking accounts
         data_type: varchar(32)
         data_tests:
@@ -22,7 +22,7 @@ models:
           - accepted_values:
               values: ['Asset', 'Crypto APY']
 
-      - name: Category
+      - name: category
         description: Asset category - 'Crypto' for spot holdings or 'Crypto APY' for staking/earn
         data_type: varchar(32)
         data_tests:
@@ -30,30 +30,48 @@ models:
           - accepted_values:
               values: ['Crypto', 'Crypto APY']
 
-      - name: Description
+      - name: description
         description: Detailed description including platform and asset name
         data_type: varchar(256)
-        data_tests:
-          - not_null
 
-      - name: Currency
+      - name: amount_currency
+        description: Amount held in original currency
+        data_type: double
+
+      - name: currency
         description: Currency code or crypto symbol (BTC, USDT, ETH, etc.)
         data_type: varchar(16)
         data_tests:
           - not_null
 
-      - name: Amount
-        description: Amount held in original currency
-        data_type: double
+      - name: amount_rub
+        description: Amount converted to RUB (where available)
+        data_type: decimal(18,2)
 
-      - name: Amount, USD
+      - name: amount_usd
         description: USD-equivalent value of the asset
         data_type: double
 
-      - name: APY, %
+      - name: executed_rate_rub
+        description: Exchange rate to RUB at execution time
+        data_type: decimal(18,6)
+
+      - name: executed_rate_usd
+        description: Exchange rate to USD at execution time
+        data_type: decimal(18,6)
+
+      - name: close_rate_rub
+        description: Closing exchange rate to RUB
+        data_type: decimal(18,6)
+
+      - name: close_rate_usd
+        description: Closing exchange rate to USD
+        data_type: decimal(18,6)
+
+      - name: apy_pct
         description: Annual Percentage Yield for staking/earn accounts (null for spot holdings)
         data_type: decimal(10,2)
 
-      - name: Comments
+      - name: comments
         description: Additional details like free/locked amounts, yield earned, or current price
         data_type: varchar(512)

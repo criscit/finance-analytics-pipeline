@@ -5,19 +5,19 @@
 
 -- Binance assets
 select
-  'Asset' as "Type",
-  'Crypto' as "Category",
-  null as "Description",
-  total as "Amount, Currency",
-  asset as "Currency",
-  null::decimal(18,2) as "Amount, RUB",
-  amount_usd as "Amount, USD",
-  null::decimal(18,6) as "Executed Rate, RUB",
-  price_usd as "Executed Rate, USD",
-  null::decimal(18,6) as "Close Rate, RUB",
-  null::decimal(18,6) as "Close Rate, USD",
-  null::decimal(10,2) as "APY, %",
-  null as "Comments"
+  'Asset' as type,
+  'Crypto' as category,
+  null as description,
+  total as amount_currency,
+  asset as currency,
+  null::decimal(18,2) as amount_rub,
+  amount_usd,
+  null::decimal(18,6) as executed_rate_rub,
+  cast(price_usd as decimal(18,6)) as executed_rate_usd,
+  null::decimal(18,6) as close_rate_rub,
+  null::decimal(18,6) as close_rate_usd,
+  null::decimal(10,2) as apy_pct,
+  null as comments
 from
   {{ ref('mart_load_binance_assets') }}
 
@@ -25,19 +25,19 @@ union all
 
 -- Telegram assets
 select
-  'Asset' as "Type",
-  'Crypto' as "Category",
-  null as "Description",
-  balance as "Amount, Currency",
-  asset_short_name as "Currency",
-  null::decimal(18,2) as "Amount, RUB",
-  value_usd as "Amount, USD",
-  null::decimal(18,6) as "Executed Rate, RUB",
-  price_usd as "Executed Rate, USD",
-  null::decimal(18,6) as "Close Rate, RUB",
-  null::decimal(18,6) as "Close Rate, USD",
-  null::decimal(10,2) as "APY, %",
-  null as "Comments"
+  'Asset' as type,
+  'Crypto' as category,
+  null as description,
+  balance as amount_currency,
+  asset_short_name as currency,
+  null::decimal(18,2) as amount_rub,
+  value_usd as amount_usd,
+  null::decimal(18,6) as executed_rate_rub,
+  cast(price_usd as decimal(18,6)) as executed_rate_usd,
+  null::decimal(18,6) as close_rate_rub,
+  null::decimal(18,6) as close_rate_usd,
+  null::decimal(10,2) as apy_pct,
+  null as comments
 from
   {{ ref('mart_load_telegram_assets') }}
 
@@ -45,19 +45,19 @@ union all
 
 -- Bybit assets
 select
-  'Asset' as "Type",
-  'Crypto' as "Category",
-  null as "Description",
-  equity as "Amount, Currency",
-  coin as "Currency",
-  null::decimal(18,2) as "Amount, RUB",
-  usd_value as "Amount, USD",
-  null::decimal(18,6) as "Executed Rate, RUB",
-  usd_value / equity as "Executed Rate, USD",
-  null::decimal(18,6) as "Close Rate, RUB",
-  null::decimal(18,6) as "Close Rate, USD",
-  null::decimal(10,2) as "APY, %",
-  null as "Comments"
+  'Asset' as type,
+  'Crypto' as category,
+  null as description,
+  equity as amount_currency,
+  coin as currency,
+  null::decimal(18,2) as amount_rub,
+  usd_value as amount_usd,
+  null::decimal(18,6) as executed_rate_rub,
+  cast(usd_value / equity as decimal(18,6)) as executed_rate_usd,
+  null::decimal(18,6) as close_rate_rub,
+  null::decimal(18,6) as close_rate_usd,
+  null::decimal(10,2) as apy_pct,
+  null as comments
 from
   {{ ref('mart_load_bybit_assets') }}
 
@@ -65,19 +65,19 @@ union all
 
 -- Telegram Earn (Staking/APY accounts)
 select
-  'Asset' as "Type",
-  'Crypto APY' as "Category",
-  null as "Description",
-  wallet_balance as "Amount, Currency",
-  asset as "Currency",
-  null::decimal(18,2) as "Amount, RUB",
-  value_usd as "Amount, USD",
-  null::decimal(18,6) as "Executed Rate, RUB",
-  price_usd as "Executed Rate, USD",
-  null::decimal(18,6) as "Close Rate, RUB",
-  null::decimal(18,6) as "Close Rate, USD",
-  apy_pct as "APY, %",
-  'Yield earned: $' || cast(yield_usd as varchar) as "Comments"
+  'Asset' as type,
+  'Crypto APY' as category,
+  null as description,
+  wallet_balance as amount_currency,
+  asset as currency,
+  null::decimal(18,2) as amount_rub,
+  value_usd as amount_usd,
+  null::decimal(18,6) as executed_rate_rub,
+  cast(price_usd as decimal(18,6)) as executed_rate_usd,
+  null::decimal(18,6) as close_rate_rub,
+  null::decimal(18,6) as close_rate_usd,
+  cast(apy_pct as decimal(10,2)) as apy_pct,
+  'Yield earned: $' || cast(yield_usd as varchar) as comments
 from
   {{ ref('mart_load_telegram_earn') }}
 
@@ -85,18 +85,18 @@ union all
 
 -- Bybit Earn (Staking/APY accounts)
 select
-  'Asset' as "Type",
-  'Crypto APY' as "Category",
-  'Bybit - ' || asset || ' Earn' as "Description",
-  wallet_balance as "Amount, Currency",
-  asset as "Currency",
-  null::decimal(18,2) as "Amount, RUB",
-  value_usd as "Amount, USD",
-  null::decimal(18,6) as "Executed Rate, RUB",
-  price_usd as "Executed Rate, USD",
-  null::decimal(18,6) as "Close Rate, RUB",
-  null::decimal(18,6) as "Close Rate, USD",
-  apy as "APY, %",
-  null as "Comments"
+  'Asset' as type,
+  'Crypto APY' as category,
+  'Bybit - ' || asset || ' Earn' as description,
+  wallet_balance as amount_currency,
+  asset as currency,
+  null::decimal(18,2) as amount_rub,
+  value_usd as amount_usd,
+  null::decimal(18,6) as executed_rate_rub,
+  cast(price_usd as decimal(18,6)) as executed_rate_usd,
+  null::decimal(18,6) as close_rate_rub,
+  null::decimal(18,6) as close_rate_usd,
+  cast(apy as decimal(10,2)) as apy_pct,
+  null as comments
 from
   {{ ref('mart_load_bybit_earn') }}

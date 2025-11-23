@@ -14,58 +14,62 @@ models:
         enforced: true
 
     columns:
-      - name: Date
+      - name: date
         description: Transaction date in Europe/Moscow (MSK) timezone
         data_type: date
         data_tests:
           - not_null
 
-      - name: Platform Name
+      - name: transacted_at
+        description: Full timestamp of the transaction
+        data_type: timestamptz
+
+      - name: platform_name
         description: Platform identifier (T Bank, BakAi Bank, Binance, Bybit, Telegram Wallet)
         data_type: varchar(32)
         data_tests:
           - not_null
 
-      - name: Category
+      - name: category
         description: Transaction category or type (Spot Trade, P2P Trade, Deposit, Withdrawal, etc.)
         data_type: varchar(128)
 
-      - name: Description
+      - name: description
         description: Detailed transaction description
         data_type: varchar(512)
         data_tests:
           - not_null
 
-      - name: Amount, Currency
+      - name: amount_currency
         description: Transaction amount in original currency
         data_type: double
         data_tests:
           - not_null
 
-      - name: Currency
+      - name: currency
         description: Currency code (RUB, KGS, USDT, USD, BTC, etc.)
         data_type: varchar(16)
 
-      - name: Amount, RUB
+      - name: amount_rub
         description: Transaction amount converted to RUB (where available)
-        data_type: decimal(18,2)
+        data_type: double
 
-      - name: Amount, USD
+      - name: amount_usd
         description: Transaction amount converted to USD (where available)
-        data_type: decimal(18,2)
+        data_type: double
 
-      - name: Executed Rate, RUB
+      - name: executed_rate_rub
         description: Exchange rate to RUB at execution time (future use)
-        data_type: decimal(18,6)
+        data_type: double
 
-      - name: Exchange Rate, USD
+      - name: executed_rate_usd
         description: Exchange rate to USD (populated for P2P trades, conversions, etc.)
-        data_type: decimal(18,6)
+        data_type: double
 
-      - name: Close Rate, RUB
+      - name: close_rate_rub
         description: Closing exchange rate to RUB (future use)
         data_type: decimal(18,6)
 
-      - name: Close Rate, USD
+      - name: close_rate_usd
         description: Closing exchange rate to USD (future use)
-        data_type: decimal(18,6)
+        data_type: double
