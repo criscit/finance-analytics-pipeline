@@ -21,27 +21,6 @@ from
 
 union all
 
--- T Bank cashback (RUB)
-select
-  transacted_at_utc as transacted_at,
-  'T Bank' as platform_name,
-  'Cashback' as category,
-  'Cashback and other rewards' as description,
-  total_rewards_amt as amount_currency,
-  transaction_currency_cd as currency,
-  total_rewards_amt as amount_rub,  -- T Bank is in RUB
-  null::decimal(18,2) as amount_usd,
-  null::decimal(18,6) as executed_rate_rub,
-  null::decimal(18,6) as executed_rate_usd,
-  null::decimal(18,6) as close_rate_rub,
-  null::decimal(18,6) as close_rate_usd
-from
-  {{ ref('mart_load_t_bank_transactions') }}
-where
-  total_rewards_amt > 0
-
-union all
-
 -- BakAi Bank transactions (KGS with USD exchange rate)
 select
   transacted_at_utc as transacted_at,
