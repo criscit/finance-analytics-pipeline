@@ -15,47 +15,53 @@ target_table:
   name: bybit_assets
 
 columns:
+  - name: 'account_type'
+    type: varchar
+    nullable: true
+    description: 'Raw account_type value from Bybit assets export (e.g., UNIFIED, FUND)'
+    source_column_index: 0
+
   - name: 'coin'
     type: varchar
     nullable: true
     description: 'Raw coin value from Bybit assets export'
-    source_column_index: 0
+    source_column_index: 1
 
   - name: 'equity'
     type: varchar
     nullable: true
     description: 'Raw equity value from Bybit assets export'
-    source_column_index: 1
+    source_column_index: 2
 
   - name: 'free'
     type: varchar
     nullable: true
     description: 'Raw free value from Bybit assets export'
-    source_column_index: 2
+    source_column_index: 3
 
   - name: 'locked'
     type: varchar
     nullable: true
     description: 'Raw locked value from Bybit assets export'
-    source_column_index: 3
+    source_column_index: 4
 
   - name: 'price_usd'
     type: varchar
     nullable: true
     description: 'Raw price_usd value from Bybit assets export'
-    source_column_index: 4
+    source_column_index: 5
 
   - name: 'usdValue'
     type: varchar
     nullable: true
     description: 'Raw usdValue value from Bybit assets export'
-    source_column_index: 5
+    source_column_index: 6
 
   - name: 'walletBalance'
     type: varchar
     nullable: true
     description: 'Raw walletBalance value from Bybit assets export'
-    source_column_index: 6
+    source_column_index: 7
 
 metadata:
   refresh_frequency: monthly

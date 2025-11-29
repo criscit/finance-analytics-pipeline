@@ -10,7 +10,8 @@
 }}
 
 select
-    md5(concat_ws('|', 'bybit_assets', coin)) as asset_bk,
+    md5(concat_ws('|', 'bybit_assets', account_type, coin)) as asset_bk,
+    account_type,
     coin,
     equity,
     free,

@@ -47,18 +47,18 @@ from
 
 union all
 
--- Bybit assets
+-- Bybit assets (aggregated by coin across account types)
 select
   'Asset' as type,
   'Bybit' as platform_name,
   'Crypto' as category,
   null as description,
-  equity as amount_currency,
+  sum(equity) as amount_currency,
   coin as currency,
   null::decimal(18,2) as amount_rub,
-  usd_value as amount_usd,
+  sum(usd_value) as amount_usd,
   null::decimal(18,6) as executed_rate_rub,
-  cast(usd_value / equity as decimal(18,6)) as executed_rate_usd,
+  cast(sum(usd_value) / sum(equity) as decimal(18,6)) as executed_rate_usd,
   null::decimal(18,6) as close_rate_rub,
   null::decimal(18,6) as close_rate_usd,
   null::decimal(10,2) as apy_pct,
@@ -66,6 +66,7 @@ select
   null as comments
 from
   {{ ref('mart_load_bybit_assets') }}
+group by coin
 
 union all
 

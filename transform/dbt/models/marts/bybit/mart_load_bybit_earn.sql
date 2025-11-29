@@ -1,6 +1,4 @@
-{{ config(
-    materialized='view'
-) }}
+{{ config(materialized='table') }}
 
 -- Current versions only from SCD2 snapshot
 -- Joins with aggregated yield data to calculate total_yield_usd per asset

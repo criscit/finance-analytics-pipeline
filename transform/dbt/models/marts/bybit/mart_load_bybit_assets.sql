@@ -1,10 +1,9 @@
-{{ config(
-    materialized='view'
-) }}
+{{ config(materialized='table') }}
 
 -- Current versions only from SCD2 snapshot
 select
     asset_bk,
+    account_type,
     coin,
     equity,
     free,
