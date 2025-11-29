@@ -7,7 +7,7 @@ from dagster import AssetExecutionContext, Output, asset
 
 from src.duckdb_utils import read_table_data_with_ordered_columns
 from src.google_sheets import GoogleSheetsTableManager
-from src.utils import filter_new_transactions, get_max_transaction_dates_by_bank
+from src.utils import filter_new_transactions, get_max_transaction_datetimes_by_platform
 
 
 def load_runtime_config() -> dict[str, Any]:
@@ -57,9 +57,9 @@ def export_to_google_sheets(context: AssetExecutionContext) -> Output[dict[str, 
         context.log.info("No data found in table %s", cfg["export_finance_table"])
         return Output({"appended": 0}, metadata={"appended": 0})
 
-    # Read existing data from Google Sheets to get max transaction dates per bank
+    # Read existing data from Google Sheets to get max transaction datetimes per platform
     context.log.info(
-        "Reading existing data from Google Sheets to determine max transaction dates per bank"
+        "Reading existing data from Google Sheets to determine max transaction datetimes per platform"
     )
     existing_data = sheets_manager.read_existing_data(
         spreadsheet_id=cfg["google_spreadsheet_id"],
@@ -67,14 +67,16 @@ def export_to_google_sheets(context: AssetExecutionContext) -> Output[dict[str, 
         table_name=cfg["google_table_name"],
     )
 
-    # Get max transaction dates by bank from existing data
-    max_dates_by_bank = get_max_transaction_dates_by_bank(existing_data)
+    # Get max transaction datetimes by platform from existing data
+    max_datetimes_by_platform = get_max_transaction_datetimes_by_platform(existing_data)
     context.log.info(
-        "Found max transaction dates for %d banks: %s", len(max_dates_by_bank), max_dates_by_bank
+        "Found max transaction datetimes for %d platforms: %s",
+        len(max_datetimes_by_platform),
+        max_datetimes_by_platform,
     )
 
-    # Filter new data to only include transactions with dates greater than max date per bank
-    filtered_values = filter_new_transactions(all_values, max_dates_by_bank)
+    # Filter new data to only include transactions with datetimes greater than max datetime per platform
+    filtered_values = filter_new_transactions(all_values, max_datetimes_by_platform)
 
     if not filtered_values:
         context.log.info(

@@ -4,7 +4,6 @@
 
 -- T Bank transactions (RUB)
 select
-  transaction_dt as date,
   transacted_at_utc as transacted_at,
   'T Bank' as platform_name,
   category_nm as category,
@@ -24,7 +23,6 @@ union all
 
 -- T Bank cashback (RUB)
 select
-  transaction_dt as date,
   transacted_at_utc as transacted_at,
   'T Bank' as platform_name,
   'Cashback' as category,
@@ -46,7 +44,6 @@ union all
 
 -- BakAi Bank transactions (KGS with USD exchange rate)
 select
-  transaction_dt as date,
   transacted_at_utc as transacted_at,
   'BakAi Bank' as platform_name,
   null as category,
@@ -66,7 +63,6 @@ union all
 
 -- Binance Spot Orders - Sold crypto (what you gave up)
 select
-  date(executed_at) as date,
   executed_at as transacted_at,
   'Binance' as platform_name,
   'Spot Trade' as category,
@@ -96,7 +92,6 @@ union all
 
 -- Binance Spot Orders - Bought crypto (what you received)
 select
-  date(executed_at) as date,
   executed_at as transacted_at,
   'Binance' as platform_name,
   'Spot Trade' as category,
@@ -126,7 +121,6 @@ union all
 
 -- Binance P2P Trades - Fiat side
 select
-  date(created_at) as date,
   created_at as transacted_at,
   'Binance' as platform_name,
   'P2P Trade' as category,
@@ -153,7 +147,6 @@ union all
 
 -- Binance P2P Trades - Crypto side
 select
-  date(created_at) as date,
   created_at as transacted_at,
   'Binance' as platform_name,
   'P2P Trade' as category,
@@ -176,7 +169,6 @@ union all
 
 -- Binance P2P Trades - Fee
 select
-  date(created_at) as date,
   created_at as transacted_at,
   'Binance' as platform_name,
   'Fee' as category,
@@ -198,7 +190,6 @@ union all
 
 -- Binance Convert Trades - From (what you gave up)
 select
-  date(created_at) as date,
   created_at as transacted_at,
   'Binance' as platform_name,
   'Convert' as category,
@@ -222,7 +213,6 @@ union all
 
 -- Binance Convert Trades - To (what you received)
 select
-  date(created_at) as date,
   created_at as transacted_at,
   'Binance' as platform_name,
   'Convert' as category,
@@ -246,7 +236,6 @@ union all
 
 -- Bybit Spot Orders - Sold crypto (what you gave up)
 select
-  date(executed_at) as date,
   executed_at as transacted_at,
   'Bybit' as platform_name,
   'Spot Trade' as category,
@@ -275,7 +264,6 @@ union all
 
 -- Bybit Spot Orders - Bought crypto (what you received)
 select
-  date(executed_at) as date,
   executed_at as transacted_at,
   'Bybit' as platform_name,
   'Spot Trade' as category,
@@ -304,7 +292,6 @@ union all
 
 -- Bybit Spot Orders - Trading Fee
 select
-  date(executed_at) as date,
   executed_at as transacted_at,
   'Bybit' as platform_name,
   'Fee' as category,
@@ -326,7 +313,6 @@ union all
 
 -- Bybit P2P Trades - Fiat side
 select
-  date(executed_at) as date,
   executed_at as transacted_at,
   'Bybit' as platform_name,
   'P2P Trade' as category,
@@ -352,7 +338,6 @@ union all
 
 -- Bybit P2P Trades - Crypto side
 select
-  date(executed_at) as date,
   executed_at as transacted_at,
   'Bybit' as platform_name,
   'P2P Trade' as category,
@@ -375,7 +360,6 @@ union all
 
 -- Bybit P2P Trades - Fee
 select
-  date(executed_at) as date,
   executed_at as transacted_at,
   'Bybit' as platform_name,
   'Fee' as category,
@@ -397,7 +381,6 @@ union all
 
 -- Bybit Deposits
 select
-  date(success_at) as date,
   success_at as transacted_at,
   'Bybit' as platform_name,
   'Deposit' as category,
@@ -421,7 +404,6 @@ union all
 
 -- Bybit Deposits - Fee
 select
-  date(success_at) as date,
   success_at as transacted_at,
   'Bybit' as platform_name,
   'Fee' as category,
@@ -447,7 +429,6 @@ union all
 
 -- Bybit Withdrawals
 select
-  date(executed_at) as date,
   executed_at as transacted_at,
   'Bybit' as platform_name,
   'Withdrawal' as category,
@@ -471,7 +452,6 @@ union all
 
 -- Bybit Withdrawals - Fee
 select
-  date(executed_at) as date,
   executed_at as transacted_at,
   'Bybit' as platform_name,
   'Fee' as category,
@@ -497,7 +477,6 @@ union all
 
 -- Telegram General Transactions
 select
-  transacted_dt as date,
   transacted_at as transacted_at,
   'Telegram' as platform_name,
   transaction_type as category,
@@ -523,7 +502,6 @@ union all
 
 -- Telegram General Transactions - Fee
 select
-  transacted_dt as date,
   transacted_at as transacted_at,
   'Telegram' as platform_name,
   'Fee' as category,
@@ -545,7 +523,6 @@ union all
 
 -- Telegram P2P Trades - Fiat side
 select
-  date(completed_at) as date,
   completed_at as transacted_at,
   'Telegram' as platform_name,
   'P2P Trade' as category,
@@ -572,7 +549,6 @@ union all
 
 -- Telegram P2P Trades - Crypto side
 select
-  date(completed_at) as date,
   completed_at as transacted_at,
   'Telegram' as platform_name,
   'P2P Trade' as category,
@@ -595,7 +571,6 @@ union all
 
 -- Telegram P2P Trades - Fee
 select
-  date(completed_at) as date,
   completed_at as transacted_at,
   'Telegram' as platform_name,
   'Fee' as category,
@@ -617,7 +592,6 @@ union all
 
 -- Binance Fiat Orders
 select
-  date(executed_at) as date,
   executed_at as transacted_at,
   'Binance' as platform_name,
   'Fiat ' || transaction_type as category,
@@ -637,7 +611,6 @@ union all
 
 -- Binance Fiat Orders - Fee
 select
-  date(executed_at) as date,
   executed_at as transacted_at,
   'Binance' as platform_name,
   'Fee' as category,
@@ -659,7 +632,6 @@ union all
 
 -- Bybit Convert Trades - From (what you gave up)
 select
-  date(created_at) as date,
   created_at as transacted_at,
   'Bybit' as platform_name,
   'Convert' as category,
@@ -683,7 +655,6 @@ union all
 
 -- Bybit Convert Trades - To (what you received)
 select
-  date(created_at) as date,
   created_at as transacted_at,
   'Bybit' as platform_name,
   'Convert' as category,
@@ -707,7 +678,6 @@ union all
 
 -- Binance Fiat Payments - Fiat side
 select
-  executed_dt as date,
   executed_at as transacted_at,
   'Binance' as platform_name,
   'Fiat Payment' as category,
@@ -734,7 +704,6 @@ union all
 
 -- Binance Fiat Payments - Crypto side
 select
-  executed_dt as date,
   executed_at as transacted_at,
   'Binance' as platform_name,
   'Fiat Payment' as category,
@@ -757,7 +726,6 @@ union all
 
 -- Binance Fiat Payments - Fee
 select
-  executed_dt as date,
   executed_at as transacted_at,
   'Binance' as platform_name,
   'Fee' as category,
@@ -779,7 +747,6 @@ union all
 
 -- Bybit Earn Yield (Staking/APY yield distributions)
 select
-  date(created_at_utc) as date,
   created_at_utc as transacted_at,
   'Bybit' as platform_name,
   'Yield' as category,

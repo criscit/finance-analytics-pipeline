@@ -101,9 +101,9 @@ def convert_cell_value(value: Any) -> str:
     if value is None:
         return ""
 
-    # Handle datetime objects - extract just the date part
+    # Handle datetime objects - format as YYYY-MM-DD HH:MM:SS (without timezone)
     if isinstance(value, datetime):
-        return value.date().isoformat()
+        return value.strftime("%Y-%m-%d %H:%M:%S")
 
     # Handle date objects - format as YYYY-MM-DD
     if isinstance(value, date):
@@ -153,7 +153,7 @@ def get_duckdb_to_sheets_column_mapping() -> dict[str, str]:
     Maps the imart column names (snake_case) to display names for Google Sheets.
     """
     return {
-        "date": "Date",
+        "transacted_at": "DateTime",
         "platform_name": "Platform Name",
         "category": "Category",
         "description": "Description",

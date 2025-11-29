@@ -14,12 +14,6 @@ models:
         enforced: true
 
     columns:
-      - name: date
-        description: Transaction date in Europe/Moscow (MSK) timezone
-        data_type: date
-        data_tests:
-          - not_null
-
       - name: transacted_at
         description: Full timestamp of the transaction
         data_type: timestamptz

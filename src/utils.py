@@ -3,7 +3,7 @@
 import hashlib
 import re
 import time
-from datetime import UTC, date, datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 # Minimum row length for transaction data (Date, Platform Name)
@@ -52,67 +52,85 @@ def build_load_key_expr(file_cols: list[str]) -> str:
 
 
 def parse_date_string(date_str: str) -> datetime | None:
-    """Parse date string from Google Sheets to datetime object."""
+    """
+    Parse date/datetime string from Google Sheets to datetime object.
+
+    Supports various formats including ISO 8601 datetime strings with timezone.
+    For backwards compatibility with existing date-only data.
+    """
     if not date_str:
         return None
 
-    # Try different date formats that might come from Google Sheets
+    date_str = date_str.strip()
+
+    # First try parsing as ISO format datetime (most common for new data)
+    # ISO 8601: 2025-01-15T10:30:00 or 2025-01-15T10:30:00+03:00
+    try:
+        # Try with timezone info
+        if "T" in date_str:
+            return datetime.fromisoformat(date_str)
+    except ValueError:
+        pass
+
+    # Try different date/datetime formats that might come from Google Sheets
     date_formats = [
-        "%Y-%m-%d",  # 2025-01-15
-        "%m/%d/%Y",  # 01/15/2025
-        "%d/%m/%Y",  # 15/01/2025
-        "%Y-%m-%d %H:%M:%S",  # 2025-01-15 10:30:00
+        "%Y-%m-%d %H:%M:%S",  # 2025-01-15 10:30:00 (space-separated datetime)
+        "%Y-%m-%d",  # 2025-01-15 (date only)
+        "%m/%d/%Y",  # 01/15/2025 (US format)
+        "%d/%m/%Y",  # 15/01/2025 (European format)
     ]
 
     for fmt in date_formats:
         try:
-            return datetime.strptime(date_str.strip(), fmt)
+            return datetime.strptime(date_str, fmt)
         except ValueError:
             continue
 
     return None
 
 
-def get_max_transaction_dates_by_bank(existing_data: list[list[str]]) -> dict[str, date]:
+def get_max_transaction_datetimes_by_platform(
+    existing_data: list[list[str]],
+) -> dict[str, datetime]:
     """
-    Get maximum transaction date for each bank from existing Google Sheets data.
+    Get maximum transaction datetime for each platform from existing Google Sheets data.
 
     Args:
         existing_data: List of data rows from Google Sheets (without headers)
-                      Expected format: [Date, Platform Name, Category, Description, Amount, Currency]
+                      Expected format: [DateTime, Platform Name, Category, Description, Amount, Currency]
 
     Returns:
-        dict: Bank name -> max transaction date
+        dict: Platform name -> max transaction datetime
     """
-    max_dates: dict[str, date] = {}
+    max_datetimes: dict[str, datetime] = {}
 
     for row in existing_data:
-        if len(row) < MIN_TRANSACTION_ROW_LENGTH:  # Need at least Date and Platform Name
+        if len(row) < MIN_TRANSACTION_ROW_LENGTH:  # Need at least DateTime and Platform Name
             continue
 
-        date_str = row[0]
-        bank_name = row[1]
+        datetime_str = row[0]
+        platform_name = row[1]
 
-        parsed_date = parse_date_string(date_str)
-        if parsed_date is None:
+        parsed_datetime = parse_date_string(datetime_str)
+        if parsed_datetime is None:
             continue
 
-        if bank_name not in max_dates or parsed_date > max_dates[bank_name]:
-            max_dates[bank_name] = parsed_date
+        if platform_name not in max_datetimes or parsed_datetime > max_datetimes[platform_name]:
+            max_datetimes[platform_name] = parsed_datetime
 
-    return max_dates
+    return max_datetimes
 
 
 def filter_new_transactions(
-    new_data: list[list[str]], max_dates_by_bank: dict[str, date]
+    new_data: list[list[str]], max_datetimes_by_platform: dict[str, datetime]
 ) -> list[list[str]]:
     """
-    Filter new transaction data to only include rows with dates greater than max date per bank.
+    Filter new transaction data to only include rows with datetimes greater than max datetime per platform.
 
     Args:
         new_data: New transaction data from DuckDB
-                 Expected format: [Date, Platform Name, Category, Description, Amount, Currency]
-        max_dates_by_bank: Dictionary of bank name -> max transaction date
+                 Expected format: [DateTime, Platform Name, Category, Description, Amount, Currency]
+        max_datetimes_by_platform: Dictionary of platform name -> max transaction datetime
 
     Returns:
         list: Filtered new data rows
@@ -120,23 +138,23 @@ def filter_new_transactions(
     filtered_data = []
 
     for row in new_data:
-        if len(row) < MIN_TRANSACTION_ROW_LENGTH:  # Need at least Date and Platform Name
+        if len(row) < MIN_TRANSACTION_ROW_LENGTH:  # Need at least DateTime and Platform Name
             continue
 
-        date_str = row[0]
-        bank_name = row[1]
+        datetime_str = row[0]
+        platform_name = row[1]
 
-        parsed_date = parse_date_string(date_str)
-        if parsed_date is None:
+        parsed_datetime = parse_date_string(datetime_str)
+        if parsed_datetime is None:
             continue
 
-        # If no existing data for this bank, include all transactions
-        if bank_name not in max_dates_by_bank:
+        # If no existing data for this platform, include all transactions
+        if platform_name not in max_datetimes_by_platform:
             filtered_data.append(row)
             continue
 
-        # Only include if date is greater than max date for this bank
-        if parsed_date > max_dates_by_bank[bank_name]:
+        # Only include if datetime is greater than max datetime for this platform
+        if parsed_datetime > max_datetimes_by_platform[platform_name]:
             filtered_data.append(row)
 
     return filtered_data
