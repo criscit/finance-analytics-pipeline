@@ -1,6 +1,5 @@
 {{ config(
     materialized='incremental',
-    incremental_strategy='delete+insert',
     unique_key='spot_order_bk'
 ) }}
 
@@ -32,5 +31,8 @@ from
       coalesce(max(processed_at), '1900-01-02'::timestamp) - interval '1 day'
     from
       {{ this }}
+  )
+  and spot_order_bk not in (
+    select spot_order_bk from {{ this }}
   )
 {% endif %}

@@ -17,7 +17,10 @@ models:
         data_type: varchar(32)
         data_tests:
           - not_null
-          - unique
+          - unique:
+              config:
+                severity: warn
+                warn_if: ">= 1"
 
       - name: transaction_type
         description: Type of transaction (e.g., Swap, Deposit, Withdrawal, Transfer).

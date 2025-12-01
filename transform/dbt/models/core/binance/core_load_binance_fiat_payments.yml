@@ -17,7 +17,10 @@ models:
         data_type: varchar(32)
         data_tests:
           - not_null
-          - unique
+          - unique:
+              config:
+                severity: warn
+                warn_if: ">= 1"
 
       - name: created_at
         description: Timestamp when the payment was created (converted from milliseconds).

@@ -1,6 +1,5 @@
 {{ config(
     materialized='incremental',
-    incremental_strategy='delete+insert',
     unique_key='p2p_trade_bk'
 ) }}
 
@@ -29,5 +28,8 @@ from
       coalesce(max(processed_at), '1900-01-02'::timestamp) - interval '1 day'
     from
       {{ this }}
+  )
+  and p2p_trade_bk not in (
+    select p2p_trade_bk from {{ this }}
   )
 {% endif %}

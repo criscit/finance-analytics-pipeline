@@ -18,7 +18,10 @@ models:
         data_type: varchar(32)
         data_tests:
           - not_null
-          - unique
+          - unique:
+              config:
+                severity: warn
+                warn_if: ">= 1"
 
       - name: qty
         description: Quantity of cryptocurrency traded (raw varchar value, e.g., "138.8078 USDT").

@@ -1,6 +1,5 @@
 {{ config(
     materialized='incremental',
-    incremental_strategy='delete+insert',
     unique_key='deposit_bk'
 ) }}
 
@@ -24,5 +23,8 @@ where
       coalesce(max(processed_at), '1900-01-02'::timestamp) - interval '1 day'
     from
       {{ this }}
+  )
+  and deposit_bk not in (
+    select deposit_bk from {{ this }}
   )
 {% endif %}

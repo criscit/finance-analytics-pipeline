@@ -1,6 +1,5 @@
 {{ config(
     materialized='incremental',
-    incremental_strategy='delete+insert',
     unique_key='fiat_payment_bk'
 ) }}
 
@@ -28,5 +27,8 @@ where
       coalesce(max(processed_at), '1900-01-02'::timestamp) - interval '1 day'
     from
       {{ this }}
+  )
+  and fiat_payment_bk not in (
+    select fiat_payment_bk from {{ this }}
   )
 {% endif %}

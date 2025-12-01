@@ -4,7 +4,7 @@
 
 -- T Bank transactions (RUB)
 select
-  transacted_at_utc as transacted_at,
+  transacted_at_utc at time zone 'Europe/Moscow' as transacted_at,
   'T Bank' as platform_name,
   category_nm as category,
   description,

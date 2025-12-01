@@ -17,7 +17,8 @@ The pipeline runs entirely locally in Docker with no cloud dependencies (except 
 
 **IMPORTANT**: The project codebase is bind-mounted into the Docker container via `docker-compose.yml`. This means:
 - Code changes on the host are immediately available in the container
-- **No rebuild or restart is needed** after changing Python code, dbt models, or configuration files
+- **No rebuild needed** for Python code, dbt models, or data contract changes
+- **Restart required** (no rebuild) for `.env` changes: `docker compose restart`
 - The container automatically picks up file changes (selectors, models, Python modules, etc.)
 - Only rebuild (`docker compose up --build -d`) when changing:
   - Dependencies in `pyproject.toml`
@@ -31,17 +32,29 @@ The pipeline runs entirely locally in Docker with no cloud dependencies (except 
 # Install dependencies
 poetry install
 
+# Set up pre-commit hooks
+make setup
+
 # Run linting
 poetry run ruff check .
+make lint
 
 # Format code
 poetry run black .
+make fmt
 
 # Type checking
 poetry run mypy src/
 
 # Run all tests
 poetry run pytest
+make test
+
+# Run specific test suites
+make test-unit         # Unit tests only
+make test-integration  # Integration tests
+make test-dagster      # Dagster asset tests
+make test-e2e          # End-to-end tests
 
 # Run specific test file
 poetry run pytest tests/unit/test_duckdb_utils.py
@@ -54,14 +67,16 @@ poetry run pytest tests/unit/test_duckdb_utils.py::test_ensure_meta_schema -v
 ```bash
 # Start Dagster UI (http://localhost:3000)
 docker compose up --build -d
+make up
 
 # View logs
 docker compose logs worker -f
 
 # Stop services
 docker compose down
+make down
 
-# Rebuild after code changes
+# Rebuild after dependency changes
 docker compose up --build -d
 ```
 
@@ -72,6 +87,7 @@ docker compose up --build -d
 
 # Build all models (staging → core → marts)
 poetry run dbt run --project-dir transform/dbt --profiles-dir transform/dbt/profiles
+make dbt-build
 
 # Build specific model
 poetry run dbt run --project-dir transform/dbt --profiles-dir transform/dbt/profiles --select stg_load_bakai_transactions
@@ -81,12 +97,16 @@ poetry run dbt run --project-dir transform/dbt --profiles-dir transform/dbt/prof
 
 # Test models
 poetry run dbt test --project-dir transform/dbt --profiles-dir transform/dbt/profiles
+make dbt-test
 
 # List models in a selector
 poetry run dbt ls --project-dir transform/dbt --profiles-dir transform/dbt/profiles --selector run_bakai_transactions
 
 # Parse project (useful after adding models/macros)
 poetry run dbt parse --project-dir transform/dbt --profiles-dir transform/dbt/profiles
+
+# Lint dbt models
+make dbt-lint
 ```
 
 ### DuckDB Inspection
@@ -96,13 +116,16 @@ poetry run python -c "import duckdb; con = duckdb.connect('data/warehouse/analyt
 
 # Query data
 poetry run python -c "import duckdb; con = duckdb.connect('data/warehouse/analytics.duckdb'); con.execute('select * from prod_raw.bakai_transactions limit 5').show()"
+
+# List all schemas
+poetry run python -c "import duckdb; con = duckdb.connect('data/warehouse/analytics.duckdb'); con.execute('show schemas').show()"
 ```
 
 ## Architecture
 
 ### Pipeline Flow
 
-The pipeline consists of 3 main orchestrated jobs:
+The pipeline consists of 4 main orchestrated jobs:
 
 1. **Build Pipeline** (`build_finance_data_pipeline`):
    - Ingest bank & crypto data → Quality checks (raw) → dbt models (stg/core/mart) → Quality checks (marts)
@@ -156,15 +179,20 @@ Models follow a medallion architecture:
 - **Staging** (`prod_stg` schema): Raw data cleaning and type casting
   - Pattern: `stg_load_{source}_{data_type}.sql`
   - Example: `stg_load_bakai_transactions.sql`
+  - Uses `get_stg_columns_list_map()` macro to read column definitions from `seeds/mappings/transactions_column_map.csv`
 
 - **Core** (`prod_core` schema): Business logic and standardization
   - Pattern: `core_load_{source}_{data_type}.sql`
+  - Passes through properly typed columns from staging
+  - Applies regexp cleaning for special varchar fields (e.g., "$1.23" → 1.23)
 
 - **Marts** (`prod_mart` schema): Aggregated/denormalized for analytics
   - Pattern: `mart_load_{source}_{data_type}.sql`
+  - Materialized as tables for performance
 
 - **Integration Marts** (`prod_imart` schema): Cross-source unified views (VIEWs)
-  - Example: `imart_bind_bank_transactions.sql` (combines T Bank + Bakai Bank)
+  - Example: `imart_bind_transactions.sql` (combines T Bank + Bakai Bank + Telegram + Crypto)
+  - Materialized as views for flexibility
 
 All models materialize as tables except integration marts (views).
 
@@ -172,7 +200,7 @@ All models materialize as tables except integration marts (views).
 
 ### DuckDB Schemas
 
-- `prod_meta`: Metadata tables (ingest_ledger for file tracking)
+- `prod_meta`: Metadata tables (ingest_ledger for file tracking, export_bookmarks for incremental exports)
 - `prod_raw`: Raw ingested data (text columns only + `__load_key`, `processed_at`)
 - `prod_stg`: Staging tables from dbt
 - `prod_core`: Core tables from dbt
@@ -217,7 +245,9 @@ Configuration: `data/quality/gx/great_expectations.yml`
    - Core: `transform/dbt/models/core/{source}/core_load_{source}_{type}.sql`
    - Mart: `transform/dbt/models/marts/{source}/mart_load_{source}_{type}.sql`
 
-4. **Run ingestion** to validate contract and ingest data
+4. **Add column mappings** to `transform/dbt/seeds/mappings/transactions_column_map.csv`
+
+5. **Run ingestion** to validate contract and ingest data
 
 ### Working with DuckDB Tables
 
@@ -241,6 +271,12 @@ Use utilities from `src/utils.py`:
 - **E2E tests** (`tests/e2e/`): Complete workflow validation
 
 All tests use `conftest.py` fixtures for DuckDB connections and sample data.
+
+**Test markers**:
+- `@pytest.mark.unit`: Quick unit tests
+- `@pytest.mark.integration`: Tests requiring DuckDB/dbt
+- `@pytest.mark.dagster`: Dagster asset tests
+- `@pytest.mark.e2e`: Full pipeline tests
 
 ## Environment Variables
 
@@ -275,8 +311,62 @@ DBT_PROFILES_DIR=/app/transform/dbt/profiles
 - **Type hints**: Required on all functions (mypy strict mode)
 - **Imports**: Sorted and organized (Ruff)
 - **Docstrings**: Required for all public functions
+- **Constants**: Use `UPPER_SNAKE_CASE` for module-level constants
+- **String formatting**: Prefer f-strings over `.format()` or `%` formatting
+- **Pre-commit hooks**: Installed via `make setup` to run checks before each commit
 
-Run `poetry run ruff check . && poetry run black . && poetry run mypy src/` before committing.
+Run `poetry run ruff check . && poetry run black . && poetry run mypy src/` before committing, or use `make lint` and `make fmt`.
+
+## Project Structure
+
+```
+├── orchestration/
+│   └── dagster_project/       # Dagster assets, jobs, and schedules
+├── transform/
+│   └── dbt/                   # dbt models (staging → core → marts)
+│       ├── models/
+│       │   ├── staging/       # Raw data cleaning
+│       │   ├── core/          # Business logic
+│       │   ├── marts/         # Analytics tables
+│       │   └── integration_marts/  # Cross-source views
+│       ├── profiles/          # dbt profiles configuration
+│       └── seeds/             # Column mappings and reference data
+├── src/
+│   ├── ingestion/             # Contract-driven ingestion service
+│   ├── export/                # CSV and Google Sheets exporters
+│   ├── duckdb_utils.py        # DuckDB helper functions
+│   └── utils.py               # General utilities
+├── tests/
+│   ├── unit/                  # Unit tests
+│   ├── integration/           # Integration tests
+│   ├── dagster/               # Dagster asset tests
+│   ├── e2e/                   # End-to-end tests
+│   └── fixtures/              # Shared test fixtures
+├── data/
+│   ├── contracts/             # YAML data contracts
+│   ├── raw/                   # Parquet cache
+│   ├── warehouse/             # DuckDB database file
+│   └── quality/               # Great Expectations configuration
+├── docs/                      # Documentation and reports
+├── credentials/               # Service account credentials
+├── docker-compose.yml         # Docker services configuration
+├── Dockerfile                 # Python 3.11 + Poetry setup
+├── pyproject.toml             # Poetry dependencies
+├── Makefile                   # Common development commands
+└── .env                       # Environment variables (not in git)
+```
+
+## Commit & Pull Request Guidelines
+
+- Use imperative, capitalized commit messages (`Add mart layer for crypto`, not `added mart layer`)
+- Squash WIP commits before review
+- Split cross-cutting changes into focused commits
+- In PRs:
+  - Outline affected assets/models
+  - Call out `.env` or schema changes
+  - Note `make lint` and relevant `make test-*` results
+  - Link issues or Dagster incidents
+  - Include screenshots for UI-facing updates
 
 ## Important Notes
 
@@ -286,3 +376,4 @@ Run `poetry run ruff check . && poetry run black . && poetry run mypy src/` befo
 - **Windows paths**: Always use forward slashes in `.env`, even on Windows
 - **Docker volume sharing**: Ensure Docker Desktop has access to your data drive
 - **Bind mounts**: Code is bind-mounted to container - no rebuild needed for code/config changes (only for dependency/Docker changes)
+- **Security**: Keep `.env` and `credentials/` out of git; use `env.example` as template

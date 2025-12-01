@@ -1,6 +1,5 @@
 {{ config(
     materialized='incremental',
-    incremental_strategy='delete+insert',
     unique_key='convert_trade_bk'
 ) }}
 
@@ -25,5 +24,8 @@ from
       coalesce(max(processed_at), '1900-01-02'::timestamp) - interval '1 day'
     from
       {{ this }}
+  )
+  and convert_trade_bk not in (
+    select convert_trade_bk from {{ this }}
   )
 {% endif %}
