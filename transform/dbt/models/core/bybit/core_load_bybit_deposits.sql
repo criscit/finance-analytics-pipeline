@@ -23,7 +23,7 @@ select
   deposit_type,
   from_address,
   status,
-  success_at_ms,
+  to_timestamp(success_at_ms / 1000.0) as success_at_utc,
   tag,
   tax_deposit_records_id,
   tax_status,

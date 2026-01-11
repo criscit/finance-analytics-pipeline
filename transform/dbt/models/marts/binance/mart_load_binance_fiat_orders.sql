@@ -5,8 +5,7 @@
 
 select
   fiat_order_bk,
-  (to_timestamp(update_time_ms / 1000.0) at time zone 'Europe/Moscow') as executed_at,
-  date(to_timestamp(update_time_ms / 1000.0) at time zone 'Europe/Moscow') as executed_dt,
+  executed_at_utc,
   amount,
   indicated_amt,
   total_fee,

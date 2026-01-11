@@ -4,7 +4,7 @@
 
 -- T Bank transactions (RUB)
 select
-  transacted_at_utc at time zone 'Europe/Moscow' as transacted_at,
+  transacted_at_utc + interval '3 hours' as transacted_at,
   'T Bank' as platform_name,
   category_nm as category,
   description,
@@ -42,7 +42,7 @@ union all
 
 -- Binance Spot Orders - Sold crypto (what you gave up)
 select
-  executed_at as transacted_at,
+  executed_at_utc + interval '3 hours' as transacted_at,
   'Binance' as platform_name,
   'Spot Trade' as category,
   order_side || ' ' || pair || ' @ ' || cast(average_price as varchar) || ' - Sold' as description,
@@ -71,7 +71,7 @@ union all
 
 -- Binance Spot Orders - Bought crypto (what you received)
 select
-  executed_at as transacted_at,
+  executed_at_utc + interval '3 hours' as transacted_at,
   'Binance' as platform_name,
   'Spot Trade' as category,
   order_side || ' ' || pair || ' @ ' || cast(average_price as varchar) || ' - Bought' as description,
@@ -100,7 +100,7 @@ union all
 
 -- Binance P2P Trades - Fiat side
 select
-  created_at as transacted_at,
+  created_at_utc + interval '3 hours' as transacted_at,
   'Binance' as platform_name,
   'P2P Trade' as category,
   trade_type || ' ' || cast(amount as varchar) || ' ' || asset || ' via ' || pay_method_name || ' - Fiat' as description,
@@ -126,7 +126,7 @@ union all
 
 -- Binance P2P Trades - Crypto side
 select
-  created_at as transacted_at,
+  created_at_utc + interval '3 hours' as transacted_at,
   'Binance' as platform_name,
   'P2P Trade' as category,
   trade_type || ' ' || cast(amount as varchar) || ' ' || asset || ' via ' || pay_method_name || ' - Crypto' as description,
@@ -148,7 +148,7 @@ union all
 
 -- Binance P2P Trades - Fee
 select
-  created_at as transacted_at,
+  created_at_utc + interval '3 hours' as transacted_at,
   'Binance' as platform_name,
   'Fee' as category,
   'P2P trading fee for ' || trade_type || ' ' || asset as description,
@@ -169,7 +169,7 @@ union all
 
 -- Binance Convert Trades - From (what you gave up)
 select
-  created_at as transacted_at,
+  created_at_utc + interval '3 hours' as transacted_at,
   'Binance' as platform_name,
   'Convert' as category,
   'Convert ' || cast(from_amt as varchar) || ' ' || from_asset || ' to ' || cast(to_amt as varchar) || ' ' || to_asset || ' - From' as description,
@@ -192,7 +192,7 @@ union all
 
 -- Binance Convert Trades - To (what you received)
 select
-  created_at as transacted_at,
+  created_at_utc + interval '3 hours' as transacted_at,
   'Binance' as platform_name,
   'Convert' as category,
   'Convert ' || cast(from_amt as varchar) || ' ' || from_asset || ' to ' || cast(to_amt as varchar) || ' ' || to_asset || ' - To' as description,
@@ -215,7 +215,7 @@ union all
 
 -- Bybit Spot Orders - Sold crypto (what you gave up)
 select
-  executed_at as transacted_at,
+  executed_at_utc + interval '3 hours' as transacted_at,
   'Bybit' as platform_name,
   'Spot Trade' as category,
   side || ' ' || symbol || ' @ ' || cast(exec_price as varchar) || ' - Sold' as description,
@@ -243,7 +243,7 @@ union all
 
 -- Bybit Spot Orders - Bought crypto (what you received)
 select
-  executed_at as transacted_at,
+  executed_at_utc + interval '3 hours' as transacted_at,
   'Bybit' as platform_name,
   'Spot Trade' as category,
   side || ' ' || symbol || ' @ ' || cast(exec_price as varchar) || ' - Bought' as description,
@@ -271,7 +271,7 @@ union all
 
 -- Bybit Spot Orders - Trading Fee
 select
-  executed_at as transacted_at,
+  executed_at_utc + interval '3 hours' as transacted_at,
   'Bybit' as platform_name,
   'Fee' as category,
   'Trading fee for ' || side || ' ' || symbol as description,
@@ -290,34 +290,9 @@ where
 
 union all
 
--- Bybit P2P Trades - Fiat side
-select
-  executed_at as transacted_at,
-  'Bybit' as platform_name,
-  'P2P Trade' as category,
-  type || ' ' || qty || ' crypto for ' || amount || ' - Fiat' as description,
-  case
-    when upper(type) = 'BUY' then -1.0 * fiat_amt  -- When buying crypto, you pay fiat
-    when upper(type) = 'SELL' then fiat_amt  -- When selling crypto, you receive fiat
-  end as amount_currency,
-  fiat_currency as currency,
-  null::decimal(18,2) as amount_rub,
-  case
-    when upper(type) = 'BUY' then -1.0 * fiat_amt
-    when upper(type) = 'SELL' then fiat_amt
-  end as amount_usd,
-  null::decimal(18,6) as executed_rate_rub,
-  price_usd as executed_rate_usd,
-  null::decimal(18,6) as close_rate_rub,
-  null::decimal(18,6) as close_rate_usd
-from
-  {{ ref('mart_load_bybit_p2p_trades') }}
-
-union all
-
 -- Bybit P2P Trades - Crypto side
 select
-  executed_at as transacted_at,
+  executed_at_utc + interval '3 hours' as transacted_at,
   'Bybit' as platform_name,
   'P2P Trade' as category,
   type || ' ' || qty || ' crypto for ' || amount || ' - Crypto' as description,
@@ -339,7 +314,7 @@ union all
 
 -- Bybit P2P Trades - Fee
 select
-  executed_at as transacted_at,
+  executed_at_utc + interval '3 hours' as transacted_at,
   'Bybit' as platform_name,
   'Fee' as category,
   'P2P trading fee' as description,
@@ -360,7 +335,7 @@ union all
 
 -- Bybit Deposits
 select
-  success_at as transacted_at,
+  success_at_utc + interval '3 hours' as transacted_at,
   'Bybit' as platform_name,
   'Deposit' as category,
   'Deposit ' || cast(amount as varchar) || ' ' || coin || ' via ' || chain as description,
@@ -383,7 +358,7 @@ union all
 
 -- Bybit Deposits - Fee
 select
-  success_at as transacted_at,
+  success_at_utc + interval '3 hours' as transacted_at,
   'Bybit' as platform_name,
   'Fee' as category,
   'Deposit fee for ' || coin || ' via ' || chain as description,
@@ -408,7 +383,7 @@ union all
 
 -- Bybit Withdrawals
 select
-  executed_at as transacted_at,
+  executed_at_utc + interval '3 hours' as transacted_at,
   'Bybit' as platform_name,
   'Withdrawal' as category,
   'Withdraw ' || cast(amount as varchar) || ' ' || coin || ' via ' || chain as description,
@@ -431,7 +406,7 @@ union all
 
 -- Bybit Withdrawals - Fee
 select
-  executed_at as transacted_at,
+  executed_at_utc + interval '3 hours' as transacted_at,
   'Bybit' as platform_name,
   'Fee' as category,
   'Withdrawal fee for ' || coin || ' via ' || chain as description,
@@ -456,14 +431,23 @@ union all
 
 -- Telegram General Transactions
 select
-  transacted_at as transacted_at,
+  transacted_at_utc + interval '3 hours' as transacted_at,
   'Telegram' as platform_name,
   transaction_type as category,
   coalesce(counterparty, 'Telegram transaction') || ' | In: ' || coalesce(cast(amount_in as varchar) || ' ' || currency_in, 'N/A') || ' | Out: ' || coalesce(cast(amount_out as varchar) || ' ' || currency_out, 'N/A') as description,
-  coalesce(amount_in, -1.0 * amount_out) as amount_currency,
+  case
+    when transaction_type = 'Withdraw' and amount_out is not null then
+      -1.0 * (amount_out - coalesce(fee_amt, 0))
+    else
+      coalesce(amount_in, -1.0 * amount_out)
+  end as amount_currency,
   coalesce(currency_in, currency_out) as currency,
   null::decimal(18,2) as amount_rub,
   case
+    when transaction_type = 'Withdraw' and currency_out in ('USDT', 'USD') then
+      -1.0 * (amount_out - coalesce(fee_amt, 0))
+    when transaction_type = 'Withdraw' and amount_out is not null and currency_out_price_usd is not null then
+      -1.0 * (amount_out - coalesce(fee_amt, 0)) * currency_out_price_usd
     when currency_in in ('USDT', 'USD') then amount_in
     when currency_out in ('USDT', 'USD') then -1.0 * amount_out
     when amount_in is not null and currency_in_price_usd is not null then amount_in * currency_in_price_usd
@@ -476,12 +460,14 @@ select
   coalesce(currency_in_price_usd, currency_out_price_usd) as close_rate_usd
 from
   {{ ref('mart_load_telegram_general_transactions') }}
+where
+  transaction_type not in ('Exchange', 'Transfer to Earn', 'Transfer from Earn')
 
 union all
 
 -- Telegram General Transactions - Fee
 select
-  transacted_at as transacted_at,
+  transacted_at_utc + interval '3 hours' as transacted_at,
   'Telegram' as platform_name,
   'Fee' as category,
   'Transaction fee' as description,
@@ -500,41 +486,174 @@ where
 
 union all
 
--- Telegram P2P Trades - Fiat side
+-- Telegram Exchanges - Out side (what you gave up)
 select
-  completed_at as transacted_at,
+  transacted_at_utc + interval '3 hours' as transacted_at,
   'Telegram' as platform_name,
-  'P2P Trade' as category,
-  ad_type || ' as ' || role || ' - ' || cast(net_crypto_amt as varchar) || ' ' || crypto_currency || ' for ' || cast(fiat_amt as varchar) || ' ' || fiat_currency || ' - Fiat' as description,
-  case
-    when upper(ad_type) = 'BUY' then -1.0 * fiat_amt  -- When buying crypto, you pay fiat
-    when upper(ad_type) in ('SELL', 'SALE') then fiat_amt  -- When selling crypto, you receive fiat
-  end as amount_currency,
-  fiat_currency as currency,
+  'Exchange' as category,
+  'Exchange ' || cast(amount_out as varchar) || ' ' || currency_out ||
+    ' to ' || cast(amount_in as varchar) || ' ' || currency_in as description,
+  -1.0 * amount_out as amount_currency,
+  currency_out as currency,
   null::decimal(18,2) as amount_rub,
   case
-    when fiat_currency = 'USD' and upper(ad_type) = 'BUY' then -1.0 * fiat_amt
-    when fiat_currency = 'USD' and upper(ad_type) in ('SELL', 'SALE') then fiat_amt
+    when currency_out in ('USDT', 'USD') then -1.0 * amount_out
+    when amount_out is not null and currency_out_price_usd is not null then
+      -1.0 * amount_out * currency_out_price_usd
     else null
   end as amount_usd,
   null::decimal(18,6) as executed_rate_rub,
-  price as executed_rate_usd,
+  ex_rate_value as executed_rate_usd,
   null::decimal(18,6) as close_rate_rub,
-  null::decimal(18,6) as close_rate_usd
+  currency_out_price_usd as close_rate_usd
 from
-  {{ ref('mart_load_telegram_p2p_trades') }}
+  {{ ref('mart_load_telegram_general_transactions') }}
+where
+  transaction_type = 'Exchange'
 
 union all
 
--- Telegram P2P Trades - Crypto side
+-- Telegram Exchanges - In side (what you received)
 select
-  completed_at as transacted_at,
+  transacted_at_utc + interval '3 hours' as transacted_at,
+  'Telegram' as platform_name,
+  'Exchange' as category,
+  'Exchange ' || cast(amount_out as varchar) || ' ' || currency_out ||
+    ' to ' || cast(amount_in as varchar) || ' ' || currency_in as description,
+  amount_in as amount_currency,
+  currency_in as currency,
+  null::decimal(18,2) as amount_rub,
+  case
+    when currency_in in ('USDT', 'USD') then amount_in
+    when amount_in is not null and currency_in_price_usd is not null then
+      amount_in * currency_in_price_usd
+    else null
+  end as amount_usd,
+  null::decimal(18,6) as executed_rate_rub,
+  ex_rate_value as executed_rate_usd,
+  null::decimal(18,6) as close_rate_rub,
+  currency_in_price_usd as close_rate_usd
+from
+  {{ ref('mart_load_telegram_general_transactions') }}
+where
+  transaction_type = 'Exchange'
+
+union all
+
+-- Telegram Transfer to Earn - Wallet side (outflow)
+select
+  transacted_at_utc + interval '3 hours' as transacted_at,
+  'Telegram' as platform_name,
+  'Transfer Out' as category,
+  'Transfer to Earn - ' || cast(amount_out as varchar) || ' ' || currency_out as description,
+  -1.0 * amount_out as amount_currency,
+  currency_out as currency,
+  null::decimal(18,2) as amount_rub,
+  case
+    when currency_out in ('USDT', 'USD') then -1.0 * amount_out
+    when amount_out is not null and currency_out_price_usd is not null then
+      -1.0 * amount_out * currency_out_price_usd
+    else null
+  end as amount_usd,
+  null::decimal(18,6) as executed_rate_rub,
+  null::decimal(18,6) as executed_rate_usd,
+  null::decimal(18,6) as close_rate_rub,
+  currency_out_price_usd as close_rate_usd
+from
+  {{ ref('mart_load_telegram_general_transactions') }}
+where
+  transaction_type = 'Transfer to Earn'
+
+union all
+
+-- Telegram Transfer to Earn - Earn side (topup)
+select
+  transacted_at_utc + interval '3 hours' as transacted_at,
+  'Telegram' as platform_name,
+  'Earn Topup' as category,
+  'Transfer to Earn - ' || cast(amount_out as varchar) || ' ' || currency_out as description,
+  amount_out as amount_currency,
+  currency_out as currency,
+  null::decimal(18,2) as amount_rub,
+  case
+    when currency_out in ('USDT', 'USD') then amount_out
+    when amount_out is not null and currency_out_price_usd is not null then
+      amount_out * currency_out_price_usd
+    else null
+  end as amount_usd,
+  null::decimal(18,6) as executed_rate_rub,
+  null::decimal(18,6) as executed_rate_usd,
+  null::decimal(18,6) as close_rate_rub,
+  currency_out_price_usd as close_rate_usd
+from
+  {{ ref('mart_load_telegram_general_transactions') }}
+where
+  transaction_type = 'Transfer to Earn'
+
+union all
+
+-- Telegram Transfer from Earn - Earn side (withdrawal)
+select
+  transacted_at_utc + interval '3 hours' as transacted_at,
+  'Telegram' as platform_name,
+  'Earn Withdrawal' as category,
+  'Transfer from Earn - ' || cast(amount_in as varchar) || ' ' || currency_in as description,
+  -1.0 * amount_in as amount_currency,
+  currency_in as currency,
+  null::decimal(18,2) as amount_rub,
+  case
+    when currency_in in ('USDT', 'USD') then -1.0 * amount_in
+    when amount_in is not null and currency_in_price_usd is not null then
+      -1.0 * amount_in * currency_in_price_usd
+    else null
+  end as amount_usd,
+  null::decimal(18,6) as executed_rate_rub,
+  null::decimal(18,6) as executed_rate_usd,
+  null::decimal(18,6) as close_rate_rub,
+  currency_in_price_usd as close_rate_usd
+from
+  {{ ref('mart_load_telegram_general_transactions') }}
+where
+  transaction_type = 'Transfer from Earn'
+
+union all
+
+-- Telegram Transfer from Earn - Wallet side (inflow)
+select
+  transacted_at_utc + interval '3 hours' as transacted_at,
+  'Telegram' as platform_name,
+  'Transfer In' as category,
+  'Transfer from Earn - ' || cast(amount_in as varchar) || ' ' || currency_in as description,
+  amount_in as amount_currency,
+  currency_in as currency,
+  null::decimal(18,2) as amount_rub,
+  case
+    when currency_in in ('USDT', 'USD') then amount_in
+    when amount_in is not null and currency_in_price_usd is not null then
+      amount_in * currency_in_price_usd
+    else null
+  end as amount_usd,
+  null::decimal(18,6) as executed_rate_rub,
+  null::decimal(18,6) as executed_rate_usd,
+  null::decimal(18,6) as close_rate_rub,
+  currency_in_price_usd as close_rate_usd
+from
+  {{ ref('mart_load_telegram_general_transactions') }}
+where
+  transaction_type = 'Transfer from Earn'
+
+union all
+
+-- Telegram P2P Trades - Consolidated
+select
+  completed_at_utc + interval '3 hours' as transacted_at,
   'Telegram' as platform_name,
   'P2P Trade' as category,
-  ad_type || ' as ' || role || ' - ' || cast(net_crypto_amt as varchar) || ' ' || crypto_currency || ' for ' || cast(fiat_amt as varchar) || ' ' || fiat_currency || ' - Crypto' as description,
+  ad_type || ' as ' || role || ' - ' || cast(net_crypto_amt as varchar) || ' ' ||
+    crypto_currency || ' for ' || cast(fiat_amt as varchar) || ' ' || fiat_currency as description,
   case
-    when upper(ad_type) = 'BUY' then net_crypto_amt  -- When buying crypto, you receive crypto
-    when upper(ad_type) in ('SELL', 'SALE') then -1.0 * net_crypto_amt  -- When selling crypto, you give up crypto
+    when upper(role) = 'BUYER' then net_crypto_amt
+    when upper(role) = 'SELLER' then -1.0 * net_crypto_amt
   end as amount_currency,
   crypto_currency as currency,
   null::decimal(18,2) as amount_rub,
@@ -550,7 +669,7 @@ union all
 
 -- Telegram P2P Trades - Fee
 select
-  completed_at as transacted_at,
+  completed_at_utc + interval '3 hours' as transacted_at,
   'Telegram' as platform_name,
   'Fee' as category,
   'P2P trading fee' as description,
@@ -571,7 +690,7 @@ union all
 
 -- Binance Fiat Orders
 select
-  executed_at as transacted_at,
+  executed_at_utc + interval '3 hours' as transacted_at,
   'Binance' as platform_name,
   'Fiat ' || transaction_type as category,
   transaction_type || ' ' || cast(indicated_amt as varchar) || ' via ' || method as description,
@@ -590,7 +709,7 @@ union all
 
 -- Binance Fiat Orders - Fee
 select
-  executed_at as transacted_at,
+  executed_at_utc + interval '3 hours' as transacted_at,
   'Binance' as platform_name,
   'Fee' as category,
   'Fiat ' || transaction_type || ' fee via ' || method as description,
@@ -611,7 +730,7 @@ union all
 
 -- Bybit Convert Trades - From (what you gave up)
 select
-  created_at as transacted_at,
+  created_at_utc + interval '3 hours' as transacted_at,
   'Bybit' as platform_name,
   'Convert' as category,
   'Convert ' || cast(from_amt as varchar) || ' ' || from_coin || ' to ' || cast(to_amt as varchar) || ' ' || to_coin || ' - From' as description,
@@ -634,7 +753,7 @@ union all
 
 -- Bybit Convert Trades - To (what you received)
 select
-  created_at as transacted_at,
+  created_at_utc + interval '3 hours' as transacted_at,
   'Bybit' as platform_name,
   'Convert' as category,
   'Convert ' || cast(from_amt as varchar) || ' ' || from_coin || ' to ' || cast(to_amt as varchar) || ' ' || to_coin || ' - To' as description,
@@ -657,7 +776,7 @@ union all
 
 -- Binance Fiat Payments - Fiat side
 select
-  executed_at as transacted_at,
+  executed_at_utc + interval '3 hours' as transacted_at,
   'Binance' as platform_name,
   'Fiat Payment' as category,
   transaction_type || ' ' || cast(obtain_amt as varchar) || ' ' || crypto_currency || ' for ' || cast(source_amt as varchar) || ' ' || fiat_currency || ' via ' || payment_method || ' - Fiat' as description,
@@ -683,7 +802,7 @@ union all
 
 -- Binance Fiat Payments - Crypto side
 select
-  executed_at as transacted_at,
+  executed_at_utc + interval '3 hours' as transacted_at,
   'Binance' as platform_name,
   'Fiat Payment' as category,
   transaction_type || ' ' || cast(obtain_amt as varchar) || ' ' || crypto_currency || ' for ' || cast(source_amt as varchar) || ' ' || fiat_currency || ' via ' || payment_method || ' - Crypto' as description,
@@ -705,7 +824,7 @@ union all
 
 -- Binance Fiat Payments - Fee
 select
-  executed_at as transacted_at,
+  executed_at_utc + interval '3 hours' as transacted_at,
   'Binance' as platform_name,
   'Fee' as category,
   'Fiat payment fee via ' || payment_method as description,

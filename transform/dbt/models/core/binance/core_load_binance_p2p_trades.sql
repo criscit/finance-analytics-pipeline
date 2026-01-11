@@ -13,7 +13,7 @@ select
     )
   ) as p2p_trade_bk,
   adv_no,
-  create_time_ms,
+  to_timestamp(create_time_ms / 1000.0) as created_at_utc,
   additional_kyc_verify,
   amount,
   commission,

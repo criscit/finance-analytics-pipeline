@@ -17,8 +17,7 @@ select
   fee_amount,
   fee_currency,
   type,
-  executed_at at time zone 'Europe/Moscow' as executed_at,
-  date(executed_at at time zone 'Europe/Moscow') as executed_dt,
+  executed_at_utc,
   current_timestamp at time zone 'UTC' as processed_at
 from
   {{ ref('core_load_bybit_p2p_trades') }}

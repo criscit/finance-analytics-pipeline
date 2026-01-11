@@ -22,8 +22,8 @@ select
   crypto_currency,
   fiat_currency,
   payment_method,
-  created_at,
-  completed_at,
+  created_at_utc,
+  completed_at_utc,
   current_timestamp at time zone 'UTC' as processed_at
 from
   {{ ref('stg_load_telegram_p2p_trades') }}

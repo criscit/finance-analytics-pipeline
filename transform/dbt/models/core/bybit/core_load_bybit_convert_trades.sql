@@ -12,7 +12,7 @@ select
       exchange_tx_id
     )
   ) as convert_trade_bk,
-  created_time_ms,
+  to_timestamp(created_time_ms / 1000.0) as created_at_utc,
   exchange_rate,
   from_amt,
   from_coin,

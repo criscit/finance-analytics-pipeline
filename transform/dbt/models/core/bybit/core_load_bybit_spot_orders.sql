@@ -29,7 +29,7 @@ select
   order_qty,
   trade_iv,
   underlying_price,
-  exec_time_ms,
+  to_timestamp(exec_time_ms / 1000.0) as executed_at_utc,
   exec_type,
   fee_currency,
   is_maker,

@@ -12,8 +12,7 @@ select
       order_no
     )
   ) as fiat_order_bk,
-  create_time_ms,
-  update_time_ms,
+  to_timestamp(update_time_ms / 1000.0) as executed_at_utc,
   amount,
   indicated_amt,
   total_fee,

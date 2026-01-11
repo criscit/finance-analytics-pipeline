@@ -21,12 +21,9 @@ models:
     data_tests:
     - not_null
     - unique
-  - name: executed_at
-    description: 'Fiat payment execution timestamp (Europe/Moscow timezone)'
+  - name: executed_at_utc
+    description: 'Fiat payment execution timestamp (UTC)'
     data_type: timestamp
-  - name: executed_dt
-    description: 'Fiat payment execution date (Europe/Moscow timezone)'
-    data_type: date
   - name: obtain_amt
     description: 'Amount of cryptocurrency obtained'
     data_type: double

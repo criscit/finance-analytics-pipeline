@@ -10,7 +10,6 @@ select
   transaction_amt,
   transaction_currency_cd,
   transacted_at_utc,
-  date(transacted_at_utc at time zone 'Europe/Moscow') as transaction_dt,
   total_rewards_amt,
   current_timestamp at time zone 'UTC' as processed_at
 from

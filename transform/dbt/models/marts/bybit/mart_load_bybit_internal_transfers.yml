@@ -36,12 +36,9 @@ models:
   - name: price_usd
     description: 'USD price of the coin at transfer time'
     data_type: double
-  - name: success_at
-    description: 'Transfer success timestamp (Europe/Moscow timezone)'
+  - name: executed_at_utc
+    description: 'Transfer execution timestamp (UTC)'
     data_type: timestamp
-  - name: success_dt
-    description: 'Transfer success date (Europe/Moscow timezone)'
-    data_type: date
   - name: processed_at
     description: 'Ingestion timestamp for incremental processing (UTC)'
     data_type: timestamp

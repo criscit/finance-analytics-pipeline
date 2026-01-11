@@ -21,12 +21,9 @@ models:
     data_tests:
     - not_null
     - unique
-  - name: executed_at
-    description: 'Fiat order execution timestamp (Europe/Moscow timezone)'
+  - name: executed_at_utc
+    description: 'Fiat order execution timestamp (UTC)'
     data_type: timestamp
-  - name: executed_dt
-    description: 'Fiat order execution date (Europe/Moscow timezone)'
-    data_type: date
   - name: amount
     description: 'Order amount in fiat currency'
     data_type: varchar(64)

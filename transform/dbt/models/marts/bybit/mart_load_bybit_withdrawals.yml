@@ -36,12 +36,9 @@ models:
   - name: price_usd
     description: 'USD price of the coin at withdrawal time'
     data_type: double
-  - name: executed_at
-    description: 'Withdrawal execution timestamp (Europe/Moscow timezone)'
+  - name: executed_at_utc
+    description: 'Withdrawal execution timestamp (UTC)'
     data_type: timestamp
-  - name: executed_dt
-    description: 'Withdrawal execution date (Europe/Moscow timezone)'
-    data_type: date
   - name: withdraw_type
     description: 'Type of withdrawal (on-chain, internal, etc.)'
     data_type: varchar(64)

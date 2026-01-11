@@ -10,8 +10,7 @@ select
   price_usd,
   from_account_type,
   to_account_type,
-  (to_timestamp(timestamp_ms / 1000.0) at time zone 'Europe/Moscow') as success_at,
-  date(to_timestamp(timestamp_ms / 1000.0) at time zone 'Europe/Moscow') as success_dt,
+  executed_at_utc,
   current_timestamp at time zone 'UTC' as processed_at
 from
   {{ ref('core_load_bybit_internal_transfers') }}

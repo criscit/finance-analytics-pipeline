@@ -58,8 +58,8 @@ models:
   - name: counterparty
     description: 'Counterparty involved in the transaction'
     data_type: varchar(64)
-  - name: transacted_at
-    description: 'Transaction timestamp (Europe/Moscow timezone)'
+  - name: transacted_at_utc
+    description: 'Transaction timestamp (UTC timezone)'
     data_type: timestamp
   - name: transacted_dt
     description: 'Transaction date (Europe/Moscow timezone)'

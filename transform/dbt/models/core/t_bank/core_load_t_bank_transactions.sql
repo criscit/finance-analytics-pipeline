@@ -9,7 +9,7 @@ select
     concat_ws(
       '|',
       't_bank',
-      transacted_at_utc,
+      transacted_at,
       transaction_amt,
       coalesce(card_last4, 'no_card_last4')
     )
@@ -20,7 +20,7 @@ select
   description,
   transaction_amt,
   transaction_currency_cd,
-  transacted_at_utc,
+  transacted_at - interval '3 hours' as transacted_at_utc,
   total_rewards_amt,
   current_timestamp at time zone 'UTC' AS processed_at
 from

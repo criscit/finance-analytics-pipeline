@@ -21,12 +21,9 @@ models:
     data_tests:
     - not_null
     - unique
-  - name: created_at
-    description: 'P2P trade creation timestamp (Europe/Moscow timezone)'
+  - name: created_at_utc
+    description: 'P2P trade creation timestamp (UTC)'
     data_type: timestamp
-  - name: created_dt
-    description: 'P2P trade creation date (Europe/Moscow timezone)'
-    data_type: date
   - name: amount
     description: 'Total amount transacted, as reported by Binance (denominated in the asset units)'
     data_type: varchar(64)

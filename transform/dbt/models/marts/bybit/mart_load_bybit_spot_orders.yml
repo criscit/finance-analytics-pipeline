@@ -48,12 +48,9 @@ models:
   - name: order_qty
     description: 'Original order quantity requested'
     data_type: double
-  - name: executed_at
-    description: 'Order execution timestamp (Europe/Moscow timezone)'
+  - name: executed_at_utc
+    description: 'Order execution timestamp (UTC)'
     data_type: timestamp
-  - name: executed_dt
-    description: 'Order execution date (Europe/Moscow timezone)'
-    data_type: date
   - name: exec_type
     description: 'Order execution type'
     data_type: varchar(64)

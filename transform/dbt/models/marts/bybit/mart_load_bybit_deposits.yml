@@ -33,12 +33,9 @@ models:
   - name: coin
     description: 'Cryptocurrency symbol deposited'
     data_type: varchar(64)
-  - name: success_at
-    description: 'Deposit success timestamp (Europe/Moscow timezone)'
+  - name: success_at_utc
+    description: 'Deposit success timestamp (UTC)'
     data_type: timestamp
-  - name: success_dt
-    description: 'Deposit success date (Europe/Moscow timezone)'
-    data_type: date
   - name: processed_at
     description: 'Ingestion timestamp for incremental processing (UTC)'
     data_type: timestamp

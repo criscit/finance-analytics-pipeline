@@ -25,7 +25,7 @@ select
   regexp_extract(fee, '[A-Z]+$', 0) as fee_currency,
   type,
   status,
-  executed_at,
+  executed_at - interval '3 hours' as executed_at_utc,
   current_timestamp at time zone 'UTC' as processed_at
 from
   {{ ref('stg_load_bybit_p2p_trades') }}

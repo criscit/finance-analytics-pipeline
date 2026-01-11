@@ -13,7 +13,7 @@ select
     )
   ) as convert_trade_bk,
   quote_id,
-  create_time_ms,
+  to_timestamp(create_time_ms / 1000.0) as created_at_utc,
   from_amt,
   from_asset,
   from_price_usd,

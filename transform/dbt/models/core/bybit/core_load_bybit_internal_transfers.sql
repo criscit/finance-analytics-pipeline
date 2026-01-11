@@ -18,7 +18,7 @@ select
   from_account_type,
   to_account_type,
   status,
-  timestamp_ms,
+  to_timestamp(timestamp_ms / 1000.0) as executed_at_utc,
 
   current_timestamp at time zone 'UTC' as processed_at
 from

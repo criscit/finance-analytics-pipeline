@@ -33,9 +33,9 @@ select
   counterparty,
   case
     when transaction_date is not null and nullif(transaction_time, '') is not null
-    then transaction_date + cast(transaction_time as time)
+    then transaction_date + cast(transaction_time as time) - interval '3 hours'
     else null
-  end as transacted_at,
+  end as transacted_at_utc,
   current_timestamp at time zone 'UTC' as processed_at
 from
   {{ ref('stg_load_telegram_general_transactions') }}

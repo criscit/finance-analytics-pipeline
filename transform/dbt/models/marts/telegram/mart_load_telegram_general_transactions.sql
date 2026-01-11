@@ -18,8 +18,7 @@ select
   fee_amt,
   fee_currency,
   counterparty,
-  transacted_at,
-  date(transacted_at at time zone 'Europe/Moscow') as transacted_dt,
+  transacted_at_utc,
   current_timestamp at time zone 'UTC' as processed_at
 from
   {{ ref('core_load_telegram_general_transactions') }}

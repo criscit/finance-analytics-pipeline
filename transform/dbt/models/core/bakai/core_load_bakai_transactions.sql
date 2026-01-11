@@ -9,12 +9,12 @@ select
     concat_ws(
       '|',
       'bakai',
-      transacted_at_utc,
+      transacted_at,
       coalesce(doc_no, 'no_doc_no')
     )
   ) as transaction_bk,
   doc_no,
-  transacted_at_utc,
+  transacted_at - interval '3 hours' as transacted_at_utc,
   correspondent_account,
   debit_amt,
   credit_amt,

@@ -54,7 +54,7 @@ models:
               severity: warn
           - not_null
 
-      - name: transacted_at_utc
+      - name: transacted_at
         description: timestamp of the transaction with UTC timezone.
         data_type: timestamp
         data_tests:

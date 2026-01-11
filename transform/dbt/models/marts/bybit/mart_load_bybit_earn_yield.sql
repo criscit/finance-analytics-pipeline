@@ -8,7 +8,6 @@ select
   amount,
   coin,
   created_at_utc,
-  date(created_at_utc at time zone 'Europe/Moscow') as created_dt,
   effectiveStakingAmount,
   price_usd,
   productId,

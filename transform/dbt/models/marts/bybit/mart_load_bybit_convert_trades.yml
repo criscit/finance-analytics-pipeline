@@ -21,12 +21,9 @@ models:
     data_tests:
     - not_null
     - unique
-  - name: created_at
-    description: 'Convert trade creation timestamp (Europe/Moscow timezone)'
+  - name: created_at_utc
+    description: 'Convert trade creation timestamp (UTC)'
     data_type: timestamp
-  - name: created_dt
-    description: 'Convert trade creation date (Europe/Moscow timezone)'
-    data_type: date
   - name: exchange_rate
     description: 'Exchange rate used for conversion'
     data_type: double

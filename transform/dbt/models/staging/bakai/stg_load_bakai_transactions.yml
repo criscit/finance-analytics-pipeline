@@ -19,7 +19,7 @@ models:
         description: Document number from bank export.
         data_type: varchar(32)
 
-      - name: transacted_at_utc
+      - name: transacted_at
         description: Timestamp of the transaction.
         data_type: timestamp
         data_tests:

@@ -78,7 +78,7 @@ models:
         description: Raw transaction data from Telegram export.
         data_type: varchar(512)
 
-      - name: transacted_at
+      - name: transacted_at_utc
         description: Timestamp when the transaction occurred.
         data_type: timestamp
         data_tests:

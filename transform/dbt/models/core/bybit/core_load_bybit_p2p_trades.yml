@@ -75,7 +75,7 @@ models:
         description: Status of the P2P trade.
         data_type: varchar(16)
 
-      - name: executed_at
+      - name: executed_at_utc
         description: Timestamp when the trade was executed.
         data_type: timestamp
 

@@ -36,12 +36,9 @@ models:
   - name: type
     description: 'Trade type (buy or sell)'
     data_type: varchar(64)
-  - name: executed_at
-    description: 'Trade execution timestamp in Europe/Moscow timezone'
+  - name: executed_at_utc
+    description: 'Trade execution timestamp (UTC)'
     data_type: timestamp
-  - name: executed_dt
-    description: 'Trade execution date (Europe/Moscow timezone)'
-    data_type: date
   - name: processed_at
     description: 'Ingestion timestamp for incremental processing (UTC)'
     data_type: timestamp

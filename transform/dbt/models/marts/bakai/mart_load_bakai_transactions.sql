@@ -10,7 +10,6 @@ with source_data as (
     -1.0 * debit_amt as transaction_amt,
     exchange_rate,
     transacted_at_utc,
-    date(transacted_at_utc at time zone 'Europe/Moscow') as transaction_dt,
     current_timestamp at time zone 'UTC' as processed_at
   from
     {{ ref('core_load_bakai_transactions') }}
@@ -25,7 +24,6 @@ with source_data as (
     credit_amt as transaction_amt,
     exchange_rate,
     transacted_at_utc,
-    date(transacted_at_utc at time zone 'Europe/Moscow') as transaction_dt,
     current_timestamp at time zone 'UTC' as processed_at
   from
     {{ ref('core_load_bakai_transactions') }}

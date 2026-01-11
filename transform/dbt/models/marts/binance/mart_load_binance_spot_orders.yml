@@ -2,7 +2,7 @@ version: 2
 models:
 - name: mart_load_binance_spot_orders
   description: 'Mart table for Binance spot order executions (filled and partially
-    filled only). Contains order execution details with Moscow timezone timestamps.
+    filled only). Contains order execution details with UTC timestamps.
 
     '
   tags:
@@ -63,18 +63,12 @@ models:
   - name: trading_price_usd
     description: 'Trading price in USD'
     data_type: double
-  - name: order_placed_at
-    description: 'Order placement timestamp in Europe/Moscow timezone'
+  - name: order_placed_at_utc
+    description: 'Order placement timestamp (UTC)'
     data_type: timestamp
-  - name: order_placed_dt
-    description: 'Order placement date (Europe/Moscow timezone)'
-    data_type: date
-  - name: executed_at
-    description: 'Order execution timestamp in Europe/Moscow timezone'
+  - name: executed_at_utc
+    description: 'Order execution timestamp (UTC)'
     data_type: timestamp
-  - name: executed_dt
-    description: 'Order execution date (Europe/Moscow timezone)'
-    data_type: date
   - name: processed_at
     description: 'Ingestion timestamp for incremental processing (UTC)'
     data_type: timestamp

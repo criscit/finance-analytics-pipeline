@@ -34,11 +34,8 @@ models:
     description: 'Transaction currency code'
     data_type: varchar(64)
   - name: transacted_at_utc
-    description: 'Transaction timestamp in UTC'
-    data_type: varchar(64)
-  - name: transaction_dt
-    description: 'Transaction date'
-    data_type: varchar(64)
+    description: 'Transaction timestamp (UTC)'
+    data_type: timestamp
   - name: total_rewards_amt
     description: 'Total cashback or rewards amount earned from transaction'
     data_type: double
