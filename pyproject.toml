@@ -57,10 +57,11 @@ line-length = 100
 
 [tool.ruff.lint]
 # Core errors + imports + modernizations + bugbear + simplicities + ruff extras
-select = ["E","F","I","UP","B","SIM","C4","RET","PL","RUF","G","PTH"]
+select = ["E","F","I","UP","B","SIM","C4","RET","PL","RUF","G","PTH","T20"]
 ignore = [
   "E501", # Let Black handle line length
   "RUF001", # ignore ambiguous character warnings
+  "PLE1205", # loguru uses {}-style formatting with args passed separately, not %-style
 ]
 
 [tool.ruff.lint.per-file-ignores]
