@@ -31,33 +31,53 @@ Usage::
 from __future__ import annotations
 
 import argparse
+import base64
 import contextlib
 import csv
 import os
 import re
+import sys
 import time
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import parse_qs, unquote, urlencode, urlparse
 
-import duckdb
 from dotenv import load_dotenv
 from playwright.sync_api import Download, Locator, Page, sync_playwright
+
+from src.logging_config import get_logger
+from src.utils import get_max_transaction_datetimes_by_platform
+
+logger = get_logger("fetch_sources")
 
 # --------------------------------------------------------------------------------------
 # Paths / constants
 # --------------------------------------------------------------------------------------
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+# Canonical browser profile for fetch automation. Do not create alternate repo-local profiles
+# like data/profiles or data/chrome_*; T-Bank login state is expected to live here.
 DEFAULT_PROFILE_DIR = PROJECT_ROOT / "data" / "browser_profile"
-DEFAULT_WAREHOUSE = PROJECT_ROOT / "data" / "warehouse" / "analytics.duckdb"
-
-# View the marts unify into; used to derive the per-source incremental cutoff.
-EXPORT_TABLE = "prod_imart.view_transactions"
+CHROME_CHANNEL = "chrome"
+CHROME_ARGS: tuple[str, ...] = (
+    "--no-first-run",
+    "--no-default-browser-check",
+    "--disable-sync",
+    "--disable-features=ChromeWhatsNewUI,SigninIntercept,IdentityInDiceWebSigninInterception",
+)
 
 LOGIN_POLL_SECONDS = 3
 PAGE_TIMEOUT_MS = 60_000
 ACTION_TIMEOUT_MS = 20_000
+T_BANK_EXPORT_API = (
+    "https://www.tbank.ru/mybank/api/operations/timeline/public/legacy/v1/export_operations"
+)
+T_BANK_EXPORT_FORMAT = "csv"
+T_BANK_PLATFORM_NAME = "T Bank"
+# Path fragment of the authenticated operations XHR the SPA fires once loaded; it carries the
+# sessionid we reuse for the export call. We wait for it instead of reading resources once.
+T_BANK_TIMELINE_MARKER = "/operations/timeline/public/legacy/v1/"
 
 # Source entry URLs. Adjust here if a site changes its layout.
 # NOTE: T-Bank operations page expects you to choose a period, then click "Скачать" (CSV).
@@ -113,7 +133,7 @@ class SourceConfig:
     """Everything needed to fetch one source."""
 
     name: str
-    platform_name: str  # must match the platform label used in EXPORT_TABLE for the cutoff
+    platform_name: str  # must match the platform label used in Results/transactions.csv
     url: str
     out_subdir: tuple[str, ...]
     login_markers: tuple[str, ...]  # URL substrings that indicate a login/auth page
@@ -131,6 +151,15 @@ class FetchCtx:
     source: SourceConfig
     cutoff: datetime | None
     out_dir: Path
+
+
+@dataclass
+class RunConfig:
+    """Browser launch settings for one fetch run."""
+
+    headless: bool
+    profile_dir: Path
+    cdp: str | None
 
 
 # --------------------------------------------------------------------------------------
@@ -201,6 +230,45 @@ def _write_csv(path: Path, rows: list[dict[str, str]]) -> None:
         writer.writerows(rows)
 
 
+def _read_csv_rows(path: Path) -> list[list[str]]:
+    """Read rows from a CSV file, excluding its header."""
+    if not path.exists():
+        return []
+    with path.open(newline="", encoding="utf-8") as handle:
+        sample = handle.read(4096)
+        handle.seek(0)
+        try:
+            dialect = csv.Sniffer().sniff(sample, delimiters=",;\t")
+        except csv.Error:
+            dialect = csv.excel
+        reader = csv.reader(handle, dialect)
+        next(reader, None)
+        return list(reader)
+
+
+def _datetime_to_epoch_ms(value: datetime) -> int:
+    """Convert a timezone-aware or local timestamp to epoch milliseconds."""
+    return int(value.timestamp() * 1000)
+
+
+def _floor_datetime_to_day(value: datetime) -> datetime:
+    """Round a cutoff down to the start of its calendar day."""
+    return value.replace(hour=0, minute=0, second=0, microsecond=0)
+
+
+def _filename_from_content_disposition(value: str | None, fallback: str) -> str:
+    """Extract a safe filename from a Content-Disposition header."""
+    if not value:
+        return fallback
+    match = re.search(r"filename\*=UTF-8''([^;]+)", value, flags=re.IGNORECASE)
+    if match:
+        name = unquote(match.group(1))
+    else:
+        match = re.search(r'filename="?([^";]+)', value, flags=re.IGNORECASE)
+        name = match.group(1) if match else fallback
+    return name.replace("/", "-").replace("\\", "-").replace(":", "-")
+
+
 def _dump_discovery(page: Page, out_dir: Path, name: str) -> None:
     """Save the current page HTML + screenshot so selectors can be discovered later."""
     _ensure_dir(out_dir)
@@ -246,15 +314,113 @@ def fetch_export(ctx: FetchCtx) -> Path | None:
     download = _try_download(ctx.page, EXPORT_SELECTORS)
     if download is None:
         _dump_discovery(ctx.page, ctx.out_dir, ctx.source.name)
-        print(
-            f"  [{ctx.source.name}] No export control matched yet — saved a discovery dump "
-            f"in {ctx.out_dir} so the export selector can be confirmed."
+        logger.warning(
+            "[{}] No export control matched yet — saved a discovery dump in {} "
+            "so the export selector can be confirmed.",
+            ctx.source.name,
+            ctx.out_dir,
         )
         return None
     suggested = download.suggested_filename or f"{ctx.source.name}.csv"
     target = ctx.out_dir / f"{ctx.source.name}_{_stamp()}_{suggested}"
     _ensure_dir(ctx.out_dir)
     download.save_as(str(target))
+    return target
+
+
+def _t_bank_seed_url(page: Page, timeout_ms: int = PAGE_TIMEOUT_MS) -> str:
+    """Wait until the operations SPA has issued an authenticated timeline XHR; return its URL.
+
+    The operations page is a single-page app, so the request that carries the ``sessionid`` we
+    reuse for the export only appears after the framework boots and fetches the timeline. Polling
+    via ``wait_for_function`` avoids racing a not-yet-loaded page (the old code read resources once
+    and failed immediately).
+    """
+    handle = page.wait_for_function(
+        """(marker) => {
+            const match = performance.getEntriesByType('resource')
+                .map((entry) => entry.name)
+                .reverse()
+                .find((name) => name.includes(marker) && name.includes('sessionid='));
+            return match || null;
+        }""",
+        arg=T_BANK_TIMELINE_MARKER,
+        timeout=timeout_ms,
+    )
+    seed_url = handle.json_value()
+    if not seed_url:
+        raise RuntimeError("Could not find an authenticated T-Bank operations API request")
+    return str(seed_url)
+
+
+def _t_bank_export_params(page: Page, cutoff: datetime | None) -> dict[str, str]:
+    """Build authenticated T-Bank export params from page resources and the CSV cutoff."""
+    seed_url = _t_bank_seed_url(page)
+    qs = parse_qs(urlparse(seed_url).query)
+    session_ids = qs.get("sessionid")
+    if not session_ids:
+        raise RuntimeError("Could not recover T-Bank sessionid from page resources")
+
+    start_ms = _datetime_to_epoch_ms(_floor_datetime_to_day(cutoff)) if cutoff else 0
+    now_ms = _datetime_to_epoch_ms(datetime.now().astimezone())
+    return {
+        "appName": qs.get("appName", ["supreme"])[0],
+        "appVersion": qs.get("appVersion", ["0.0.1"])[0],
+        "origin": qs.get("origin", ["web,ib5,platform"])[0],
+        "sessionid": session_ids[0],
+        "start": str(start_ms),
+        "end": str(now_ms),
+        "format": T_BANK_EXPORT_FORMAT,
+    }
+
+
+def fetch_t_bank(ctx: FetchCtx) -> Path | None:
+    """T-Bank: call the authenticated export API directly and save the CSV response."""
+    ctx.page.goto(ctx.source.url, wait_until="domcontentloaded", timeout=PAGE_TIMEOUT_MS)
+    _settle(ctx.page)
+
+    params = _t_bank_export_params(ctx.page, ctx.cutoff)
+    export_url = f"{T_BANK_EXPORT_API}?{urlencode(params)}"
+    result = ctx.page.evaluate(
+        """async (url) => {
+            const response = await fetch(url, { credentials: 'include' });
+            const headers = {};
+            response.headers.forEach((value, key) => { headers[key] = value; });
+            const buffer = await response.arrayBuffer();
+            const bytes = new Uint8Array(buffer);
+            let binary = '';
+            const chunk = 0x8000;
+            for (let offset = 0; offset < bytes.length; offset += chunk) {
+                binary += String.fromCharCode(...bytes.subarray(offset, offset + chunk));
+            }
+            return {
+                ok: response.ok,
+                status: response.status,
+                statusText: response.statusText,
+                headers,
+                byteLength: bytes.length,
+                base64: btoa(binary),
+                preview: new TextDecoder('utf-8', { fatal: false }).decode(bytes.slice(0, 300)),
+            };
+        }""",
+        export_url,
+    )
+    if not result["ok"] or result["byteLength"] == 0:
+        _dump_discovery(ctx.page, ctx.out_dir, ctx.source.name)
+        raise RuntimeError(
+            "T-Bank export failed "
+            f"status={result['status']} {result['statusText']} preview={result['preview']!r}"
+        )
+
+    suggested = _filename_from_content_disposition(
+        result["headers"].get("content-disposition"),
+        f"t_bank_operations_{_stamp()}.csv",
+    )
+    if not suggested.lower().endswith(".csv"):
+        suggested = f"{suggested}.csv"
+    target = ctx.out_dir / suggested
+    _ensure_dir(ctx.out_dir)
+    target.write_bytes(base64.b64decode(result["base64"]))
     return target
 
 
@@ -269,7 +435,7 @@ def _wb_collect_sbp_debits(ctx: FetchCtx) -> list[dict[str, str]]:
     count = rows.count()
     if count == 0:
         _dump_discovery(page, ctx.out_dir, "wb_wallet")
-        print(f"  [wb] No wallet rows matched '{WB_WALLET_ROW}' — saved discovery dump.")
+        logger.warning("[wb] No wallet rows matched '{}' — saved discovery dump.", WB_WALLET_ROW)
         return []
 
     debits: list[dict[str, str]] = []
@@ -315,7 +481,7 @@ def _wb_receipt_names_by_amount(ctx: FetchCtx) -> dict[str, str]:
     count = receipts.count()
     if count == 0:
         _dump_discovery(page, ctx.out_dir, "wb_receipts")
-        print(f"  [wb] No receipts matched '{WB_RECEIPT_ROW}' — saved discovery dump.")
+        logger.warning("[wb] No receipts matched '{}' — saved discovery dump.", WB_RECEIPT_ROW)
         return {}
 
     mapping: dict[str, str] = {}
@@ -334,7 +500,7 @@ def fetch_wb(ctx: FetchCtx) -> Path | None:
     """Wildberries: SBP debits from the wallet, enriched with product names from receipts."""
     debits = _wb_collect_sbp_debits(ctx)
     if not debits:
-        print(f"  [wb] No new 'Оплата по СБП' debits after cutoff {ctx.cutoff}.")
+        logger.info("[wb] No new 'Оплата по СБП' debits after cutoff {}.", ctx.cutoff)
         return None
 
     names = _wb_receipt_names_by_amount(ctx)
@@ -358,7 +524,7 @@ def build_sources() -> dict[str, SourceConfig]:
             out_subdir=("Bank", "T-Bank", "transactions"),
             # observed: logged-out -> redirect to id.tbank.ru/auth/...
             login_markers=("id.tbank.ru", "id.tinkoff.ru", "/auth", "/login"),
-            fetch=fetch_export,
+            fetch=fetch_t_bank,
         ),
         "ozon": SourceConfig(
             name="ozon",
@@ -382,29 +548,18 @@ def build_sources() -> dict[str, SourceConfig]:
     }
 
 
-# --------------------------------------------------------------------------------------
-# Cutoff
-# --------------------------------------------------------------------------------------
-def get_cutoff(platform_name: str, warehouse: Path) -> datetime | None:
-    """Latest transaction timestamp already stored for a platform (None on first run / errors)."""
-    if not warehouse.exists():
+def get_results_csv_cutoff(platform_name: str, finance_root: Path) -> datetime | None:
+    """Latest transaction timestamp for a platform from Results/transactions.csv."""
+    results_path = finance_root / "Results" / "transactions.csv"
+    rows = _read_csv_rows(results_path)
+    if not rows:
         return None
-    try:
-        con = duckdb.connect(str(warehouse), read_only=True)
-    except (duckdb.Error, OSError):
-        return None
-    try:
-        row = con.execute(
-            f"select max(transacted_at) from {EXPORT_TABLE} where platform_name = ?",
-            [platform_name],
-        ).fetchone()
-    except duckdb.Error:
-        return None
-    finally:
-        con.close()
-    if row is None or row[0] is None:
-        return None
-    return row[0] if isinstance(row[0], datetime) else None
+    return get_max_transaction_datetimes_by_platform(rows).get(platform_name)
+
+
+def get_source_cutoff(platform_name: str, finance_root: Path) -> datetime | None:
+    """Resolve the incremental cutoff for a source."""
+    return get_results_csv_cutoff(platform_name, finance_root)
 
 
 # --------------------------------------------------------------------------------------
@@ -414,59 +569,63 @@ def ensure_logged_in(page: Page, source: SourceConfig) -> None:
     page.goto(source.url, wait_until="domcontentloaded", timeout=PAGE_TIMEOUT_MS)
     _settle(page)
     if is_logged_in(page, source):
-        print(f"  [{source.name}] Already logged in.")
+        logger.info("[{}] Already logged in.", source.name)
         return
-    print(f"\n>>> [{source.name}] Not logged in. Please log in in the browser window.")
-    print(">>> Waiting until login is detected... (Ctrl+C to abort)")
+    logger.warning(
+        "[{}] Not logged in. Please log in in the browser window; "
+        "waiting until login is detected (Ctrl+C to abort).",
+        source.name,
+    )
     while not is_logged_in(page, source):
         time.sleep(LOGIN_POLL_SECONDS)
-    print(f">>> [{source.name}] Login detected. Continuing.\n")
+    logger.success("[{}] Login detected. Continuing.", source.name)
 
 
 # --------------------------------------------------------------------------------------
 # Driver
 # --------------------------------------------------------------------------------------
-def resolve_to_parse_root() -> Path:
-    """Resolve the host 'To Parse' folder from FINANCE_DIR_HOST in .env."""
+def resolve_finance_root() -> Path:
+    """Resolve FINANCE_DIR_HOST from .env."""
     load_dotenv(PROJECT_ROOT / ".env")
     raw = os.environ.get("FINANCE_DIR_HOST", "data/finance")
     base = Path(raw)
     if not base.is_absolute():
         base = (PROJECT_ROOT / base).resolve()
-    return base / "To Parse"
+    return base
 
 
-def run(
-    selected: list[str],
-    *,
-    headless: bool,
-    profile_dir: Path,
-    warehouse: Path,
-    cdp: str | None,
-) -> int:
+def resolve_to_parse_root() -> Path:
+    """Resolve the host 'To Parse' folder from FINANCE_DIR_HOST in .env."""
+    return resolve_finance_root() / "To Parse"
+
+
+def run(selected: list[str], config: RunConfig) -> int:
     sources = build_sources()
-    to_parse_root = resolve_to_parse_root()
-    print(f"Target 'To Parse' root: {to_parse_root}")
+    finance_root = resolve_finance_root()
+    to_parse_root = finance_root / "To Parse"
+    logger.info("Target 'To Parse' root: {}", to_parse_root)
 
     failures = 0
     with sync_playwright() as playwright:
         launched_context = None
-        if cdp:
+        if config.cdp:
             # Attach to YOUR already-running Chrome (started with --remote-debugging-port).
             # Reuses its real cookies/sessions/extensions; we never close it.
-            print(f"Connecting to existing Chrome over CDP: {cdp}")
-            browser = playwright.chromium.connect_over_cdp(cdp)
+            logger.info("Connecting to existing Chrome over CDP: {}", config.cdp)
+            browser = playwright.chromium.connect_over_cdp(config.cdp)
             context = (
                 browser.contexts[0]
                 if browser.contexts
                 else browser.new_context(accept_downloads=True)
             )
         else:
-            _ensure_dir(profile_dir)
+            _ensure_dir(config.profile_dir)
             context = playwright.chromium.launch_persistent_context(
-                user_data_dir=str(profile_dir),
-                headless=headless,
+                user_data_dir=str(config.profile_dir),
+                channel=CHROME_CHANNEL,
+                headless=config.headless,
                 accept_downloads=True,
+                args=list(CHROME_ARGS),
             )
             launched_context = context
         context.set_default_timeout(PAGE_TIMEOUT_MS)
@@ -476,19 +635,19 @@ def run(
             source = sources[key]
             out_dir = to_parse_root.joinpath(*source.out_subdir)
             _ensure_dir(out_dir)
-            cutoff = get_cutoff(source.platform_name, warehouse)
-            print(f"\n=== {source.name} (cutoff: {cutoff or 'full history'}) ===")
+            cutoff = get_source_cutoff(source.platform_name, finance_root)
+            logger.info("=== {} (cutoff: {}) ===", source.name, cutoff or "full history")
             try:
                 ensure_logged_in(page, source)
                 result = source.fetch(FetchCtx(page, source, cutoff, out_dir))
-            except Exception as exc:  # keep going with the other sources
+            except Exception:  # keep going with the other sources
                 failures += 1
-                print(f"  [{source.name}] ERROR: {exc}")
+                logger.exception("[{}] ERROR", source.name)
                 continue
             if result is None:
-                print(f"  [{source.name}] No file produced.")
+                logger.warning("[{}] No file produced.", source.name)
             else:
-                print(f"  [{source.name}] Saved -> {result}")
+                logger.success("[{}] Saved -> {}", source.name, result)
 
         if launched_context is not None:
             launched_context.close()  # only close the browser we launched ourselves
@@ -507,8 +666,14 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         action="store_true",
         help="Run without a visible browser (cannot complete manual logins).",
     )
-    parser.add_argument("--profile-dir", default=str(DEFAULT_PROFILE_DIR))
-    parser.add_argument("--warehouse", default=str(DEFAULT_WAREHOUSE))
+    parser.add_argument(
+        "--profile-dir",
+        default=str(DEFAULT_PROFILE_DIR),
+        help=(
+            "Persistent real-Chrome profile for fetch automation "
+            f"(default: {DEFAULT_PROFILE_DIR}). Keep T-Bank login here."
+        ),
+    )
     parser.add_argument(
         "--cdp",
         default=os.environ.get("FETCH_CDP_URL", ""),
@@ -520,20 +685,29 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def _force_utf8_stdio() -> None:
+    """Print UTF-8 so Cyrillic output/filenames don't crash on a cp1252 Windows console."""
+    for stream in (sys.stdout, sys.stderr):
+        with contextlib.suppress(AttributeError):
+            stream.reconfigure(encoding="utf-8")  # type: ignore[union-attr]
+
+
 def main(argv: Sequence[str] | None = None) -> int:
+    _force_utf8_stdio()
     args = parse_args(argv)
     known = list(build_sources().keys())
     selected = known if args.sources == "all" else [s.strip() for s in args.sources.split(",")]
     unknown = [s for s in selected if s not in known]
     if unknown:
-        print(f"Unknown source(s): {unknown}. Known: {known}")
+        logger.error("Unknown source(s): {}. Known: {}", unknown, known)
         return 2
     return run(
         selected,
-        headless=args.headless,
-        profile_dir=Path(args.profile_dir),
-        warehouse=Path(args.warehouse),
-        cdp=args.cdp or None,
+        RunConfig(
+            headless=args.headless,
+            profile_dir=Path(args.profile_dir),
+            cdp=args.cdp or None,
+        ),
     )
 
 
