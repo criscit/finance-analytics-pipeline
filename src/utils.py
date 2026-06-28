@@ -63,12 +63,10 @@ def parse_date_string(date_str: str) -> datetime | None:
 
     date_str = date_str.strip()
 
-    # First try parsing as ISO format datetime (most common for new data)
-    # ISO 8601: 2025-01-15T10:30:00 or 2025-01-15T10:30:00+03:00
+    # First try parsing as ISO format datetime (most common for new data).
+    # Supports both "2025-01-15T10:30:00+03:00" and "2025-01-15 10:30:00+03:00".
     try:
-        # Try with timezone info
-        if "T" in date_str:
-            return datetime.fromisoformat(date_str)
+        return datetime.fromisoformat(date_str)
     except ValueError:
         pass
 
