@@ -31,10 +31,10 @@ fetch-install: ## Install Playwright + Chromium for the fetch script (host only)
 	poetry run playwright install chromium
 
 fetch-only: ## Fetch transactions into the "To Parse" folder (no pipeline run)
-	poetry run python scripts/fetch_sources.py
+	poetry run python -m scripts.fetch
 
 fetch: ## Fetch transactions, then run the build pipeline in the container
-	poetry run python scripts/fetch_sources.py
+	poetry run python -m scripts.fetch
 	docker compose exec -T etl-dagster-dbt-worker \
 		dagster job execute -m orchestration.repo -j build_finance_data_pipeline
 
