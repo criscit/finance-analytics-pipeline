@@ -35,6 +35,14 @@ mypy = "^1.18.2"
 pre-commit = "^4.3.0"
 types-PyYAML = "^6.0.12"
 
+# Host-only group for the Playwright transaction fetcher (scripts/fetch_sources.py).
+# Not installed in the Docker image; the fetch step runs on the host with a visible browser.
+[tool.poetry.group.fetch]
+optional = true
+
+[tool.poetry.group.fetch.dependencies]
+playwright = "^1.49.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

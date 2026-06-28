@@ -1,6 +1,6 @@
 # Finance Analytics Pipeline - Makefile
 
-.PHONY: help up down logs lint fmt test dbt-build docs demo clean install-hooks
+.PHONY: help up down logs lint fmt test dbt-build docs demo clean install-hooks fetch fetch-only fetch-install
 
 help: ## Show this help message
 	@echo "Finance Analytics Pipeline - Available Commands:"
@@ -24,6 +24,19 @@ down: ## Stop the pipeline services
 
 logs: ## Show logs from pipeline services
 	docker compose logs -f pipeline-worker
+
+# Transaction fetching (Playwright, host-side with a visible browser)
+fetch-install: ## Install Playwright + Chromium for the fetch script (host only)
+	poetry install --with fetch
+	poetry run playwright install chromium
+
+fetch-only: ## Fetch transactions into the "To Parse" folder (no pipeline run)
+	poetry run python scripts/fetch_sources.py
+
+fetch: ## Fetch transactions, then run the build pipeline in the container
+	poetry run python scripts/fetch_sources.py
+	docker compose exec -T etl-dagster-dbt-worker \
+		dagster job execute -m orchestration.repo -j build_finance_data_pipeline
 
 # Code quality
 lint: ## Run linting (ruff + black + mypy)
