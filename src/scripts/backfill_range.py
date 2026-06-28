@@ -13,7 +13,7 @@ from src.logging_config import logger
 
 def run_dagster_asset(asset_name: str, start_date: str, end_date: str) -> None:
     """Run a specific Dagster asset with date parameters"""
-    logger.info("Running asset %s for date range %s to %s", asset_name, start_date, end_date)
+    logger.info("Running asset {} for date range {} to {}", asset_name, start_date, end_date)
 
     # This would typically use Dagster's CLI or API
     # For now, we'll just print the command that would be run
@@ -26,7 +26,7 @@ def run_dagster_asset(asset_name: str, start_date: str, end_date: str) -> None:
         "--partition",
         f"{start_date}:{end_date}",
     ]
-    logger.info("Command: %s", " ".join(cmd))
+    logger.info("Command: {}", " ".join(cmd))
 
     # In a real implementation, you would run:
     # subprocess.run(cmd, check=True)
@@ -43,8 +43,8 @@ def backfill_range(start_date: str, end_date: str, assets: list[str] | None = No
             "export_to_google_sheets",
         ]
 
-    logger.info("Starting backfill from %s to %s", start_date, end_date)
-    logger.info("Assets to run: %s", ", ".join(assets))
+    logger.info("Starting backfill from {} to {}", start_date, end_date)
+    logger.info("Assets to run: {}", ", ".join(assets))
 
     # Parse dates
     start_dt = datetime.strptime(start_date, "%Y-%m-%d")
@@ -53,18 +53,18 @@ def backfill_range(start_date: str, end_date: str, assets: list[str] | None = No
     current_dt = start_dt
     while current_dt <= end_dt:
         date_str = current_dt.strftime("%Y-%m-%d")
-        logger.info("Processing date: %s", date_str)
+        logger.info("Processing date: {}", date_str)
 
         for asset in assets:
             try:
                 run_dagster_asset(asset, date_str, date_str)
             except Exception as e:
-                logger.error("Error running %s for %s: %s", asset, date_str, e)
+                logger.error("Error running {} for {}: {}", asset, date_str, e)
                 # Continue with other assets
 
         current_dt += timedelta(days=1)
 
-    logger.info("Backfill completed for %s to %s", start_date, end_date)
+    logger.info("Backfill completed for {} to {}", start_date, end_date)
 
 
 def main() -> None:
@@ -82,15 +82,15 @@ def main() -> None:
 
     if args.dry_run:
         logger.info("DRY RUN MODE - No actual execution")
-        logger.info("Would backfill from %s to %s", args.start_date, args.end_date)
+        logger.info("Would backfill from {} to {}", args.start_date, args.end_date)
         if args.assets:
-            logger.info("Would run assets: %s", ", ".join(args.assets))
+            logger.info("Would run assets: {}", ", ".join(args.assets))
         return
 
     try:
         backfill_range(args.start_date, args.end_date, args.assets)
     except Exception as e:
-        logger.error("Backfill failed: %s", e)
+        logger.error("Backfill failed: {}", e)
         sys.exit(1)
 
 

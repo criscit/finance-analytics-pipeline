@@ -57,7 +57,7 @@ class GoogleSheetsTableManager:
             return int(r["replies"][0]["addSheet"]["properties"]["sheetId"])
 
         except Exception as e:
-            logger.error("Error getting or creating sheet: %s", e)
+            logger.error("Error getting or creating sheet: {}", e)
             raise
 
     def find_table_by_name(self, spreadsheet_id: str, sheet_id: int, table_name: str) -> str | None:
@@ -92,7 +92,7 @@ class GoogleSheetsTableManager:
             return None
 
         except Exception as e:
-            logger.error("Error finding table: %s", e)
+            logger.error("Error finding table: {}", e)
             return None
 
     def create_table(self, spreadsheet_id: str, sheet_id: int, table_name: str) -> str:
@@ -243,7 +243,7 @@ class GoogleSheetsTableManager:
             return str(reply["replies"][1]["addTable"]["table"]["tableId"])
 
         except Exception as e:
-            logger.error("Error creating table structure: %s", e)
+            logger.error("Error creating table structure: {}", e)
             raise
 
     def _format_date_column(self, spreadsheet_id: str, sheet_id: int, updated_range: str) -> None:
@@ -304,9 +304,9 @@ class GoogleSheetsTableManager:
                     spreadsheetId=spreadsheet_id, body=format_request
                 ).execute()
 
-                logger.info("Applied date formatting to rows %d to %d", start_row, end_row)
+                logger.info("Applied date formatting to rows {} to {}", start_row, end_row)
         except Exception as e:
-            logger.warning("Could not apply date formatting: %s", e)
+            logger.warning("Could not apply date formatting: {}", e)
             # Don't raise - formatting is nice to have but not critical
 
     def read_existing_data(
@@ -330,7 +330,7 @@ class GoogleSheetsTableManager:
             # Check if table exists
             existing_table_id = self.find_table_by_name(spreadsheet_id, sheet_id, table_name)
             if not existing_table_id:
-                logger.info("Table '%s' does not exist, returning empty data", table_name)
+                logger.info("Table '{}' does not exist, returning empty data", table_name)
                 return []
 
             # Get the sheet name for reading data
@@ -363,7 +363,7 @@ class GoogleSheetsTableManager:
             return values[1:] if len(values) > 1 else []
 
         except Exception as e:
-            logger.error("Error reading existing data: %s", e)
+            logger.error("Error reading existing data: {}", e)
             return []
 
     def append_rows(
@@ -388,12 +388,12 @@ class GoogleSheetsTableManager:
             # Check if table already exists
             existing_table_id = self.find_table_by_name(spreadsheet_id, sheet_id, table_name)
             if existing_table_id:
-                logger.info("Table '%s' already exists with ID: %s", table_name, existing_table_id)
+                logger.info("Table '{}' already exists with ID: {}", table_name, existing_table_id)
                 table_id = existing_table_id
             else:
                 # Create the table
                 table_id = self.create_table(spreadsheet_id, sheet_id, table_name)
-                logger.info("Created new table '%s' with ID: %s", table_name, table_id)
+                logger.info("Created new table '{}' with ID: {}", table_name, table_id)
 
             # Get the sheet name for appending data
             spreadsheet = (
@@ -438,11 +438,11 @@ class GoogleSheetsTableManager:
                 # Format the date column (column A) with proper date format
                 self._format_date_column(spreadsheet_id, sheet_id, updated_range)
 
-            logger.info("Appended %d rows of data to table '%s'", len(sample_data), table_name)
+            logger.info("Appended {} rows of data to table '{}'", len(sample_data), table_name)
             return table_id
 
         except Exception as e:
-            logger.error("Error appending data: %s", e)
+            logger.error("Error appending data: {}", e)
             raise
 
     def delete_rows_by_source(
@@ -501,7 +501,7 @@ class GoogleSheetsTableManager:
                     rows_to_delete.append(i)
 
             if not rows_to_delete:
-                logger.info("No rows found with source='%s'", source_value)
+                logger.info("No rows found with source='{}'", source_value)
                 return 0
 
             # Delete rows in reverse order to maintain correct indices
@@ -526,11 +526,11 @@ class GoogleSheetsTableManager:
                     spreadsheetId=spreadsheet_id, body={"requests": delete_requests}
                 ).execute()
 
-            logger.info("Deleted %d rows with source='%s'", len(rows_to_delete), source_value)
+            logger.info("Deleted {} rows with source='{}'", len(rows_to_delete), source_value)
             return len(rows_to_delete)
 
         except Exception as e:
-            logger.error("Error deleting rows by source: %s", e)
+            logger.error("Error deleting rows by source: {}", e)
             raise
 
     def replace_rows_by_source(
@@ -556,7 +556,7 @@ class GoogleSheetsTableManager:
         deleted = self.delete_rows_by_source(
             spreadsheet_id, sheet_name, source_filter.column_index, source_filter.value
         )
-        logger.info("Deleted %d existing rows before inserting new data", deleted)
+        logger.info("Deleted {} existing rows before inserting new data", deleted)
 
         if not new_data:
             logger.info("No new data to insert")
@@ -586,5 +586,5 @@ class GoogleSheetsTableManager:
             body={"values": new_data},
         ).execute()
 
-        logger.info("Inserted %d new rows with source='%s'", len(new_data), source_filter.value)
+        logger.info("Inserted {} new rows with source='{}'", len(new_data), source_filter.value)
         return len(new_data)

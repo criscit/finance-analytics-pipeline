@@ -63,14 +63,14 @@ def _get_data_context() -> Any:
             f"Set GE_DIR or ensure the folder is mounted into the container."
         )
 
-    logger.info("Loading GE context from: %s", root)
-    logger.info("DUCKDB_URL: %s", os.getenv("DUCKDB_URL"))
+    logger.info("Loading GE context from: {}", root)
+    logger.info("DUCKDB_URL: {}", os.getenv("DUCKDB_URL"))
 
     context = gx.get_context(context_root_dir=str(root))  # type: ignore[attr-defined]
 
     # Log GX version and configuration
     with contextlib.suppress(Exception):
-        logger.info("great_expectations version: %s", gx.__version__)
+        logger.info("great_expectations version: {}", gx.__version__)
 
     return context
 
@@ -97,7 +97,7 @@ def _run_checkpoint(checkpoint_name: str, filter_tables: set[str] | None = None)
     Raises:
         RuntimeError: If checkpoint validation fails
     """
-    logger.info("Running checkpoint: %s", checkpoint_name)
+    logger.info("Running checkpoint: {}", checkpoint_name)
 
     # Run checkpoint using DataFrame-based approach
     result = run_checkpoint_with_dataframes(checkpoint_name, filter_tables=filter_tables)

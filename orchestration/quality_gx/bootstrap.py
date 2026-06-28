@@ -77,7 +77,7 @@ def _ensure_raw_table_exists(schema: str, table: str) -> bool:
         conn_readonly.close()
 
         if exists:
-            logger.info("✓ Table %s.%s exists", schema, table)
+            logger.info("✓ Table {}.{} exists", schema, table)
             return True
 
         logger.warning(
@@ -117,10 +117,10 @@ def _ensure_raw_table_exists(schema: str, table: str) -> bool:
         return True
 
     except FileNotFoundError as e:
-        logger.error("Cannot restore %s.%s: %s", schema, table, e)
+        logger.error("Cannot restore {}.{}: {}", schema, table, e)
         return False
     except Exception as e:
-        logger.error("Error checking/restoring table %s.%s: %s", schema, table, e)
+        logger.error("Error checking/restoring table {}.{}: {}", schema, table, e)
         return False
 
 
@@ -139,7 +139,7 @@ def _read_table_to_dataframe(table_name: str) -> pd.DataFrame:
     Raises:
         RuntimeError: If table doesn't exist and cannot be restored
     """
-    logger.info("Reading table '%s' from DuckDB...", table_name)
+    logger.info("Reading table '{}' from DuckDB...", table_name)
 
     # Parse schema and table name
     parts = table_name.split(".")
@@ -160,7 +160,7 @@ def _read_table_to_dataframe(table_name: str) -> pd.DataFrame:
         df = conn.execute(f"SELECT * FROM {table_name}").df()
         conn.close()
 
-        logger.info("✓ Read %s rows from '%s'", len(df), table_name)
+        logger.info("✓ Read {} rows from '{}'", len(df), table_name)
         return df
     except Exception as e:
         raise RuntimeError(f"Failed to read table '{table_name}' from DuckDB: {e}") from e
@@ -267,8 +267,8 @@ def run_checkpoint_with_dataframes(
         )
 
     checkpoint_config = all_configs[checkpoint_name]
-    logger.info("Running checkpoint: %s", checkpoint_name)
-    logger.info("Description: %s", checkpoint_config.description)
+    logger.info("Running checkpoint: {}", checkpoint_name)
+    logger.info("Description: {}", checkpoint_config.description)
 
     # Get GX context
     gx_dir = os.getenv("GE_DIR")
@@ -294,9 +294,9 @@ def run_checkpoint_with_dataframes(
                 table_name,
             )
             continue
-        logger.info("Validating: %s", validation_config.name)
-        logger.info("  Table: %s", validation_config.duckdb_table)
-        logger.info("  Suite: %s", validation_config.suite_name)
+        logger.info("Validating: {}", validation_config.name)
+        logger.info("  Table: {}", validation_config.duckdb_table)
+        logger.info("  Suite: {}", validation_config.suite_name)
 
         try:
             # Read data from DuckDB
@@ -325,7 +325,7 @@ def run_checkpoint_with_dataframes(
                 all_success = False
 
         except Exception as e:
-            logger.error("Error running validation '%s': %s", validation_config.name, e)
+            logger.error("Error running validation '{}': {}", validation_config.name, e)
             raise RuntimeError(
                 f"Validation '{validation_config.name}' encountered an error: {e}"
             ) from e
@@ -335,7 +335,7 @@ def run_checkpoint_with_dataframes(
             f"Checkpoint '{checkpoint_name}' failed validation. " "Check logs for detailed results."
         )
 
-    logger.info("✓ Checkpoint '%s' passed all validations", checkpoint_name)
+    logger.info("✓ Checkpoint '{}' passed all validations", checkpoint_name)
 
     return {
         "success": all_success,
