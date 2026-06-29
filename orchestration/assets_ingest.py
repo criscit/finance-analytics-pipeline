@@ -18,6 +18,7 @@ STABILITY_S = 8
 
 BANK_INPUT_PATH = FINANCE_DATA_DIR_CONTAINER / "To Parse" / "Bank"
 CRYPTO_INPUT_PATH = FINANCE_DATA_DIR_CONTAINER / "To Parse" / "Crypto"
+MARKETPLACE_INPUT_PATH = FINANCE_DATA_DIR_CONTAINER / "To Parse" / "Marketplace"
 
 INGESTION_CONTEXT = IngestionContext(
     duckdb_path=DUCKDB_PATH,
@@ -38,6 +39,11 @@ def _crypto_leaf_options(leaf_dir: Path) -> LeafIngestionOptions:
     return LeafIngestionOptions(latest_only=is_snapshot, merge_pending=not is_snapshot)
 
 
+def _marketplace_leaf_options(leaf_dir: Path) -> LeafIngestionOptions:
+    """Configure marketplace ingestion - merge transaction-history files like bank."""
+    return LeafIngestionOptions(latest_only=False, merge_pending=True)
+
+
 BANK_CONFIG = IngestionSourceConfig(
     name="Bank",
     root_path=BANK_INPUT_PATH,
@@ -56,6 +62,15 @@ CRYPTO_CONFIG = IngestionSourceConfig(
     leaf_options_factory=_crypto_leaf_options,
 )
 
+MARKETPLACE_CONFIG = IngestionSourceConfig(
+    name="Marketplace",
+    root_path=MARKETPLACE_INPUT_PATH,
+    source_label="marketplace",
+    leaf_label="data type",
+    structure_hint="Marketplace/{source}/<data_type>/",
+    leaf_options_factory=_marketplace_leaf_options,
+)
+
 
 def _run_asset_ingestion(
     config: IngestionSourceConfig, context: AssetExecutionContext
@@ -72,10 +87,20 @@ def _run_asset_ingestion(
     return Output(metrics, metadata=metrics)
 
 
-@asset(name="ingest_bank", deps=["ingest_crypto"])
+@asset(name="ingest_bank", deps=["ingest_marketplace"])
 def ingest_bank(context: AssetExecutionContext) -> Output[dict[str, int]]:
     """Ingest bank statements and exports into the raw DuckDB schema."""
     return _run_asset_ingestion(BANK_CONFIG, context)
+
+
+@asset(name="ingest_marketplace", deps=["ingest_crypto"])
+def ingest_marketplace(context: AssetExecutionContext) -> Output[dict[str, int]]:
+    """Ingest marketplace (WB, Ozon) exports into the raw DuckDB schema.
+
+    Chained after crypto (and before bank) to serialize writes: DuckDB allows only one
+    read-write process per database file, so the ingest assets run in sequence, not in parallel.
+    """
+    return _run_asset_ingestion(MARKETPLACE_CONFIG, context)
 
 
 @asset(name="ingest_crypto")

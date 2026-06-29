@@ -4,7 +4,7 @@ from dagster import AssetSelection, Definitions, ScheduleDefinition, define_asse
 from .assets_export_assets_sheets import export_assets_to_google_sheets
 from .assets_export_csv import export_assets_csv_snapshot, export_csv_snapshot
 from .assets_export_sheets import export_to_google_sheets
-from .assets_ingest import ingest_bank, ingest_crypto
+from .assets_ingest import ingest_bank, ingest_crypto, ingest_marketplace
 from .assets_maintenance import pipeline_maintenance
 from .assets_quality_ge import (
     run_ge_mart_checkpoints,
@@ -15,6 +15,7 @@ from .assets_transform_dbt import build_dbt_models, build_imart_models
 all_assets = [
     ingest_bank,
     ingest_crypto,
+    ingest_marketplace,
     run_ge_raw_checkpoints,
     build_dbt_models,
     run_ge_mart_checkpoints,
@@ -28,7 +29,7 @@ all_assets = [
 
 # -------------------------
 # Pipeline 1: Build Pipeline
-# Ingest (bank, crypto) → QE raw checks → build dbt models (stg, core, mart) → QE mart checks
+# Ingest (crypto → marketplace → bank) → QE raw checks → build dbt models (stg, core, mart) → QE mart checks
 # -------------------------
 build_finance_data_pipeline = define_asset_job(
     name="build_finance_data_pipeline",
@@ -36,6 +37,7 @@ build_finance_data_pipeline = define_asset_job(
     selection=AssetSelection.assets(
         ingest_bank,
         ingest_crypto,
+        ingest_marketplace,
         run_ge_raw_checkpoints,
         build_dbt_models,
         run_ge_mart_checkpoints,
@@ -80,6 +82,7 @@ monthly_job = define_asset_job(
     selection=AssetSelection.assets(
         ingest_bank,
         ingest_crypto,
+        ingest_marketplace,
         run_ge_raw_checkpoints,
         build_dbt_models,
         run_ge_mart_checkpoints,
