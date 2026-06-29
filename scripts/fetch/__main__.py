@@ -23,6 +23,7 @@ from pathlib import Path
 
 from scripts.fetch.browser import RunConfig, browser_page
 from scripts.fetch.core import (
+    DEFAULT_CDP_URL,
     DEFAULT_PROFILE_DIR,
     FetchCtx,
     ensure_dir,
@@ -92,6 +93,11 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
             "e.g. http://localhost:9222 (start Chrome with --remote-debugging-port=9222)."
         ),
     )
+    parser.add_argument(
+        "--cdp-auto",
+        action="store_true",
+        help=("Deprecated; CDP auto-start is now the default unless --headless is used."),
+    )
     return parser.parse_args(argv)
 
 
@@ -111,12 +117,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     if unknown:
         logger.error("Unknown source(s): {}. Known: {}", unknown, known)
         return 2
+    cdp = args.cdp or (None if args.headless else DEFAULT_CDP_URL)
     return run(
         selected,
         RunConfig(
             headless=args.headless,
             profile_dir=Path(args.profile_dir),
-            cdp=args.cdp or None,
+            cdp=cdp,
+            cdp_auto=bool(cdp),
         ),
     )
 

@@ -16,7 +16,7 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from urllib.parse import unquote
+from urllib.parse import unquote, urlparse
 
 from dotenv import load_dotenv
 from playwright.sync_api import Download, Locator, Page
@@ -32,6 +32,11 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 # Canonical browser profile for fetch automation. Do not create alternate repo-local profiles
 # like data/profiles or data/chrome_*; T-Bank login state is expected to live here.
 DEFAULT_PROFILE_DIR = PROJECT_ROOT / "data" / "browser_profile"
+# Finance-specific CDP port. Other local automation projects (e.g. crypto-wallet-analysis) use
+# 9222; sharing it makes this fetcher attach to the WRONG Chrome (wrong profile, not logged in).
+# Keep this unique so we always launch/reuse our own profile's Chrome.
+DEFAULT_CDP_PORT = 9224
+DEFAULT_CDP_URL = f"http://localhost:{DEFAULT_CDP_PORT}"
 CHROME_CHANNEL = "chrome"
 CHROME_ARGS: tuple[str, ...] = (
     "--no-first-run",
@@ -79,6 +84,7 @@ class SourceConfig:
     out_subdir: tuple[str, ...]
     login_markers: tuple[str, ...]  # URL substrings that indicate a login/auth page
     fetch: Callable[[FetchCtx], Path | None]
+    logged_in_url_markers: tuple[str, ...] = ()
     # CSS selector for an element present ONLY when NOT logged in (e.g. the login form/button).
     # Filled in from real page HTML; when set it takes priority over the URL heuristic.
     auth_selector: str = ""
@@ -159,6 +165,7 @@ def parse_amount(text: str) -> str:
     """Normalise a money string like '1 405,00 ₽' into '1405.00' (sign preserved)."""
     if not text:
         return ""
+    text = text.replace("−", "-")
     cleaned = re.sub(r"[^\d,.\-]", "", text)
     return cleaned.replace(",", ".")
 
@@ -262,14 +269,28 @@ def try_download(page: Page, selectors: Sequence[str]) -> Download | None:
 # --------------------------------------------------------------------------------------
 def is_logged_in(page: Page, source: SourceConfig) -> bool:
     """Not logged in if the URL looks like a login page or a known auth element is visible."""
+    url = page.url.lower()
+    if any(marker.lower() in url for marker in source.logged_in_url_markers):
+        return True
     if not _url_has_none(page, source.login_markers):
         return False
-    return not (source.auth_selector and page.locator(source.auth_selector).count() > 0)
+    if not source.auth_selector:
+        return True
+
+    auth_locator = page.locator(source.auth_selector)
+    for index in range(auth_locator.count()):
+        with contextlib.suppress(Exception):
+            if auth_locator.nth(index).is_visible(timeout=1_000):
+                return False
+    return True
 
 
 def ensure_logged_in(page: Page, source: SourceConfig) -> None:
     """Open the source URL and block until the session is logged in."""
-    goto(page, source.url)
+    current_host = urlparse(page.url).netloc
+    source_host = urlparse(source.url).netloc
+    if current_host != source_host or not is_logged_in(page, source):
+        goto(page, source.url)
     if is_logged_in(page, source):
         logger.info("[{}] Already logged in.", source.name)
         return
