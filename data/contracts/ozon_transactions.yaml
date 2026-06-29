@@ -1,0 +1,84 @@
+version: 1.0.0
+dataset: ozon_transactions
+description: Ozon Bank operations scraped from the operations history, each enriched with its order items where available (one row per item)
+owner: finance-analytics-team
+domain: marketplace
+source_system: Ozon
+format: CSV
+delimiter: ","
+encoding: utf-8
+skip_header_rows: 0 # header is the first row
+skip_footer_rows: 0
+
+target_table:
+  schema: prod_raw
+  name: ozon_transactions
+
+columns:
+  - name: "transaction_dttm"
+    type: varchar
+    nullable: false
+    description: Operation timestamp from the operation detail, as 'YYYY-MM-DD HH:MM:SS'
+    source_column_index: 0
+    format: "%Y-%m-%d %H:%M:%S"
+
+  - name: "order_amt_rub"
+    type: varchar
+    nullable: false
+    description: Signed operation amount in RUB (negative for purchases/debits, positive for credits)
+    source_column_index: 1
+
+  - name: "item_amt_rub"
+    type: varchar
+    nullable: true
+    description: Order item price in RUB; empty for operations without itemised order details
+    source_column_index: 2
+
+  - name: "status"
+    type: varchar
+    nullable: true
+    description: Operation status from the detail (e.g. "Успешная покупка")
+    source_column_index: 3
+
+  - name: "category"
+    type: varchar
+    nullable: true
+    description: Operation category from the list row (e.g. "Покупка")
+    source_column_index: 4
+
+  - name: "order_item_num"
+    type: varchar
+    nullable: true
+    description: Sequential item number within the order; empty for operations without order items
+    source_column_index: 5
+
+  - name: "item_status"
+    type: varchar
+    nullable: true
+    description: Per-item status from the order page (e.g. "Получен", "Отменён")
+    source_column_index: 6
+
+  - name: "item"
+    type: varchar
+    nullable: true
+    description: Order item name; empty for operations without order items
+    source_column_index: 7
+
+  - name: "order_url"
+    type: varchar
+    nullable: true
+    description: URL of the linked order page; empty when no order link present
+    source_column_index: 8
+
+  - name: "raw_details"
+    type: varchar
+    nullable: true
+    description: Raw newline-joined text of the operation detail dialog (debugging/audit)
+    source_column_index: 9
+
+metadata:
+  refresh_frequency: monthly
+  data_classification: internal
+  retention_period_days: 2555  # ~7 years for financial data
+  pii_fields: ['order_url']
+  file_pattern: "ozon_*.csv"
